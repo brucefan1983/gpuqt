@@ -1,6 +1,6 @@
-# gpuqt
+# GPUQT
 
-A CUDA-implementation of a linear-scaling quantum transport method. This major reference for the GPU implementation is 
+A CUDA-implementation of a linear-scaling quantum transport method. The major reference for the GPU implementation is 
 
 * Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014).
 
