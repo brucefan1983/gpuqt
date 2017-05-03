@@ -6,7 +6,7 @@ A CUDA implementation of a linear-scaling quantum transport method. The major re
 
 # File organizations
 
-* After downloading and unpacking GPUQT, one can see two folders: src and examples. 
+* After downloading and unpacking GPUQT, one can see two folders: "src" and "examples". 
 
 * The folder "src" contains all the source files (with suffix .h or .cu) of the main code and a makefile. The source files are:
     * main.cu                          - the main function
@@ -19,7 +19,7 @@ A CUDA implementation of a linear-scaling quantum transport method. The major re
 
 * The folder "examples" contains two sub-folders with names "diffusive" and "localized", both containing the files "make_inputs.cpp" and "plot_results.m".
 
-* There is also a file name "input.txt" in the "example" folder, which is a "driver input file".
+* There is also a file named "input.txt" in the "examples" folder, which is a "driver input file".
 
 ## Prerequisite
 
