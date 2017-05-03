@@ -4,7 +4,7 @@ A CUDA implementation of a linear-scaling quantum transport method. The major re
 
 * Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014).
 
-# File organizations
+## File organizations
 
 * After downloading and unpacking GPUQT, one can see two folders: "src" and "examples". 
 
