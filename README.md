@@ -20,7 +20,7 @@ Go to "src" and type "make" to compile the gpuqt code. This will produce an exec
 
 ## Analyzing the results
 
-Go to the folders "diffusive" and "localized" and run the matlab scripts. You should get similar figures as in the following paper (I will give the arXiv id when it's ready):
+Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You should get similar figures as in the following paper (I will give the arXiv id when it's ready):
 
 * Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units
 
