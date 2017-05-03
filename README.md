@@ -4,9 +4,26 @@ A CUDA implementation of a linear-scaling quantum transport method. The major re
 
 * Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014).
 
+# File organizations
+
+* After downloading and unpacking GPUQT, one can see two folders: src and examples. 
+
+* The folder "src" contains all the source files (with suffix .h or .cu) of the main code and a makefile. The source files are:
+    * main.cu                          - the main function
+    * common.h                         - some constants
+    * gpuqt.h and gpuqt.cu             - the "driver function"
+    * sigma.h and sigma.cu             - functions to obtain the transport properties
+    * model.h and model.cu             - class to define the simulation model
+    * hamiltonian.h and hamiltonian.cu - class to perforem the matrix-related operations
+    * vector.h and vector.cu           - class to perform the vector-related operations
+
+* The folder "examples" contains two sub-folders with names "diffusive" and "localized", both containing the files "make_inputs.cpp" and "plot_results.m".
+
+* There is also a file name "input.txt" in the "example" folder, which is a "driver input file".
+
 ## Prerequisite
 
-Need a CUDA-enabled GPU with compute capability of 2.0 or higher.
+Need a CUDA-enabled GPU with compute capability of 2.0 or higher, a g++ compiler and a CUDA toolkit.
 
 ## Installing
 
