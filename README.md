@@ -14,10 +14,9 @@ Go to "src" and type "make" to compile the gpuqt code. This will produce an exec
 
 ## Running the examples
 
-* Go to the folders "diffusive" and "localized", compile the C++ codes with the "-std=c++11" option, and run the executables.
-  This will produce all the input files for the examples.
+* Go to the folders "diffusive" and "localized", compile the C++ codes with the "-std=c++11" option, and run the executables. This will produce all the input files (with suffix .in) for the examples.
   
-* Go to the main folder where you can see the "src" folder and type "src/gpuqt examples/input.txt" to run the examples.
+* Go to the main folder where you can see the "src" folder and type "src/gpuqt examples/input.txt" to run the examples. The data will be written into the output files (with suffix .out) in the "diffusive" and "localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
 
 ## Analyzing the results
 
