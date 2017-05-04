@@ -22,9 +22,9 @@ The major reference for the CUDA implementation is
 
 * There is also a file named "input.txt" in the "examples" folder, which is a "driver input file".
 
-## Prerequisite
+## Prerequisites
 
-Need a CUDA-enabled GPU with compute capability of 2.0 or higher, a g++ compiler and a CUDA toolkit.
+Need a computer/workstation/cluster equipped with one or more CUDA-enabled GPUs with compute capability of 2.0 or higher, a g++ compiler and a CUDA toolkit. The code has only been tested in linux systems.
 
 ## Installing
 
