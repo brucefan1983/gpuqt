@@ -14,7 +14,7 @@ A CUDA implementation of a linear-scaling quantum transport method. The major re
     * gpuqt.h and gpuqt.cu             - the "driver function"
     * sigma.h and sigma.cu             - functions to obtain the transport properties
     * model.h and model.cu             - class to define the simulation model
-    * hamiltonian.h and hamiltonian.cu - class to perforem the matrix-related operations
+    * hamiltonian.h and hamiltonian.cu - class to perform the matrix-related operations
     * vector.h and vector.cu           - class to perform the vector-related operations
 
 * The folder "examples" contains two sub-folders with names "diffusive" and "localized", both containing the files "make_inputs.cpp" and "plot_results.m".
@@ -39,7 +39,7 @@ Go to "src" and type "make" to compile the gpuqt code. This will produce an exec
 
 Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You should get similar figures as in the following paper (I will give the arXiv id when it's ready):
 
-* Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units
+* Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, arXiv:1705.01387 [physics.comp-ph], submitted to Comput. Phys. Commun. on May 3, 2017.
 
 ## Authors
 
