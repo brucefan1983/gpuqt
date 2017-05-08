@@ -50,7 +50,7 @@ Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You sh
 
 * Ari Harju (Aalto University): The supervisor of this project.
 
-# Contact
+## Contact
 
 * Zheyong Fan: brucenju(at)gmail.com; zheyong.fan(at)aalto.fi; zheyongfan(at)163.com
 
