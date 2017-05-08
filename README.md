@@ -49,3 +49,8 @@ Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You sh
 * Ville Vierimaa (Aalto University): Changed the code from the original C style to the current C++ style and made many other improvements.
 
 * Ari Harju (Aalto University): The supervisor of this project.
+
+# Contact
+
+* Zheyong Fan: brucenju(at)gmail.com; zheyong.fan(at)aalto.fi; zheyongfan(at)163.com
+
