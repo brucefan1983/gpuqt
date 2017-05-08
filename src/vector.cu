@@ -17,7 +17,7 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+ 
 #include "vector.h"
 #include "model.h"
 
