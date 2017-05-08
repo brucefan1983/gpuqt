@@ -44,8 +44,8 @@ Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You sh
 
 ## Authors
 
-* Zheyong Fan (Aalto University): wrote the first working version of this code.
+* Zheyong Fan (Aalto University): Wrote the first working version of this code.
 
-* Ville Vierimaa (Aalto University): Changed the code from the original C stype to the current C++ style and made many other improvements.
+* Ville Vierimaa (Aalto University): Changed the code from the original C style to the current C++ style and made many other improvements.
 
 * Ari Harju (Aalto University): The supervisor of this project.
