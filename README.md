@@ -3,7 +3,7 @@
 A CUDA implementation of a linear-scaling quantum transport method. This code can be used to obtain intrinsic electronic transport properties of large systems described by a real-space tight-binding Hamiltonian together with one or more types of disorder.
 
 The major reference for the CUDA implementation is 
-* Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014).
+* Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014). https://doi.org/10.1016/j.cpc.2013.08.009
 
 ## File organizations
 
@@ -40,7 +40,8 @@ Go to "src" and type "make" to compile the gpuqt code. This will produce an exec
 
 Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You should get similar figures as in the following paper:
 
-* Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, arXiv:1705.01387 [physics.comp-ph], submitted to Comput. Phys. Commun. on May 3, 2017.
+* Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, Comput. Phys. Commun. 230, 113 (2018). https://doi.org/10.1016/j.cpc.2018.04.013
+
 
 ## Authors
 
