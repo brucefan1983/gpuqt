@@ -18,6 +18,8 @@
 */
 
 
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +33,9 @@
 #include "common.h"
 #include "gpuqt.h"
 
+
+
+
 //----------------------------------------------------------------------------80
 int main(int argc, char *argv[])
 {	
@@ -40,7 +45,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 	
-    std::ifstream input(argv[1]);
+    std::ifstream input(argv[1]); // input = the driver input file
     if (!input.is_open())
     {
         std::cout << "Failed to open " << argv[1] << std::endl;
@@ -50,8 +55,8 @@ int main(int argc, char *argv[])
     std::string directory;
     while (std::getline(input, directory))
     {
- 		if (directory == "")
- 			continue;
+        if (directory == "")
+             continue;
         std::cout << std::endl;
         std::cout << "===========================================" << std::endl;
         std::cout << "Run KGQT simulation for " << directory << std::endl; 
@@ -67,7 +72,8 @@ int main(int argc, char *argv[])
 
         std::cout << std::endl;
         std::cout << "===========================================" << std::endl;
-        std::cout << "Total time used for " << directory << " = " << time_used <<" s" << std::endl; 
+        std::cout << "Total time used for " << directory << " = " 
+                  << time_used <<" s" << std::endl; 
         std::cout << "===========================================" << std::endl;
     }
 
