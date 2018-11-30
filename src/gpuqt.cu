@@ -20,6 +20,7 @@
 
 
 
+#include "common.h"
 #include "gpuqt.h"
 #include "vector.h"
 #include "hamiltonian.h"

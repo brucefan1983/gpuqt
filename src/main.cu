@@ -20,16 +20,6 @@
 
 
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <string>
-
 #include "common.h"
 #include "gpuqt.h"
 
@@ -68,7 +58,7 @@ int main(int argc, char *argv[])
         gpuqt(directory);
 
         clock_t time_finish = clock();
-        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
 
         std::cout << std::endl;
         std::cout << "===========================================" << std::endl;
@@ -79,4 +69,7 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
+
 
