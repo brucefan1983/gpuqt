@@ -18,6 +18,8 @@
 */
 
 
+
+
 #include "model.h"
 #include "vector.h"
 
@@ -26,51 +28,58 @@
 #include <chrono>
 
 
+
+
 Model::Model(std::string input_dir)
 {
-	this->input_dir = input_dir;
-	initialize_parameters();
-	initialize_energy();
-	if (requires_time)
-		initialize_time();
-	else
-		time_step = 0;
-	initialize_neighbor();
-	initialize_positions();
-	initialize_potential();
-	initialize_hopping();
-	random_state_real = new real[number_of_atoms]; 
-	random_state_imag = new real[number_of_atoms];
-	
-	// Use higher accuracy clock for the RNG seed
+    this->input_dir = input_dir;
+    initialize_parameters();
+    initialize_energy();
+    if (requires_time)
+        initialize_time();
+    else
+        time_step = 0;
+    initialize_neighbor();
+    initialize_positions();
+    initialize_potential();
+    initialize_hopping();
+    random_state_real = new real[number_of_atoms]; 
+    random_state_imag = new real[number_of_atoms];
+ 
+    // Use higher accuracy clock for the RNG seed
     #ifdef DEBUG
-	    generator = std::mt19937(12345678);
+        generator = std::mt19937(12345678);
     #else
-	generator = std::mt19937
-    (std::chrono::system_clock::now().time_since_epoch().count());
+       generator = std::mt19937
+       (std::chrono::system_clock::now().time_since_epoch().count());
     #endif
 
-	// We only need RNG for random phase generation 
+    // We only need RNG for random phase generation 
     // so we may use interval [0, 2*PI] right away
-	phase_distribution = std::uniform_real_distribution<real>(0, 2 * PI);
-	std::cout << "Initialization complete\n" << std::endl;
+    phase_distribution = std::uniform_real_distribution<real>(0, 2 * PI);
+    std::cout << "Initialization complete\n" << std::endl;
 }
+
+
 
 
 Model::~Model()
-{	
-	delete[] energy;
- 	delete[] time_step;
- 	delete[] potential;
- 	delete[] hopping_real;
- 	delete[] hopping_imag;
- 	delete[] neighbor_number;
- 	delete[] neighbor_list;
- 	delete[] xx;
- 	delete[] random_state_real;
- 	delete[] random_state_imag;
- 	delete[] x;
+{ 
+    delete[] energy;
+    delete[] time_step;
+    delete[] potential;
+    delete[] hopping_real;
+    delete[] hopping_imag;
+    delete[] neighbor_number;
+    delete[] neighbor_list;
+    delete[] xx;
+    delete[] random_state_real;
+    delete[] random_state_imag;
+    delete[] x;
 }
+
+
+
 
 void Model::initialize_state(Vector& random_state)
 {
@@ -84,6 +93,8 @@ void Model::initialize_state(Vector& random_state)
 }
 
 
+
+
 void Model::initialize_parameters()
 {
     std::string filename = input_dir + "/para.in";
@@ -91,7 +102,7 @@ void Model::initialize_parameters()
     std::ifstream input(filename);
     if (!input.is_open())
     {
-        std::cout <<"Error: cannot open " + filename << std::endl;
+        std::cout << "Error: cannot open " + filename << std::endl;
         exit(1);
     }
     std::string line;
@@ -126,28 +137,31 @@ void Model::initialize_parameters()
         {
             std::cout << "Unknown identifier in " + input_dir + "/para.in:" << std::endl;
             std::cout << line << std::endl; 
-        }	
+        } 
     }
     input.close();
     
     if (calculate_vac || calculate_msd)
-    	requires_time = true;
+        requires_time = true;
     
     std::cout << "Finished reading " + filename << std::endl; 
     //Verify the used parameters
-	std::cout << "- DOS will be calculated" << std::endl;
-	if (calculate_vac)
-		std::cout << "- VAC will be calculated" << std::endl;
-	else
-		std::cout << "- VAC is not calculated" << std::endl;
-	if (calculate_msd)
-		std::cout << "- MSD will be calculated" << std::endl;
-	else
-		std::cout << "- MSD is not calculated" << std::endl;				
-    std::cout << "- Number of random vectors is " << number_of_random_vectors << std::endl;	
-	std::cout << "- Number of moments is " << number_of_moments << std::endl;
-    std::cout << "- Energy maximum is " << energy_max << std::endl;	
+    std::cout << "- DOS will be calculated" << std::endl;
+    if (calculate_vac)
+        std::cout << "- VAC will be calculated" << std::endl;
+    else
+        std::cout << "- VAC is not calculated" << std::endl;
+    if (calculate_msd)
+        std::cout << "- MSD will be calculated" << std::endl;
+    else
+        std::cout << "- MSD is not calculated" << std::endl;    
+    std::cout << "- Number of random vectors is " 
+              << number_of_random_vectors << std::endl; 
+    std::cout << "- Number of moments is " 
+              << number_of_moments << std::endl;
+    std::cout << "- Energy maximum is " << energy_max << std::endl; 
 }
+
 
 
 
@@ -167,11 +181,13 @@ void Model::initialize_energy()
     {
         input >> energy[n];
     }
-     	
+      
     input.close();
-    std::cout << "Finished reading " + filename << std::endl;     
-    
+    std::cout << "Finished reading " + filename << std::endl;
 }
+
+
+
 
 void Model::initialize_time()
 {
@@ -195,6 +211,9 @@ void Model::initialize_time()
     std::cout << "Finished reading " + filename << std::endl;         
 }
 
+
+
+
 void Model::initialize_neighbor()
 {
     std::string filename = input_dir + "/neighbor.in";
@@ -207,7 +226,7 @@ void Model::initialize_neighbor()
     }
     input >> number_of_atoms >> max_neighbor;
     number_of_pairs = number_of_atoms * max_neighbor;
-	
+ 
     neighbor_number = new int[number_of_atoms]; 
     neighbor_list = new int[number_of_pairs];
 
@@ -226,22 +245,29 @@ void Model::initialize_neighbor()
     std::cout << "- Maximum neighbor number is " << max_neighbor << std::endl;            
 }
 
+
+
+
 real Model::get_random_phase()
 {
-	return phase_distribution(generator);
-
+    return phase_distribution(generator);
 }
+
+
+
 
 real reduce_distance(real d, real box)
 {
-	if (d > box/2.0)
-		return d-box;
-	if (d < -box/2.0)
-		return d+box;
-	else 
-		return d;
-
+    if (d > box/2.0)
+        return d-box;
+    if (d < -box/2.0)
+        return d+box;
+    else 
+        return d;
 }
+
+
+
 
 void Model::initialize_positions()
 {
@@ -254,36 +280,38 @@ void Model::initialize_positions()
         exit(1);
     }
 
-	input >> box >> volume;			
-	x = new real[number_of_atoms];
+    input >> box >> volume;   
+    x = new real[number_of_atoms];
 
-	for (int i=0; i<number_of_atoms; ++i)
-			input >> x[i];
+    for (int i=0; i<number_of_atoms; ++i)
+        input >> x[i];
     input.close();
     std::cout << "Finished reading " + filename << std::endl;  
-	std::cout << "- Box length along transport direction is " << box << std::endl;
-	std::cout << "- System volume is " << volume << std::endl;	    
+    std::cout << "- Box length along transport direction is " 
+              << box << std::endl;
+    std::cout << "- System volume is " << volume << std::endl;     
     std::cout << "- Calculating neighbor distances" << std::endl; 
-		
-	xx = new real[number_of_pairs];    
+  
+    xx = new real[number_of_pairs];    
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        
         for (int m = 0; m < neighbor_number[n]; ++m)
         {        
             int index = n + m * number_of_atoms;
             xx[index] = reduce_distance(x[neighbor_list[index]] - x[n], box);
         }
     }
-    
     std::cout << "- done" << std::endl;
 }
+
+
+
 
 void Model::initialize_potential()
 { 
     std::string filename = input_dir + "/potential.in";
     std::ifstream input(filename);
-	bool nonzero_potential = true;
+    bool nonzero_potential = true;
     if (!input.is_open())
     {
         std::cout <<"Could not open " + filename << std::endl;
@@ -295,16 +323,19 @@ void Model::initialize_potential()
     
     for (int n = 0; n < number_of_atoms; ++n)
     {
-    	if (nonzero_potential)
-	        input >> potential[n];
-	    else
-	    	potential[n] = 0.0;
+        if (nonzero_potential)
+            input >> potential[n];
+        else
+            potential[n] = 0.0;
     }
 
     input.close();
     if (nonzero_potential)
-	    std::cout << "Finished reading " + filename << std::endl; 
+        std::cout << "Finished reading " + filename << std::endl; 
 }
+
+
+
 
 void Model::initialize_hopping()
 {
@@ -312,9 +343,9 @@ void Model::initialize_hopping()
     std::ifstream input(filename);
 
     /*
-    	type == 1 : complex hoppings
-    	type == 2 : real hoppings
-    	type == 3 : uniform hoppings (hoppings.in is not read)
+     type == 1 : complex hoppings
+     type == 2 : real hoppings
+     type == 3 : uniform hoppings (hoppings.in is not read)
     */
     int type = 0;
         
@@ -327,27 +358,27 @@ void Model::initialize_hopping()
     std::string first_line;
     
 
-	if (type == 0)
-	    input >> first_line;
-	else
-		first_line = ".";
+    if (type == 0)
+        input >> first_line;
+    else
+        first_line = ".";
     
     if (first_line == "complex")
     {
-    	type = 1;
+        type = 1;
     }
     else if (first_line == "real")
-	{
-		type = 2;
-	}
+    {
+        type = 2;
+    }
     else
     {
-    	type = 3;
-    	std::cout << "- Assuming uniform hoppings with strength 1" << std::endl;
+        type = 3;
+        std::cout << "- Assuming uniform hoppings with strength 1" << std::endl;
     }
     
-	hopping_real = new real[number_of_pairs]; 
-	hopping_imag = new real[number_of_pairs];
+    hopping_real = new real[number_of_pairs]; 
+    hopping_imag = new real[number_of_pairs];
 
     for (int n = 0; n < number_of_atoms; ++n)
     {
@@ -355,23 +386,24 @@ void Model::initialize_hopping()
         {
             int index = n + m * number_of_atoms;
             if (type < 3)
-	            input >> hopping_real[index];
-	        else
-	        	hopping_real[index] = 1.0;
+                input >> hopping_real[index];
+            else
+                hopping_real[index] = 1.0;
             if (type == 1)
-	            input >> hopping_imag[index];
-	        else
-	        	hopping_imag[index] = 0.0;
+                input >> hopping_imag[index];
+            else
+                hopping_imag[index] = 0.0;
         }
     }
     input.close();
     if (type < 3)
-	    std::cout << "Finished reading " + filename << std::endl; 
+        std::cout << "Finished reading " + filename << std::endl; 
     if (type == 1)
-    	std::cout << "- Hoppings had imaginary part" << std::endl;
+        std::cout << "- Hoppings had imaginary part" << std::endl;
     else if (type == 2)
-    	std::cout << "- Hoppings were real" << std::endl;
+        std::cout << "- Hoppings were real" << std::endl;
 }
+
 
 
 
