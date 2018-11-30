@@ -43,8 +43,15 @@ Model::Model(std::string input_dir)
 	random_state_imag = new real[number_of_atoms];
 	
 	// Use higher accuracy clock for the RNG seed
-	generator = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
-	// We only need RNG for random phase generation so we may use interval [0, 2*PI] right away
+    #ifdef DEBUG
+	    generator = std::mt19937(12345678);
+    #else
+	generator = std::mt19937
+    (std::chrono::system_clock::now().time_since_epoch().count());
+    #endif
+
+	// We only need RNG for random phase generation 
+    // so we may use interval [0, 2*PI] right away
 	phase_distribution = std::uniform_real_distribution<real>(0, 2 * PI);
 	std::cout << "Initialization complete\n" << std::endl;
 }
