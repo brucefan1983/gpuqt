@@ -18,18 +18,26 @@
 */
 
 
+
+
 #pragma once
 #include "common.h"
 #include <random>
 
+
+
+
 class Vector;
+
+
+
 
 class Model
 {
 public:
-	Model(std::string input_dir);
-	~Model();
-	void initialize_state(Vector& random_state);
+    Model(std::string input_dir);
+    ~Model();
+    void initialize_state(Vector& random_state);
 
     bool calculate_vac = false;
     bool calculate_msd = false;
@@ -54,7 +62,7 @@ public:
     real *hopping_real;
     real *hopping_imag;
 
-	real volume;
+    real volume;
     
 private:
     void initialize_parameters();
@@ -65,11 +73,8 @@ private:
     void initialize_potential();
     void initialize_hopping();
 	
-	real get_random_phase();
-
-    real *random_state_real;
-    real *random_state_imag;    	
-    
+    real get_random_phase();
+    	
     real* x;
     real box;
     
@@ -78,3 +83,7 @@ private:
     std::mt19937 generator;
     std::uniform_real_distribution<real> phase_distribution;
 };
+
+
+
+
