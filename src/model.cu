@@ -50,8 +50,8 @@ Model::Model(std::string input_dir)
     #ifdef DEBUG
         generator = std::mt19937(12345678);
     #else
-       generator = std::mt19937
-       (std::chrono::system_clock::now().time_since_epoch().count());
+        generator = std::mt19937
+        (std::chrono::system_clock::now().time_since_epoch().count());
     #endif
 
     // We only need RNG for random phase generation 
