@@ -43,8 +43,6 @@ Model::Model(std::string input_dir)
     initialize_positions();
     initialize_potential();
     initialize_hopping();
-    random_state_real = new real[number_of_atoms]; 
-    random_state_imag = new real[number_of_atoms];
  
     // Use higher accuracy clock for the RNG seed
     #ifdef DEBUG
@@ -73,8 +71,6 @@ Model::~Model()
     delete[] neighbor_number;
     delete[] neighbor_list;
     delete[] xx;
-    delete[] random_state_real;
-    delete[] random_state_imag;
     delete[] x;
 }
 
@@ -83,6 +79,8 @@ Model::~Model()
 
 void Model::initialize_state(Vector& random_state)
 {
+    real *random_state_real = new real[number_of_atoms]; 
+    real *random_state_imag = new real[number_of_atoms];
     for (int n = 0; n < number_of_atoms; ++n)
     {  
         real random_phase = get_random_phase();
@@ -90,6 +88,8 @@ void Model::initialize_state(Vector& random_state)
         random_state_imag[n] = sin(random_phase);
     }
     random_state.copy_from_host(random_state_real, random_state_imag);
+    delete[] random_state_real;
+    delete[] random_state_imag;
 }
 
 
@@ -351,35 +351,34 @@ void Model::initialize_hopping()
         
     if (!input.is_open())
     {
+        type = 3;
         std::cout <<"Could not open " + filename << std::endl;
-        type = 3;
-    }
-    
-    std::string first_line;
-    
-
-    if (type == 0)
-        input >> first_line;
-    else
-        first_line = ".";
-    
-    if (first_line == "complex")
-    {
-        type = 1;
-    }
-    else if (first_line == "real")
-    {
-        type = 2;
-    }
-    else
-    {
-        type = 3;
         std::cout << "- Assuming uniform hoppings with strength 1" << std::endl;
+    }
+    else
+    {
+        std::string first_line;
+        input >> first_line;
+        if (first_line == "complex")
+        {
+            type = 1;
+            std::cout << "- Hoppings have imaginary part" << std::endl;
+        }
+        else if (first_line == "real")
+        {
+            type = 2;
+            std::cout << "- Hoppings are real" << std::endl;
+        }
+        else
+        {
+            std::cout << "- Hoppings can only be real or complex"
+                      << std::endl;
+            exit(1);
+        }
     }
     
     hopping_real = new real[number_of_pairs]; 
     hopping_imag = new real[number_of_pairs];
-
     for (int n = 0; n < number_of_atoms; ++n)
     {
         for (int m = 0; m < neighbor_number[n]; ++m)
@@ -398,10 +397,6 @@ void Model::initialize_hopping()
     input.close();
     if (type < 3)
         std::cout << "Finished reading " + filename << std::endl; 
-    if (type == 1)
-        std::cout << "- Hoppings had imaginary part" << std::endl;
-    else if (type == 2)
-        std::cout << "- Hoppings were real" << std::endl;
 }
 
 
