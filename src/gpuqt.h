@@ -20,7 +20,6 @@
 
 #pragma once
 
-class Model;
 
 void gpuqt(std::string input_directory);
 
