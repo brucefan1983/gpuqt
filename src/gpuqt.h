@@ -24,6 +24,5 @@ class Model;
 
 void gpuqt(std::string input_directory);
 
-void find_neighbor(Model &model);
 
 
