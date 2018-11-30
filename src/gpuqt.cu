@@ -18,11 +18,15 @@
 */
 
 
+
+
 #include "gpuqt.h"
 #include "vector.h"
 #include "hamiltonian.h"
 #include "sigma.h"
 #include "model.h"
+
+
 
 
 void gpuqt(std::string input_directory)
@@ -46,7 +50,8 @@ void gpuqt(std::string input_directory)
         find_dos(model, H, random_state);
         time_finish = clock();
         time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
-        std::cout << "Time used for finding DOS = " << time_used << " s" << std::endl; 
+        std::cout << "Time used for finding DOS = " 
+                  << time_used << " s" << std::endl; 
 
         // Calculate the MSD only if you want to
         if (model.calculate_msd == 1)  
@@ -55,7 +60,8 @@ void gpuqt(std::string input_directory)
             find_msd(model, H, random_state);
             time_finish = clock();
             time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
-    	    std::cout << "Time used for finding MSD = " << time_used << " s" << std::endl;
+    	    std::cout << "Time used for finding MSD = " 
+                      << time_used << " s" << std::endl;
         }
 
         // Calculate the VAC only if you want to
@@ -65,10 +71,12 @@ void gpuqt(std::string input_directory)
             find_vac(model, H, random_state);
             time_finish = clock();
             time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
-	        std::cout << "Time used for finding VAC = " << time_used << " s" << std::endl;
+            std::cout << "Time used for finding VAC = " 
+                      << time_used << " s" << std::endl;
         }
     }  
       	
 }
+
 
 
