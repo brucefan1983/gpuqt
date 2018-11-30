@@ -60,7 +60,7 @@ void gpuqt(std::string input_directory)
             find_msd(model, H, random_state);
             time_finish = clock();
             time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
-    	    std::cout << "Time used for finding MSD = " 
+            std::cout << "Time used for finding MSD = " 
                       << time_used << " s" << std::endl;
         }
 
