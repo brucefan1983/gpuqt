@@ -26,31 +26,44 @@
 
 
 
+using namespace std;
+
+
+
+
 //----------------------------------------------------------------------------80
 int main(int argc, char *argv[])
-{	
+{
+    cout << endl;
+    cout << "***************************************************************\n";
+    cout << "*                  Welcome to use LSQT                        *\n";
+    cout << "*          (Linear Scaling Quantum Transport)                 *\n";
+    cout << "*        (Author:  Zheyong Fan <brucenju@gmail.com>)          *\n";
+    cout << "***************************************************************\n";
+    cout << endl;
+	
     if (argc != 2)
     {
-        std::cout << "Usage: src/gpuqt input.txt" << std::endl;
+        cout << "Usage: src/gpuqt input.txt" << std::endl;
         exit(1);
     }
 	
-    std::ifstream input(argv[1]); // input = the driver input file
+    ifstream input(argv[1]); // input = the driver input file
     if (!input.is_open())
     {
-        std::cout << "Failed to open " << argv[1] << std::endl;
+        cout << "Failed to open " << argv[1] << endl;
         exit(1);
     }		
 
-    std::string directory;
-    while (std::getline(input, directory))
+    string directory;
+    while (getline(input, directory))
     {
         if (directory == "")
              continue;
-        std::cout << std::endl;
-        std::cout << "===========================================" << std::endl;
-        std::cout << "Run KGQT simulation for " << directory << std::endl; 
-        std::cout << "===========================================" << std::endl;
+        cout << endl;
+        cout << "===========================================================\n";
+        cout << "Run LSQT simulation for " << directory << std::endl; 
+        cout << "===========================================================\n";
 
         clock_t time_begin = clock();
          
@@ -60,11 +73,11 @@ int main(int argc, char *argv[])
         clock_t time_finish = clock();
         double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
 
-        std::cout << std::endl;
-        std::cout << "===========================================" << std::endl;
-        std::cout << "Total time used for " << directory << " = " 
-                  << time_used <<" s" << std::endl; 
-        std::cout << "===========================================" << std::endl;
+        cout << endl;
+        cout << "===========================================================\n";
+        cout << "Total time used for " << directory << " = " 
+             << time_used <<" s" << endl; 
+        cout << "===========================================================\n";
     }
 
     return 0;
