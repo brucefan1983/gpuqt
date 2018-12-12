@@ -55,7 +55,6 @@ Model::Model(std::string input_dir)
     // We only need RNG for random phase generation 
     // so we may use interval [0, 2*PI] right away
     phase_distribution = std::uniform_real_distribution<real>(0, 2 * PI);
-    std::cout << "Initialization complete\n" << std::endl;
 }
 
 
@@ -95,18 +94,41 @@ void Model::initialize_state(Vector& random_state)
 
 
 
+static void print_started_reading(std::string filename)
+{
+    std::cout << std::endl;
+    std::cout << "===========================================================";
+    std::cout << std::endl;
+    std::cout << "Started reading " + filename << std::endl;
+    std::cout << std::endl;
+}
+
+
+
+
+static void print_finished_reading(std::string filename)
+{
+    std::cout << std::endl;
+    std::cout << "Finished reading " + filename << std::endl; 
+    std::cout << "===========================================================";
+    std::cout << std::endl << std::endl;
+}
+
+
+
+
 void Model::initialize_parameters()
 {
     std::string filename = input_dir + "/para.in";
-    std::cout << "\nReading " + filename << std::endl;
     std::ifstream input(filename);
     if (!input.is_open())
     {
         std::cout << "Error: cannot open " + filename << std::endl;
         exit(1);
     }
+    print_started_reading(filename);
+
     std::string line;
-    
     while (std::getline(input, line))
     {
         std::stringstream ss(line);
@@ -144,22 +166,23 @@ void Model::initialize_parameters()
     if (calculate_vac || calculate_msd)
         requires_time = true;
     
-    std::cout << "Finished reading " + filename << std::endl; 
     //Verify the used parameters
     std::cout << "- DOS will be calculated" << std::endl;
     if (calculate_vac)
         std::cout << "- VAC will be calculated" << std::endl;
     else
-        std::cout << "- VAC is not calculated" << std::endl;
+        std::cout << "- VAC will not be calculated" << std::endl;
     if (calculate_msd)
         std::cout << "- MSD will be calculated" << std::endl;
     else
-        std::cout << "- MSD is not calculated" << std::endl;    
+        std::cout << "- MSD will not be calculated" << std::endl;    
     std::cout << "- Number of random vectors is " 
               << number_of_random_vectors << std::endl; 
     std::cout << "- Number of moments is " 
               << number_of_moments << std::endl;
     std::cout << "- Energy maximum is " << energy_max << std::endl; 
+
+    print_finished_reading(filename);
 }
 
 
@@ -174,7 +197,13 @@ void Model::initialize_energy()
         std::cout <<"Error: cannot open " + filename << std::endl;
         exit(1);
     }
+
+    print_started_reading(filename);
+
     input >> number_of_energy_points;
+    std::cout << "- number of energy points = " 
+              << number_of_energy_points 
+              << std::endl;
     energy = new real[number_of_energy_points];
     
     for (int n = 0; n < number_of_energy_points; ++n)
@@ -183,7 +212,8 @@ void Model::initialize_energy()
     }
       
     input.close();
-    std::cout << "Finished reading " + filename << std::endl;
+
+    print_finished_reading(filename);
 }
 
 
@@ -199,6 +229,8 @@ void Model::initialize_time()
         std::cout <<"Error: cannot open " + filename << std::endl;
         exit(1);
     }
+    print_started_reading(filename);
+
     input >> number_of_steps_correlation;
     time_step = new real[number_of_steps_correlation];
 
@@ -208,7 +240,7 @@ void Model::initialize_time()
     }
     
     input.close();
-    std::cout << "Finished reading " + filename << std::endl;         
+    print_finished_reading(filename);         
 }
 
 
@@ -224,6 +256,8 @@ void Model::initialize_neighbor()
         std::cout <<"Error: cannot open " + filename << std::endl;
         exit(1);
     }
+    print_started_reading(filename);
+
     input >> number_of_atoms >> max_neighbor;
     number_of_pairs = number_of_atoms * max_neighbor;
  
@@ -239,10 +273,12 @@ void Model::initialize_neighbor()
             input >> neighbor_list[index];
         }
     }
+
     input.close();
-    std::cout << "Finished reading " + filename << std::endl; 
+ 
     std::cout << "- Number of atoms is " << number_of_atoms << std::endl;
-    std::cout << "- Maximum neighbor number is " << max_neighbor << std::endl;            
+    std::cout << "- Maximum neighbor number is " << max_neighbor << std::endl;
+    print_finished_reading(filename);            
 }
 
 
@@ -279,6 +315,7 @@ void Model::initialize_positions()
         std::cout <<"Error: cannot open " + filename << std::endl;
         exit(1);
     }
+    print_started_reading(filename);
 
     input >> box >> volume;   
     x = new real[number_of_atoms];
@@ -286,11 +323,10 @@ void Model::initialize_positions()
     for (int i=0; i<number_of_atoms; ++i)
         input >> x[i];
     input.close();
-    std::cout << "Finished reading " + filename << std::endl;  
+  
     std::cout << "- Box length along transport direction is " 
               << box << std::endl;
-    std::cout << "- System volume is " << volume << std::endl;     
-    std::cout << "- Calculating neighbor distances" << std::endl; 
+    std::cout << "- System volume is " << volume << std::endl;      
   
     xx = new real[number_of_pairs];    
     for (int n = 0; n < number_of_atoms; ++n)
@@ -301,7 +337,8 @@ void Model::initialize_positions()
             xx[index] = reduce_distance(x[neighbor_list[index]] - x[n], box);
         }
     }
-    std::cout << "- done" << std::endl;
+
+    print_finished_reading(filename);
 }
 
 
@@ -310,11 +347,13 @@ void Model::initialize_positions()
 void Model::initialize_potential()
 { 
     std::string filename = input_dir + "/potential.in";
+    print_started_reading(filename);
+
     std::ifstream input(filename);
     bool nonzero_potential = true;
     if (!input.is_open())
     {
-        std::cout <<"Could not open " + filename << std::endl;
+        std::cout <<"- Could not open " + filename << std::endl;
         std::cout << "- Assuming zero onsite potential" << std::endl;
         nonzero_potential = false;
     }
@@ -330,8 +369,8 @@ void Model::initialize_potential()
     }
 
     input.close();
-    if (nonzero_potential)
-        std::cout << "Finished reading " + filename << std::endl; 
+ 
+    print_finished_reading(filename);
 }
 
 
@@ -340,6 +379,7 @@ void Model::initialize_potential()
 void Model::initialize_hopping()
 {
     std::string filename = input_dir + "/hopping.in";
+    print_started_reading(filename);
     std::ifstream input(filename);
 
     /*
@@ -352,8 +392,8 @@ void Model::initialize_hopping()
     if (!input.is_open())
     {
         type = 3;
-        std::cout <<"Could not open " + filename << std::endl;
-        std::cout << "- Assuming uniform hoppings with strength 1" << std::endl;
+        std::cout <<"- Could not open " + filename << std::endl;
+        std::cout << "- Assuming uniform hoppings with strength -1" << std::endl;
     }
     else
     {
@@ -387,7 +427,7 @@ void Model::initialize_hopping()
             if (type < 3)
                 input >> hopping_real[index];
             else
-                hopping_real[index] = 1.0;
+                hopping_real[index] = -1.0;
             if (type == 1)
                 input >> hopping_imag[index];
             else
@@ -395,8 +435,8 @@ void Model::initialize_hopping()
         }
     }
     input.close();
-    if (type < 3)
-        std::cout << "Finished reading " + filename << std::endl; 
+
+    print_finished_reading(filename);
 }
 
 

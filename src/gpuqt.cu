@@ -30,6 +30,30 @@
 
 
 
+static void print_started_random_vector(int i)
+{
+    std::cout << std::endl;
+    std::cout << "===========================================================";
+    std::cout << std::endl;
+    std::cout << "Started  simulation with random vector number " 
+              << i << std::endl;
+    std::cout << std::endl;
+}
+
+
+
+static void print_finished_random_vector(int i)
+{
+    std::cout << std::endl;
+    std::cout << "Finished simulation with random vector number " 
+              << i << std::endl; 
+    std::cout << "===========================================================";
+    std::cout << std::endl << std::endl;
+}
+
+
+
+
 void gpuqt(std::string input_directory)
 {
     // Initialize model on the CPU
@@ -43,7 +67,7 @@ void gpuqt(std::string input_directory)
     // Loop over different random vectors
     for (int i = 0; i < model.number_of_random_vectors; ++i)
     {
-        std::cout << "Starting vector number " << i+1 << std::endl;
+        print_started_random_vector(i);
         model.initialize_state(random_state);
 
         // Always calculate the DOS, since it is very cheap
@@ -51,7 +75,7 @@ void gpuqt(std::string input_directory)
         find_dos(model, H, random_state);
         time_finish = clock();
         time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
-        std::cout << "Time used for finding DOS = " 
+        std::cout << "- Time used for finding DOS = " 
                   << time_used << " s" << std::endl; 
 
         // Calculate the MSD only if you want to
@@ -75,6 +99,8 @@ void gpuqt(std::string input_directory)
             std::cout << "Time used for finding VAC = " 
                       << time_used << " s" << std::endl;
         }
+
+        print_finished_random_vector(i);
     }  
       	
 }
