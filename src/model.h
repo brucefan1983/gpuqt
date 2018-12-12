@@ -72,6 +72,7 @@ private:
     void initialize_positions();
     void initialize_potential();
     void initialize_hopping();
+    void initialize_lattice_model();
 	
     real get_random_phase();
     	
@@ -79,6 +80,7 @@ private:
     real box;
     
     bool requires_time = false;
+    bool use_lattice_model = false;
     
     std::mt19937 generator;
     std::uniform_real_distribution<real> phase_distribution;

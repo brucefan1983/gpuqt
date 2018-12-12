@@ -29,20 +29,29 @@
 
 
 
-
 Model::Model(std::string input_dir)
 {
     this->input_dir = input_dir;
     initialize_parameters();
+
     initialize_energy();
     if (requires_time)
         initialize_time();
     else
         time_step = 0;
-    initialize_neighbor();
-    initialize_positions();
-    initialize_potential();
-    initialize_hopping();
+
+    if (use_lattice_model) // use lattice models
+    {
+        initialize_lattice_model();
+        initialize_potential();
+    }
+    else // use general inputs to build the model
+    {
+        initialize_neighbor();
+        initialize_positions();
+        initialize_potential();
+        initialize_hopping();
+    }
  
     // Use higher accuracy clock for the RNG seed
     #ifdef DEBUG
@@ -135,6 +144,10 @@ void Model::initialize_parameters()
         std::string token;
         ss >> token;
         if (token == "") continue;
+        if (token == "model")
+        {
+            ss >> use_lattice_model;
+        }
         if (token == "calculate_vac")
         {
             calculate_vac = true;
@@ -167,6 +180,10 @@ void Model::initialize_parameters()
         requires_time = true;
     
     //Verify the used parameters
+    if (use_lattice_model) 
+        std::cout << "- Use lattice model" << std::endl;
+    else
+        std::cout << "- Use general model" << std::endl;
     std::cout << "- DOS will be calculated" << std::endl;
     if (calculate_vac)
         std::cout << "- VAC will be calculated" << std::endl;
@@ -436,6 +453,177 @@ void Model::initialize_hopping()
     }
     input.close();
 
+    print_finished_reading(filename);
+}
+
+
+
+
+static int find_index
+(int nx, int ny, int nz, int Nx, int Ny, int Nz, int m, int N_orbital)
+{ 
+    if (nx < 0) nx += Nx;
+    if (nx >= Nx) nx -= Nx;
+    if (ny < 0) ny += Ny;
+    if (ny >= Ny) ny -= Ny;
+    if (nz < 0) nz += Nz;
+    if (nz >= Nz) nz -= Nz;
+    return ((nx * Ny + ny) * Nz + nz) * N_orbital + m;
+}
+
+
+
+
+void Model::initialize_lattice_model()
+{
+    std::string filename = input_dir + "/lattice.in";
+    print_started_reading(filename);
+    std::ifstream input(filename);
+
+    if (!input.is_open())
+    {
+        std::cout <<"Could not open " + filename << std::endl;
+        exit(1);
+    }
+ 
+    int N_orbital;
+    int transport_direction;
+    int N_cell[3];
+    int pbc[3];
+    real box[3];
+    real lattice_constant[3];
+
+    input >> N_cell[0] >> N_cell[1] >> N_cell[2];
+    std::cout << "number of cells  = " 
+         << N_cell[0] << " " << N_cell[1] << " " << N_cell[2] << std::endl;
+
+    input >> pbc[0] >> pbc[1] >> pbc[2] >> transport_direction;
+    std::cout << "pbc = " << pbc[0] << " " << pbc[1] << " " << pbc[2] 
+              << std::endl;
+    std::cout << "transport direction = " << transport_direction << std::endl;
+
+    if (pbc[transport_direction] != 1)
+    {
+        std::cout << "Error: transport direction must be periodic" << std::endl;
+        exit(1);
+    }
+
+    input >> lattice_constant[0] >> lattice_constant[1] >> lattice_constant[2];
+    std::cout << "lattice constant = " 
+         << lattice_constant[0] << " "
+         << lattice_constant[1] << " "
+         << lattice_constant[2] << " "
+         << std::endl;
+    for (int d = 0; d < 3; ++d)
+        box[d] = lattice_constant[d] * N_cell[d];
+    volume = box[0] * box[1] * box[2];
+    std::cout << "box = " << box[0] << " " << box[1] << " " << box[2] << " "
+         << std::endl;
+
+    input >> N_orbital >> max_neighbor;
+    std::cout << "nnumber of orbitals per cell = " << N_orbital << std::endl;
+    std::cout << "maximum number of hoppings per orbital = " << max_neighbor << std::endl;
+    number_of_atoms = N_orbital * N_cell[0] * N_cell[1] * N_cell[2];
+    std::cout << "number_of_atoms = " << number_of_atoms << std::endl;
+
+    number_of_pairs = number_of_atoms * max_neighbor;
+    neighbor_number = new int[number_of_atoms];
+    neighbor_list = new int [number_of_pairs];
+    hopping_real = new real[number_of_pairs];
+    hopping_imag = new real[number_of_pairs];
+    xx = new real[number_of_pairs];
+
+    std::vector<real> x_cell;
+    x_cell.resize(N_orbital);
+    int number_of_hoppings_per_cell = N_orbital * max_neighbor;
+    std::vector<std::vector<int>> hopping_data;
+    hopping_data.assign(6, std::vector<int>(number_of_hoppings_per_cell, 0));
+ 
+    std::cout << std::endl << "orbital\tx" << std::endl;
+    for (int n = 0; n < N_orbital; ++n)
+    {
+        input >> x_cell[n];
+        std::cout << n << "\t" << x_cell[n] << std::endl;
+    }
+
+    std::vector<int> number_of_hoppings;
+    number_of_hoppings.resize(N_orbital);
+    for (int m = 0; m < N_orbital; m++)
+    {
+        input >> number_of_hoppings[m];
+        std::cout << std::endl << "number_of_hoppings for orbital " << m << " = " 
+             << number_of_hoppings[m] << std::endl;
+
+        for (int n = 0; n < number_of_hoppings[m]; ++n)
+        {
+            int nx, ny, nz, m_neighbor;
+            real hopping_real, hopping_imag;
+            input >> nx >> ny >> nz >> m_neighbor >> hopping_real 
+                  >> hopping_imag;
+
+            hopping_data[0][m*max_neighbor+n] = nx;
+            hopping_data[1][m*max_neighbor+n] = ny;
+            hopping_data[2][m*max_neighbor+n] = nz;
+            hopping_data[3][m*max_neighbor+n] = m_neighbor;
+            hopping_data[4][m*max_neighbor+n] = hopping_real;
+            hopping_data[5][m*max_neighbor+n] = hopping_imag;
+
+            std::cout << "H(0,0,0," << m << "; " 
+                 << nx << "," << ny << "," << nz << "," << m_neighbor << ") = "
+                 << hopping_real << " + i " << hopping_imag << std::endl;
+        }
+    }  
+
+
+    for (int nx1 = 0; nx1 < N_cell[0]; ++nx1)
+    {
+        for (int ny1 = 0; ny1 < N_cell[1]; ++ny1)
+        {  
+            for (int nz1 = 0; nz1 < N_cell[2]; ++nz1)
+            {
+                for (int m = 0; m < N_orbital; ++m)
+                {
+                    int n1 = find_index
+                    (
+                        nx1, ny1, nz1, N_cell[0], N_cell[1], N_cell[2], 
+                        m, N_orbital
+                    );
+
+                    int count = 0;
+                    for (int i = 0; i < number_of_hoppings[m]; ++i)
+                    {
+                        int neighbor_index = n1 + count * number_of_atoms;
+                        int k = m*max_neighbor+i;
+
+                        int nx2 = hopping_data[0][k] + nx1;
+                        int ny2 = hopping_data[1][k] + ny1;
+                        int nz2 = hopping_data[2][k] + nz1;
+                        bool skip_x = !pbc[0] && (nx2 < 0 || nx2 >= N_cell[0]);
+                        bool skip_y = !pbc[1] && (ny2 < 0 || ny2 >= N_cell[1]);
+                        bool skip_z = !pbc[2] && (nz2 < 0 || nz2 >= N_cell[2]);
+                        if (skip_x || skip_y || skip_z) continue;
+
+                        neighbor_list[neighbor_index] = find_index
+                        (
+                            nx2, ny2, nz2, N_cell[0], N_cell[1], N_cell[2], 
+                            hopping_data[3][k], N_orbital
+                        );
+
+                        real x12 = lattice_constant[transport_direction]
+                                   * hopping_data[transport_direction][k];
+                        x12 += x_cell[hopping_data[3][k]] - x_cell[m];
+                        xx[neighbor_index] = x12;
+
+                        hopping_real[neighbor_index] = hopping_data[4][k]; 
+                        hopping_imag[neighbor_index] = hopping_data[5][k]; 
+
+                        ++count;
+                    } 
+                    neighbor_number[n1] = count;  
+                }
+            }
+        }
+    }
     print_finished_reading(filename);
 }
 
