@@ -56,9 +56,6 @@ Model::Model(std::string input_dir)
     if (use_lattice_model) // use a lattice model
     {
         initialize_lattice_model();
-        // then consider disorders
-        if (has_anderson_disorder)
-            add_anderson_disorder();
     }
     else // use general inputs to build the model
     {
@@ -156,6 +153,11 @@ void Model::initialize_parameters()
             has_anderson_disorder = true;
             ss >> anderson_disorder_strength;
         }
+        else if (token == "vacancy_disorder")
+        {
+            has_vacancy_disorder = true;
+            ss >> number_of_vacancies;
+        }
         else if (token == "calculate_vac")
         {
             calculate_vac = true;
@@ -197,6 +199,12 @@ void Model::initialize_parameters()
     {
         std::cout << "- Add Anderson disorder with strength W = " 
                   << anderson_disorder_strength << std::endl;
+    }
+
+    if (has_vacancy_disorder)
+    {
+        std::cout << "- Add " << number_of_vacancies 
+                  << " vacancies" << std::endl;
     }
 
     std::cout << "- DOS will be calculated" << std::endl;
@@ -409,8 +417,164 @@ void Model::add_anderson_disorder()
     std::uniform_real_distribution<real> on_site_potential(-W2, W2);
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        potential[n] = on_site_potential(generator);
+        if (has_anderson_disorder)
+            potential[n] = on_site_potential(generator);
+        else
+            potential[n] = 0.0;
     }
+}
+
+
+
+
+static void creat_random_numbers
+(int max_value, int total_number, int* random_numbers)
+{
+    int *permuted_numbers = new int[max_value];
+	for(int i = 0; i < max_value; ++i)
+    {
+        permuted_numbers[i] = i;
+    }
+	for(int i = 0; i < max_value; ++i)
+    {
+		int j = rand() % (max_value - i) + i;
+		int temp = permuted_numbers[i];
+		permuted_numbers[i] = permuted_numbers[j];
+		permuted_numbers[j] = temp;
+	}
+    for (int i = 0; i < total_number; ++i)
+    {      
+        random_numbers[i] = permuted_numbers[i];
+    }
+    delete[] permuted_numbers;
+}
+
+
+
+
+static void specify_vacancies
+(int *is_vacancy, int number_of_vacancies, int number_of_atoms_pristine)
+{
+    int *vacancy_indices = new int[number_of_vacancies];
+    creat_random_numbers
+    (number_of_atoms_pristine, number_of_vacancies, vacancy_indices);
+
+    for (int n = 0; n < number_of_atoms_pristine; ++n)
+    {
+        is_vacancy[n] = 0;
+    }
+    for (int n = 0; n < number_of_vacancies; ++n)
+    {
+        is_vacancy[vacancy_indices[n]] = 1;
+    }
+    delete[] vacancy_indices;
+}
+
+
+
+
+static void find_new_atom_index
+(int *is_vacancy, int *new_atom_index, int number_of_atoms_pristine)
+{
+    int count = 0;
+    for (int n = 0; n < number_of_atoms_pristine; ++n)
+    {
+        if (is_vacancy[n] == 0)
+        {
+            new_atom_index[n] = count;
+            ++count;
+        }
+    }
+}
+
+
+
+
+void Model::add_vacancies()
+{ 
+    // copy some data
+    int *neighbor_number_pristine = new int[number_of_atoms];
+    int *neighbor_list_pristine = new int[number_of_pairs];
+    real *hopping_real_pristine = new real[number_of_pairs];
+    real *hopping_imag_pristine = new real[number_of_pairs];
+    real *xx_pristine = new real[number_of_pairs];
+std::cout << "hello 0" << std::endl;
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        neighbor_number_pristine[n] = neighbor_number[n];
+    }   
+    for (int m = 0; m < number_of_pairs; ++m)
+    {
+        neighbor_list_pristine[m] = neighbor_list[m];
+        hopping_real_pristine[m] = hopping_real[m];
+        hopping_imag_pristine[m] = hopping_imag[m];
+        xx_pristine[m] = xx[m];
+    }
+
+std::cout << "hello 1" << std::endl;
+    // change parameters
+    int number_of_atoms_pristine = number_of_atoms;
+    number_of_atoms = number_of_atoms_pristine - number_of_vacancies;
+    number_of_pairs = number_of_atoms * max_neighbor;
+std::cout << "hello 2" << std::endl;
+    // delete old memory
+    delete[] neighbor_number;
+    delete[] neighbor_list;
+    delete[] hopping_real;
+    delete[] hopping_imag;
+    delete[] xx;
+std::cout << "hello 3" << std::endl;
+    // allocate new memory
+    neighbor_number = new int[number_of_atoms];
+    neighbor_list = new int[number_of_pairs];
+    hopping_real = new real[number_of_pairs];
+    hopping_imag = new real[number_of_pairs];
+    xx = new real[number_of_pairs];
+std::cout << "hello 4" << std::endl;
+    // specify the distribution of the vacancies
+    int *is_vacancy = new int[number_of_atoms_pristine];
+    specify_vacancies
+    (is_vacancy, number_of_vacancies, number_of_atoms_pristine);
+ std::cout << "hello 5" << std::endl;           
+    // find the new indices of the atoms    
+    int *new_atom_index = new int[number_of_atoms_pristine];
+    find_new_atom_index(is_vacancy, new_atom_index, number_of_atoms_pristine);
+       
+    // get the new neighbor structure and related data
+    int count_atom = 0;
+    for (int n = 0; n < number_of_atoms_pristine; ++n)
+    {
+        if (is_vacancy[n] == 0)
+        {
+            int count_neighbor = 0;
+            for (int m = 0; m < neighbor_number_pristine[n]; ++m)
+            {
+                int index_old = m * number_of_atoms_pristine + n;
+                int k = neighbor_list_pristine[index_old];
+                if (is_vacancy[k] == 0)
+                {
+                    int index_new = count_neighbor*number_of_atoms + count_atom;
+                    neighbor_list[index_new] = new_atom_index[k];
+                    hopping_real[index_new] = hopping_real_pristine[index_old];
+                    hopping_imag[index_new] = hopping_imag_pristine[index_old];
+                    xx[index_new] = xx_pristine[index_old];
+                    ++count_neighbor;
+                }
+            }
+            neighbor_number[count_atom] = count_neighbor;
+            ++count_atom;
+        }
+    }
+std::cout << "hello 6" << std::endl;
+    // free memory
+    delete[] neighbor_number_pristine;
+    delete[] neighbor_list_pristine;
+    delete[] hopping_real_pristine;
+    delete[] hopping_imag_pristine;
+    delete[] xx_pristine;
+    delete[] is_vacancy;  
+    delete[] new_atom_index;
+std::cout << "hello 7" << std::endl;
 }
 
 
@@ -647,6 +811,12 @@ void Model::initialize_lattice_model()
             }
         }
     }
+
+    if (has_vacancy_disorder && number_of_vacancies > 0)
+    {
+        add_vacancies();
+    }
+    add_anderson_disorder();
     print_finished_reading(filename);
 }
 

@@ -74,6 +74,7 @@ private:
     void initialize_hopping();
     void initialize_lattice_model();
     void add_anderson_disorder();
+    void add_vacancies();
     	
     bool requires_time = false;
     bool use_lattice_model = false;
@@ -81,6 +82,9 @@ private:
     // disorder
     bool has_anderson_disorder = false;
     real anderson_disorder_strength;
+
+    bool has_vacancy_disorder = false;
+    int number_of_vacancies;
     
     std::mt19937 generator;
 };
