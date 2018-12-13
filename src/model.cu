@@ -493,7 +493,7 @@ void Model::add_anderson_disorder()
 
 
 
-static void creat_random_numbers
+void Model::create_random_numbers
 (int max_value, int total_number, int* random_numbers)
 {
     int *permuted_numbers = new int[max_value];
@@ -501,9 +501,10 @@ static void creat_random_numbers
     {
         permuted_numbers[i] = i;
     }
+    std::uniform_int_distribution<int> rand_int(0, INT_MAX);
 	for(int i = 0; i < max_value; ++i)
     {
-		int j = rand() % (max_value - i) + i;
+		int j = rand_int(generator) % (max_value - i) + i;
 		int temp = permuted_numbers[i];
 		permuted_numbers[i] = permuted_numbers[j];
 		permuted_numbers[j] = temp;
@@ -518,11 +519,11 @@ static void creat_random_numbers
 
 
 
-static void specify_vacancies
-(int *is_vacancy, int number_of_vacancies, int number_of_atoms_pristine)
+void Model::specify_vacancies
+(int *is_vacancy, int number_of_atoms_pristine)
 {
     int *vacancy_indices = new int[number_of_vacancies];
-    creat_random_numbers
+    create_random_numbers
     (number_of_atoms_pristine, number_of_vacancies, vacancy_indices);
 
     for (int n = 0; n < number_of_atoms_pristine; ++n)
@@ -539,7 +540,7 @@ static void specify_vacancies
 
 
 
-static void find_new_atom_index
+void Model::find_new_atom_index
 (int *is_vacancy, int *new_atom_index, int number_of_atoms_pristine)
 {
     int count = 0;
@@ -598,8 +599,7 @@ void Model::add_vacancies()
 
     // specify the distribution of the vacancies
     int *is_vacancy = new int[number_of_atoms_pristine];
-    specify_vacancies
-    (is_vacancy, number_of_vacancies, number_of_atoms_pristine);
+    specify_vacancies(is_vacancy, number_of_atoms_pristine);
            
     // find the new indices of the atoms    
     int *new_atom_index = new int[number_of_atoms_pristine];
