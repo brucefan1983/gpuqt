@@ -410,6 +410,72 @@ void Model::initialize_potential()
 
 
 
+void Model::initialize_hopping()
+{
+    std::string filename = input_dir + "/hopping.in";
+    print_started_reading(filename);
+    std::ifstream input(filename);
+
+    /*
+     type == 1 : complex hoppings
+     type == 2 : real hoppings
+     type == 3 : uniform hoppings (hoppings.in is not read)
+    */
+    int type = 0;
+        
+    if (!input.is_open())
+    {
+        type = 3;
+        std::cout <<"- Could not open " + filename << std::endl;
+        std::cout << "- Assuming uniform hoppings with strength -1" << std::endl;
+    }
+    else
+    {
+        std::string first_line;
+        input >> first_line;
+        if (first_line == "complex")
+        {
+            type = 1;
+            std::cout << "- Hoppings have imaginary part" << std::endl;
+        }
+        else if (first_line == "real")
+        {
+            type = 2;
+            std::cout << "- Hoppings are real" << std::endl;
+        }
+        else
+        {
+            std::cout << "- Hoppings can only be real or complex"
+                      << std::endl;
+            exit(1);
+        }
+    }
+    
+    hopping_real = new real[number_of_pairs]; 
+    hopping_imag = new real[number_of_pairs];
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        for (int m = 0; m < neighbor_number[n]; ++m)
+        {
+            int index = n + m * number_of_atoms;
+            if (type < 3)
+                input >> hopping_real[index];
+            else
+                hopping_real[index] = -1.0;
+            if (type == 1)
+                input >> hopping_imag[index];
+            else
+                hopping_imag[index] = 0.0;
+        }
+    }
+    input.close();
+
+    print_finished_reading(filename);
+}
+
+
+
+
 void Model::add_anderson_disorder()
 { 
     potential = new real[number_of_atoms];
@@ -498,7 +564,7 @@ void Model::add_vacancies()
     real *hopping_real_pristine = new real[number_of_pairs];
     real *hopping_imag_pristine = new real[number_of_pairs];
     real *xx_pristine = new real[number_of_pairs];
-std::cout << "hello 0" << std::endl;
+
     for (int n = 0; n < number_of_atoms; ++n)
     {
         neighbor_number_pristine[n] = neighbor_number[n];
@@ -511,31 +577,30 @@ std::cout << "hello 0" << std::endl;
         xx_pristine[m] = xx[m];
     }
 
-std::cout << "hello 1" << std::endl;
     // change parameters
     int number_of_atoms_pristine = number_of_atoms;
     number_of_atoms = number_of_atoms_pristine - number_of_vacancies;
     number_of_pairs = number_of_atoms * max_neighbor;
-std::cout << "hello 2" << std::endl;
+
     // delete old memory
     delete[] neighbor_number;
     delete[] neighbor_list;
     delete[] hopping_real;
     delete[] hopping_imag;
     delete[] xx;
-std::cout << "hello 3" << std::endl;
+
     // allocate new memory
     neighbor_number = new int[number_of_atoms];
     neighbor_list = new int[number_of_pairs];
     hopping_real = new real[number_of_pairs];
     hopping_imag = new real[number_of_pairs];
     xx = new real[number_of_pairs];
-std::cout << "hello 4" << std::endl;
+
     // specify the distribution of the vacancies
     int *is_vacancy = new int[number_of_atoms_pristine];
     specify_vacancies
     (is_vacancy, number_of_vacancies, number_of_atoms_pristine);
- std::cout << "hello 5" << std::endl;           
+           
     // find the new indices of the atoms    
     int *new_atom_index = new int[number_of_atoms_pristine];
     find_new_atom_index(is_vacancy, new_atom_index, number_of_atoms_pristine);
@@ -565,7 +630,7 @@ std::cout << "hello 4" << std::endl;
             ++count_atom;
         }
     }
-std::cout << "hello 6" << std::endl;
+
     // free memory
     delete[] neighbor_number_pristine;
     delete[] neighbor_list_pristine;
@@ -574,73 +639,6 @@ std::cout << "hello 6" << std::endl;
     delete[] xx_pristine;
     delete[] is_vacancy;  
     delete[] new_atom_index;
-std::cout << "hello 7" << std::endl;
-}
-
-
-
-
-void Model::initialize_hopping()
-{
-    std::string filename = input_dir + "/hopping.in";
-    print_started_reading(filename);
-    std::ifstream input(filename);
-
-    /*
-     type == 1 : complex hoppings
-     type == 2 : real hoppings
-     type == 3 : uniform hoppings (hoppings.in is not read)
-    */
-    int type = 0;
-        
-    if (!input.is_open())
-    {
-        type = 3;
-        std::cout <<"- Could not open " + filename << std::endl;
-        std::cout << "- Assuming uniform hoppings with strength -1" << std::endl;
-    }
-    else
-    {
-        std::string first_line;
-        input >> first_line;
-        if (first_line == "complex")
-        {
-            type = 1;
-            std::cout << "- Hoppings have imaginary part" << std::endl;
-        }
-        else if (first_line == "real")
-        {
-            type = 2;
-            std::cout << "- Hoppings are real" << std::endl;
-        }
-        else
-        {
-            std::cout << "- Hoppings can only be real or complex"
-                      << std::endl;
-            exit(1);
-        }
-    }
-    
-    hopping_real = new real[number_of_pairs]; 
-    hopping_imag = new real[number_of_pairs];
-    for (int n = 0; n < number_of_atoms; ++n)
-    {
-        for (int m = 0; m < neighbor_number[n]; ++m)
-        {
-            int index = n + m * number_of_atoms;
-            if (type < 3)
-                input >> hopping_real[index];
-            else
-                hopping_real[index] = -1.0;
-            if (type == 1)
-                input >> hopping_imag[index];
-            else
-                hopping_imag[index] = 0.0;
-        }
-    }
-    input.close();
-
-    print_finished_reading(filename);
 }
 
 
