@@ -40,10 +40,11 @@ Model::Model(std::string input_dir)
     else
         time_step = 0;
 
-    if (use_lattice_model) // use lattice models
+    if (use_lattice_model) // use a lattice model
     {
         initialize_lattice_model();
-        initialize_potential();
+        if (has_anderson_disorder)
+            add_anderson_disorder();
     }
     else // use general inputs to build the model
     {
@@ -60,10 +61,6 @@ Model::Model(std::string input_dir)
         generator = std::mt19937
         (std::chrono::system_clock::now().time_since_epoch().count());
     #endif
-
-    // We only need RNG for random phase generation 
-    // so we may use interval [0, 2*PI] right away
-    phase_distribution = std::uniform_real_distribution<real>(0, 2 * PI);
 }
 
 
@@ -87,11 +84,12 @@ Model::~Model()
 
 void Model::initialize_state(Vector& random_state)
 {
+    std::uniform_real_distribution<real> phase(0, 2 * PI);
     real *random_state_real = new real[number_of_atoms]; 
     real *random_state_imag = new real[number_of_atoms];
     for (int n = 0; n < number_of_atoms; ++n)
     {  
-        real random_phase = get_random_phase();
+        real random_phase = phase(generator);
         random_state_real[n] = cos(random_phase);
         random_state_imag[n] = sin(random_phase);
     }
@@ -148,7 +146,12 @@ void Model::initialize_parameters()
         {
             ss >> use_lattice_model;
         }
-        if (token == "calculate_vac")
+        else if (token == "anderson_disorder")
+        {
+            has_anderson_disorder = true;
+            ss >> anderson_disorder_strength;
+        }
+        else if (token == "calculate_vac")
         {
             calculate_vac = true;
         }
@@ -179,11 +182,18 @@ void Model::initialize_parameters()
     if (calculate_vac || calculate_msd)
         requires_time = true;
     
-    //Verify the used parameters
+    //Verify the used parameters (make a seperate function later)
     if (use_lattice_model) 
         std::cout << "- Use lattice model" << std::endl;
     else
         std::cout << "- Use general model" << std::endl;
+
+    if (has_anderson_disorder)
+    {
+        std::cout << "- Add Anderson disorder with strength W = " 
+                  << anderson_disorder_strength << std::endl;
+    }
+
     std::cout << "- DOS will be calculated" << std::endl;
     if (calculate_vac)
         std::cout << "- VAC will be calculated" << std::endl;
@@ -301,14 +311,6 @@ void Model::initialize_neighbor()
 
 
 
-real Model::get_random_phase()
-{
-    return phase_distribution(generator);
-}
-
-
-
-
 real reduce_distance(real d, real box)
 {
     if (d > box/2.0)
@@ -388,6 +390,20 @@ void Model::initialize_potential()
     input.close();
  
     print_finished_reading(filename);
+}
+
+
+
+
+void Model::add_anderson_disorder()
+{ 
+    potential = new real[number_of_atoms];
+    real W2 = anderson_disorder_strength * 0.5;
+    std::uniform_real_distribution<real> on_site_potential(-W2, W2);
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        potential[n] = on_site_potential(generator);
+    }
 }
 
 
