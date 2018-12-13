@@ -56,6 +56,9 @@ Model::Model(std::string input_dir)
     if (use_lattice_model) // use a lattice model
     {
         initialize_lattice_model();
+        // then consider disorders
+        if (has_anderson_disorder)
+            add_anderson_disorder();
     }
     else // use general inputs to build the model
     {
@@ -64,10 +67,6 @@ Model::Model(std::string input_dir)
         initialize_potential();
         initialize_hopping();
     }
-
-    // consider disorders
-    if (has_anderson_disorder)
-        add_anderson_disorder();
 }
 
 
@@ -83,7 +82,6 @@ Model::~Model()
     delete[] neighbor_number;
     delete[] neighbor_list;
     delete[] xx;
-    delete[] x;
 }
 
 
@@ -343,8 +341,9 @@ void Model::initialize_positions()
     }
     print_started_reading(filename);
 
+    real box;
     input >> box >> volume;   
-    x = new real[number_of_atoms];
+    real *x = new real[number_of_atoms];
 
     for (int i=0; i<number_of_atoms; ++i)
         input >> x[i];
@@ -364,6 +363,7 @@ void Model::initialize_positions()
         }
     }
 
+    delete[] x;
     print_finished_reading(filename);
 }
 

@@ -73,12 +73,8 @@ private:
     void initialize_potential();
     void initialize_hopping();
     void initialize_lattice_model();
-
     void add_anderson_disorder();
     	
-    real* x;
-    real box;
-    
     bool requires_time = false;
     bool use_lattice_model = false;
 
