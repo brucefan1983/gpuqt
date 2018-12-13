@@ -31,20 +31,31 @@
 
 Model::Model(std::string input_dir)
 {
+    // Use higher accuracy clock for the RNG seed
+    #ifdef DEBUG
+        generator = std::mt19937(12345678);
+    #else
+        generator = std::mt19937
+        (std::chrono::system_clock::now().time_since_epoch().count());
+    #endif
+
+    // determine the input directory
     this->input_dir = input_dir;
+
+    // read in para.in
     initialize_parameters();
 
+    // read in energy.in and time_step.in
     initialize_energy();
     if (requires_time)
         initialize_time();
     else
         time_step = 0;
 
+    // initialize the model
     if (use_lattice_model) // use a lattice model
     {
         initialize_lattice_model();
-        if (has_anderson_disorder)
-            add_anderson_disorder();
     }
     else // use general inputs to build the model
     {
@@ -53,14 +64,10 @@ Model::Model(std::string input_dir)
         initialize_potential();
         initialize_hopping();
     }
- 
-    // Use higher accuracy clock for the RNG seed
-    #ifdef DEBUG
-        generator = std::mt19937(12345678);
-    #else
-        generator = std::mt19937
-        (std::chrono::system_clock::now().time_since_epoch().count());
-    #endif
+
+    // consider disorders
+    if (has_anderson_disorder)
+        add_anderson_disorder();
 }
 
 
