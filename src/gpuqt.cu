@@ -59,7 +59,7 @@ void gpuqt(std::string input_directory)
     // Initialize model on the CPU
     Model model(input_directory);
     Hamiltonian H(model);
-    Vector random_state(model);
+    Vector random_state(model.number_of_atoms);
 
     clock_t time_begin, time_finish;
     real time_used;

@@ -21,15 +21,12 @@
 #pragma once
 #include "common.h"
 
-class Model;
-
 
 class Vector
 {
  
 public:
-    Vector(int n, Model& parameters);
-    Vector(Model& parameters);
+    Vector(int n);
     Vector(Vector& original);
     ~Vector();
     void add(Vector& other, real coeff=1.0);
@@ -37,18 +34,19 @@ public:
     void copy_from_host(real* other_real, real* other_imag);
     void copy_to_host(real* target_real, real* target_imag);	
     void swap(Vector& other);
-    void inner_product_1(Vector& other, Vector& target, int offset);
-    void inner_product_2(Vector& target);	
+    void inner_product_1(int, Vector& other, Vector& target, int offset);
+    void inner_product_2(int, int, Vector& target);	
     
     real* real_part;
     real* imag_part;
     
 private:
-    void initialize_parameters();
+    void initialize_parameters(int n);
     int n;
     size_t array_size;
-    size_t grid_size;
-    Model& model;
-    
+    size_t grid_size; 
 };
+
+
+
 

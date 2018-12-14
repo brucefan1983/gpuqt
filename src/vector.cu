@@ -19,16 +19,15 @@
 
  
 #include "vector.h"
-#include "model.h"
 
 
 /*
 	Gets number of elements from model and sets array and grid sizes accordingly.
 	Allocates memory on the device
 */
-void Vector::initialize_parameters()
+void Vector::initialize_parameters(int n)
 {
-    n = model.number_of_atoms;
+    this->n = n;
     array_size = n * sizeof(real);
     grid_size = (n-1) / BLOCK_SIZE + 1;
     cudaMalloc((void**)&real_part, array_size);
@@ -50,29 +49,15 @@ __global__ void gpu_set_zero(int number_of_elements, real *g_state_real, real *g
 }
 
 
-/*
-	Constructor for an empty vector. 
-	Takes length from model and sets all elements to zero
-*/
-Vector::Vector(Model& model) : model(model)
-{
-    initialize_parameters();	
-    gpu_set_zero<<<grid_size, BLOCK_SIZE>>>(n, real_part, imag_part);
-}
-
 
 
 /*
 	Constructor for a vector of arbitrary length. 
 	Does not initialize data. 
 */
-Vector::Vector(int n, Model& model) : model(model)
+Vector::Vector(int n)
 {
-    this->n = n;
-    array_size = n * sizeof(real);
-    grid_size = (model.number_of_atoms-1) / BLOCK_SIZE + 1;
-    cudaMalloc((void**)&real_part, array_size);
-    cudaMalloc((void**)&imag_part, array_size);
+    initialize_parameters(n);
 }
 
 
@@ -95,9 +80,9 @@ __global__ void gpu_copy_state
 /*
 	Constructor which creates a copy of *original*
 */
-Vector::Vector(Vector& original) : model(original.model)
+Vector::Vector(Vector& original)
 {
-    initialize_parameters();
+    initialize_parameters(original.n);
     gpu_copy_state<<<grid_size, BLOCK_SIZE>>>(n, original.real_part, original.imag_part, real_part, imag_part);
 }
 
@@ -233,11 +218,11 @@ __global__ void gpu_find_inner_product_1
 
 
 // The first step of calculating the inner products. This is a wrapper function
-void Vector::inner_product_1(Vector& other, Vector& target, int offset)
+void Vector::inner_product_1(int number_of_atoms, Vector& other, Vector& target, int offset)
 {
     gpu_find_inner_product_1<<<grid_size, 512>>>
     (
-        model.number_of_atoms, real_part, imag_part, 
+        number_of_atoms, real_part, imag_part, 
         other.real_part, other.imag_part, target.real_part, target.imag_part, 
         offset
     );
@@ -293,11 +278,11 @@ __global__ void gpu_find_inner_product_2
 
 
 // The second step of calculating the inner products. This is a wrapper function
-void Vector::inner_product_2(Vector& target)
+void Vector::inner_product_2(int number_of_atoms, int number_of_moments, Vector& target)
 {
-    gpu_find_inner_product_2<<<model.number_of_moments, 512>>>
+    gpu_find_inner_product_2<<<number_of_moments, 512>>>
     (
-        model.number_of_atoms, real_part, imag_part, 
+        number_of_atoms, real_part, imag_part, 
         target.real_part, target.imag_part
     );	
 }

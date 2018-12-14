@@ -33,29 +33,29 @@ void find_moments_chebyshev(Model& model, Hamiltonian& H, Vector& state_left, Ve
 {
     int grid_size = (model.number_of_atoms - 1) / BLOCK_SIZE + 1;
 
-    Vector state_0(state_right), state_1(model), state_2(model); 
-    Vector inner_product_1(grid_size * model.number_of_moments, model);
+    Vector state_0(state_right), state_1(model.number_of_atoms), state_2(model.number_of_atoms); 
+    Vector inner_product_1(grid_size * model.number_of_moments);
 	
     // Tr[T_0(H)] = <left|right>
     int offset = 0 * grid_size;
-    state_0.inner_product_1(state_left, inner_product_1, offset);
+    state_0.inner_product_1(model.number_of_atoms, state_left, inner_product_1, offset);
 	
     // Tr[T_1(H)] = <left|H|right>
     H.apply(state_0, state_1);
     offset = 1 * grid_size;
-    state_1.inner_product_1(state_left, inner_product_1, offset);
+    state_1.inner_product_1(model.number_of_atoms, state_left, inner_product_1, offset);
 
     // Tr[T_m(H)] (m >= 2)
     for (int m = 2; m < model.number_of_moments; ++m)
     {    
         H.kernel_polynomial(state_0, state_1, state_2); 
         offset = m * grid_size;
-        state_2.inner_product_1(state_left, inner_product_1, offset);
+        state_2.inner_product_1(model.number_of_atoms, state_left, inner_product_1, offset);
         // permute the pointers; do not need to copy the data
         state_0.swap(state_1);
         state_1.swap(state_2);
     } 
-    inner_product_1.inner_product_2(output);
+    inner_product_1.inner_product_2(model.number_of_atoms, model.number_of_moments, output);
 }
 
 
@@ -115,7 +115,7 @@ void perform_chebyshev_summation
 // See Eq. (36) and Algorithm 6 in [Comput. Phys. Commun.185, 28 (2014)].
 void evolve(Model& model, int direction, real time_step_scaled, Hamiltonian& H, Vector& state_in)
 {
-    Vector state_0(state_in), state_1(model), state_2(model);
+    Vector state_0(state_in), state_1(model.number_of_atoms), state_2(model.number_of_atoms);
     // T_0(H) |psi> = |psi>
 	// Copied in construction
 
@@ -154,9 +154,9 @@ void evolve(Model& model, int direction, real time_step_scaled, Hamiltonian& H, 
 // See Eq. (37) and Algorithm 7 in [Comput. Phys. Commun.185, 28 (2014)].
 void evolvex(Model& model, int direction, real time_step_scaled, Hamiltonian& H, Vector& state_in)
 {
-    Vector state_0(state_in), state_0x(model);
-    Vector state_1(model), state_1x(model);    
-    Vector state_2(model), state_2x(model);    
+    Vector state_0(state_in), state_0x(model.number_of_atoms);
+    Vector state_1(model.number_of_atoms), state_1x(model.number_of_atoms);    
+    Vector state_2(model.number_of_atoms), state_2x(model.number_of_atoms);    
 
     // T_0(H) |psi> = |psi>
 	// This is done in constructor of state_0
@@ -201,7 +201,7 @@ void evolvex(Model& model, int direction, real time_step_scaled, Hamiltonian& H,
 // See Algorithm 1 in [Comput. Phys. Commun.185, 28 (2014)].
 void find_dos(Model& model, Hamiltonian& H, Vector& random_state)
 {
-    Vector inner_product_2(model.number_of_moments, model);
+    Vector inner_product_2(model.number_of_moments);
 
     real *dos;
     real *inner_product_real;
@@ -245,9 +245,9 @@ void find_dos(Model& model, Hamiltonian& H, Vector& random_state)
 void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
 {
     Vector state_left(random_state);
-    Vector state_left_copy(model);
+    Vector state_left_copy(model.number_of_atoms);
     Vector state_right(random_state);
-    Vector inner_product_2(model.number_of_moments, model);
+    Vector inner_product_2(model.number_of_moments);
 	
     real *inner_product_real; 
     real *inner_product_imag;
@@ -313,8 +313,8 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
 {
     Vector state(random_state);
     Vector state_x(random_state);	
-    Vector state_copy(model);
-    Vector inner_product_2(model.number_of_moments, model);
+    Vector state_copy(model.number_of_atoms);
+    Vector inner_product_2(model.number_of_moments);
 
     real *inner_product_real; 
     real *inner_product_imag;
