@@ -1,0 +1,6 @@
+model              1
+anderson_disorder  4.0
+energy_max         6.1
+calculate_msd
+calculate_vac
+
