@@ -27,7 +27,7 @@
 
 
 
-Hamiltonian::Hamiltonian(Model& model) : model(model)
+Hamiltonian::Hamiltonian(Model& model)
 {
     n = model.number_of_atoms;
     energy_max = model.energy_max;

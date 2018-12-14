@@ -62,7 +62,7 @@ private:
     real* hopping_imag;
     real* xx;
     size_t grid_size;
-    Model& model;
+    //Model& model;
     int n;
     real energy_max;
 };
