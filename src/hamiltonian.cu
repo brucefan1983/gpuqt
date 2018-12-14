@@ -18,57 +18,39 @@
 */
 
 
+
+
 #include "vector.h"
 #include "hamiltonian.h"
 #include "model.h"
 
 
-/*
-	Constructor which copies the Hamiltonian stored in model from the host
-*/
+
+
 Hamiltonian::Hamiltonian(Model& model) : model(model)
 {
     n = model.number_of_atoms;
     energy_max = model.energy_max;
     grid_size = (model.number_of_atoms - 1) / BLOCK_SIZE + 1;
-	
+
     cudaMalloc((void**)&neighbor_number, sizeof(int)*n);
     cudaMalloc((void**)&neighbor_list, sizeof(int)*n*model.max_neighbor);
     cudaMalloc((void**)&potential, sizeof(real)*n);
     cudaMalloc((void**)&hopping_real, sizeof(real)*n*model.max_neighbor);
-    cudaMalloc((void**)&hopping_imag, sizeof(real)*n*model.max_neighbor);	
-    cudaMalloc((void**)&xx, sizeof(real)*n*model.max_neighbor);		
-	
+    cudaMalloc((void**)&hopping_imag, sizeof(real)*n*model.max_neighbor);
+    cudaMalloc((void**)&xx, sizeof(real)*n*model.max_neighbor);
+
     cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int)*n, cudaMemcpyHostToDevice);
     cudaMemcpy(neighbor_list, model.neighbor_list, sizeof(int)*n*model.max_neighbor, cudaMemcpyHostToDevice);
     cudaMemcpy(potential, model.potential, sizeof(real)*n, cudaMemcpyHostToDevice);
     cudaMemcpy(hopping_real, model.hopping_real, sizeof(real)*n*model.max_neighbor, cudaMemcpyHostToDevice);
     cudaMemcpy(hopping_imag, model.hopping_imag, sizeof(real)*n*model.max_neighbor, cudaMemcpyHostToDevice);
-    cudaMemcpy(xx, model.xx, sizeof(real)*n*model.max_neighbor, cudaMemcpyHostToDevice);                
+    cudaMemcpy(xx, model.xx, sizeof(real)*n*model.max_neighbor, cudaMemcpyHostToDevice);
 }
 
 
-/*
-	Constructor in which the Hamiltonian is already defined on the device
-*/
-Hamiltonian::Hamiltonian
-(int* neighbor_number, int* neighbor_list, real* potential, real* hopping_real, real* hopping_imag, Model& model, real* xx)
-: model(model)
-{
-	this->neighbor_number = neighbor_number;
-	this->neighbor_list = neighbor_list;
-	this->potential = potential;
-	this->hopping_real = hopping_real;
-	this->hopping_imag = hopping_imag;
-	if (xx)
-		this->xx = xx;
-	n = model.number_of_atoms,
-	energy_max = model.energy_max;
-	this->grid_size = (model.number_of_atoms - 1) / BLOCK_SIZE + 1;
-}
 
 
-// Destructor
 Hamiltonian::~Hamiltonian()
 {
     cudaFree(neighbor_number);
@@ -76,8 +58,10 @@ Hamiltonian::~Hamiltonian()
     cudaFree(potential);
     cudaFree(hopping_real);
     cudaFree(hopping_imag);
-    cudaFree(xx); 
+    cudaFree(xx);
 }
+
+
 
 
 // Apply the (scaled) Hamiltonian H to the input vector. This is the kernel.
