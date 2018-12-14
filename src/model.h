@@ -73,8 +73,13 @@ private:
     void initialize_potential();
     void initialize_hopping();
     void initialize_lattice_model();
+
     void add_anderson_disorder();
+
     void add_vacancies();
+    void create_random_numbers(int, int, int*);
+    void specify_vacancies(int*, int);
+    void find_new_atom_index(int*, int*, int);
     	
     bool requires_time = false;
     bool use_lattice_model = false;
