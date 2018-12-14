@@ -102,23 +102,6 @@ Vector::Vector(Vector& original) : model(original.model)
 }
 
 
-/*
-	Same as above, but takes two arrays as input. The arrays can be on either host or device,
-	controlled by the input argument *device*
-*/
-Vector::Vector(real* original_real, real* original_imag, Model& model, bool device) : model(model)
-{
-    initialize_parameters();
-    if (device)
-    {
-        gpu_copy_state<<<grid_size, BLOCK_SIZE>>>(n, original_real, original_imag, real_part, imag_part);
-    }	
-    else
-    {
-        cudaMemcpy(real_part, original_real, array_size, cudaMemcpyHostToDevice);
-        cudaMemcpy(imag_part, original_imag, array_size, cudaMemcpyHostToDevice);		
-    }
-}
 
 
 // Destructor

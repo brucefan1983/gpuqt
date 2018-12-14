@@ -31,8 +31,6 @@ public:
     Vector(int n, Model& parameters);
     Vector(Model& parameters);
     Vector(Vector& original);
-    Vector(real* original_real, real* original_imag, Model& parameters, bool device=true);
-	
     ~Vector();
     void add(Vector& other, real coeff=1.0);
     void copy(Vector& other);
