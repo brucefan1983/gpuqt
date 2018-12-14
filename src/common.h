@@ -35,6 +35,6 @@ typedef double real; // if change double to float, should change 1 to 0 above
 #define BLOCK_SIZE 512     // optimized
 #define BLOCK_SIZE_512 1   // do not change this
 #define BLOCK_SIZE_256 1   // do not change this
-#define PI 3.141592653589793
+
 
 

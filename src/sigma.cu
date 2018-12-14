@@ -27,6 +27,12 @@
 
 
 
+
+#define PI 3.141592653589793
+
+
+
+
 // Find the Chebyshev moments defined in Eqs. (32-34) in [Comput. Phys. Commun.185, 28 (2014)].
 // See Algorithm 5 in [Comput. Phys. Commun.185, 28 (2014)].
 void find_moments_chebyshev(Model& model, Hamiltonian& H, Vector& state_left, Vector& state_right, Vector& output)

@@ -29,6 +29,11 @@
 
 
 
+#define PI 3.141592653589793
+
+
+
+
 Model::Model(std::string input_dir)
 {
     // Use higher accuracy clock for the RNG seed
