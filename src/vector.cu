@@ -52,12 +52,12 @@ __global__ void gpu_set_zero(int number_of_elements, real *g_state_real, real *g
 
 
 /*
-	Constructor for a vector of arbitrary length. 
-	Does not initialize data. 
+	Constructor for a vector of arbitrary length.  
 */
 Vector::Vector(int n)
 {
     initialize_parameters(n);
+    gpu_set_zero<<<grid_size, BLOCK_SIZE>>>(n, real_part, imag_part);
 }
 
 
@@ -82,8 +82,11 @@ __global__ void gpu_copy_state
 */
 Vector::Vector(Vector& original)
 {
+    // Just teach myself: one can access private members of another instance
+    // of the class from within the class
     initialize_parameters(original.n);
-    gpu_copy_state<<<grid_size, BLOCK_SIZE>>>(n, original.real_part, original.imag_part, real_part, imag_part);
+    gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
+    (n, original.real_part, original.imag_part, real_part, imag_part);
 }
 
 
