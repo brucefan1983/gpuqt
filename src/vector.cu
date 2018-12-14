@@ -31,7 +31,7 @@ void Vector::initialize_parameters(int n)
     array_size = n * sizeof(real);
     grid_size = (n-1) / BLOCK_SIZE + 1;
     cudaMalloc((void**)&real_part, array_size);
-    cudaMalloc((void**)&imag_part, array_size);	
+    cudaMalloc((void**)&imag_part, array_size);
 }
 
 
@@ -43,14 +43,14 @@ __global__ void gpu_set_zero
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_elements)
     {
-        g_state_real[n] = 0; 
-        g_state_imag[n] = 0;  
+        g_state_real[n] = 0;
+        g_state_imag[n] = 0;
     }
 }
 
 
 
- 
+
 Vector::Vector(int n)
 {
     initialize_parameters(n);
@@ -66,8 +66,8 @@ __global__ void gpu_copy_state
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < N)
     {
-        out_real[n] = in_real[n]; 
-        out_imag[n] = in_imag[n];  
+        out_real[n] = in_real[n];
+        out_imag[n] = in_imag[n];
     }
 }
 
@@ -101,8 +101,8 @@ __global__ void gpu_add_state
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
     {
-        out_real[i] += in_real[i]; 
-        out_imag[i] += in_imag[i];  
+        out_real[i] += in_real[i];
+        out_imag[i] += in_imag[i];
     }
 }
 
@@ -121,7 +121,7 @@ void Vector::add(Vector& other, real coeff)
 void Vector::copy(Vector& other)
 {
     gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
-    (n, other.real_part, other.imag_part, real_part, imag_part);	
+    (n, other.real_part, other.imag_part, real_part, imag_part);
 }
 
 
@@ -130,7 +130,7 @@ void Vector::copy(Vector& other)
 void Vector::copy_from_host(real* other_real, real* other_imag)
 {
     cudaMemcpy(real_part, other_real, array_size, cudaMemcpyHostToDevice);
-    cudaMemcpy(imag_part, other_imag, array_size, cudaMemcpyHostToDevice);		
+    cudaMemcpy(imag_part, other_imag, array_size, cudaMemcpyHostToDevice);
 }
 
 
@@ -170,11 +170,11 @@ __device__ void warp_reduce(volatile real *s, int t)
 __global__ void gpu_find_inner_product_1
 (
     int number_of_atoms,
-    real *g_final_state_real, 
-    real *g_final_state_imag, 
+    real *g_final_state_real,
+    real *g_final_state_imag,
     real *g_random_state_real,
     real *g_random_state_imag,
-    real *g_inner_product_real, 
+    real *g_inner_product_real,
     real *g_inner_product_imag,
     int   g_offset
 )
@@ -194,38 +194,38 @@ __global__ void gpu_find_inner_product_1
         b = g_final_state_imag[n];
         c = g_random_state_real[n];
         d = g_random_state_imag[n];
-        s_data_real[tid] = (a * c + b * d); 
+        s_data_real[tid] = (a * c + b * d);
         s_data_imag[tid] = (b * c - a * d);
     }
     __syncthreads();
 
     if (tid < 256) 
     {
-        m = tid + 256; 
-        s_data_real[tid] += s_data_real[m]; 
+        m = tid + 256;
+        s_data_real[tid] += s_data_real[m];
         s_data_imag[tid] += s_data_imag[m];
     }
     __syncthreads();
-    if (tid < 128) 
+    if (tid < 128)
     {
-        m = tid + 128; 
-        s_data_real[tid] += s_data_real[m]; 
+        m = tid + 128;
+        s_data_real[tid] += s_data_real[m];
         s_data_imag[tid] += s_data_imag[m];
     }
     __syncthreads();
-    if (tid < 64)  
+    if (tid < 64)
     {
-        m = tid + 64;  
-        s_data_real[tid] += s_data_real[m]; 
+        m = tid + 64;
+        s_data_real[tid] += s_data_real[m];
         s_data_imag[tid] += s_data_imag[m];
     }
     __syncthreads();
-    if (tid < 32)  
+    if (tid < 32)
     {
-        warp_reduce(s_data_real, tid); 
+        warp_reduce(s_data_real, tid);
         warp_reduce(s_data_imag, tid);
     }
-    if (tid == 0) 
+    if (tid == 0)
     {        
         g_inner_product_real[blockIdx.x + g_offset] = s_data_real[0];
         g_inner_product_imag[blockIdx.x + g_offset] = s_data_imag[0];
@@ -240,8 +240,8 @@ void Vector::inner_product_1
 {
     gpu_find_inner_product_1<<<grid_size, 512>>>
     (
-        number_of_atoms, real_part, imag_part, 
-        other.real_part, other.imag_part, target.real_part, target.imag_part, 
+        number_of_atoms, real_part, imag_part,
+        other.real_part, other.imag_part, target.real_part, target.imag_part,
         offset
     );
 }
@@ -251,10 +251,10 @@ void Vector::inner_product_1
 
 __global__ void gpu_find_inner_product_2
 (
-    int number_of_atoms,	
-    real *g_inner_product_1_real, 
+    int number_of_atoms,
+    real *g_inner_product_1_real,
     real *g_inner_product_1_imag,
-    real *g_inner_product_2_real, 
+    real *g_inner_product_2_real,
     real *g_inner_product_2_imag
 )
 {
@@ -275,43 +275,43 @@ __global__ void gpu_find_inner_product_2
         if (n < number_of_blocks)
         {
             m = blockIdx.x * number_of_blocks + n;
-            s_data_real[tid] += g_inner_product_1_real[m]; 
+            s_data_real[tid] += g_inner_product_1_real[m];
             s_data_imag[tid] += g_inner_product_1_imag[m];
         }
     }
     __syncthreads();
   
-    if (tid < 256) 
+    if (tid < 256)
     {
-        m = tid + 256; 
-        s_data_real[tid] += s_data_real[m]; 
+        m = tid + 256;
+        s_data_real[tid] += s_data_real[m];
         s_data_imag[tid] += s_data_imag[m];
     }
     __syncthreads();
-    if (tid < 128) 
+    if (tid < 128)
     {
         m = tid + 128; 
-        s_data_real[tid] += s_data_real[m]; 
+        s_data_real[tid] += s_data_real[m];
         s_data_imag[tid] += s_data_imag[m];
     }
     __syncthreads();
-    if (tid < 64) 
+    if (tid < 64)
     {
         m = tid + 64; 
-        s_data_real[tid] += s_data_real[m]; 
+        s_data_real[tid] += s_data_real[m];
         s_data_imag[tid] += s_data_imag[m];
     }
     __syncthreads();
     if (tid < 32) 
     {
-        warp_reduce(s_data_real, tid); 
+        warp_reduce(s_data_real, tid);
         warp_reduce(s_data_imag, tid);
     }
-    if (tid == 0) 
-    {        
+    if (tid == 0)
+    {
         g_inner_product_2_real[blockIdx.x] = s_data_real[0];
         g_inner_product_2_imag[blockIdx.x] = s_data_imag[0];
-    }    
+    }
 }
 
 
@@ -322,9 +322,9 @@ void Vector::inner_product_2
 {
     gpu_find_inner_product_2<<<number_of_moments, 512>>>
     (
-        number_of_atoms, real_part, imag_part, 
+        number_of_atoms, real_part, imag_part,
         target.real_part, target.imag_part
-    );	
+    );
 }
 
 
