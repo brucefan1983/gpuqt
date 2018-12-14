@@ -17,14 +17,14 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
- 
+
+
+
 #include "vector.h"
 
 
-/*
-	Gets number of elements from model and sets array and grid sizes accordingly.
-	Allocates memory on the device
-*/
+
+
 void Vector::initialize_parameters(int n)
 {
     this->n = n;
@@ -35,10 +35,10 @@ void Vector::initialize_parameters(int n)
 }
 
 
-/*
-	Kernel for setting all elements of a state to zero (both real and imaginary parts)
-*/
-__global__ void gpu_set_zero(int number_of_elements, real *g_state_real, real *g_state_imag)
+
+
+__global__ void gpu_set_zero
+(int number_of_elements, real *g_state_real, real *g_state_imag)
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_elements)
@@ -50,10 +50,7 @@ __global__ void gpu_set_zero(int number_of_elements, real *g_state_real, real *g
 
 
 
-
-/*
-	Constructor for a vector of arbitrary length.  
-*/
+ 
 Vector::Vector(int n)
 {
     initialize_parameters(n);
@@ -62,24 +59,21 @@ Vector::Vector(int n)
 
 
 
-/*
-	Kernel for copying states on the gpu
-*/
+
 __global__ void gpu_copy_state
-(int number_of_atoms, real *g_state_in_real, real *g_state_in_imag, real *g_state_out_real, real *g_state_out_imag)
+(int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
-    if (n < number_of_atoms)
+    if (n < N)
     {
-        g_state_out_real[n] = g_state_in_real[n]; 
-        g_state_out_imag[n] = g_state_in_imag[n];  
+        out_real[n] = in_real[n]; 
+        out_imag[n] = in_imag[n];  
     }
 }
 
 
-/*
-	Constructor which creates a copy of *original*
-*/
+
+
 Vector::Vector(Vector& original)
 {
     // Just teach myself: one can access private members of another instance
@@ -92,7 +86,6 @@ Vector::Vector(Vector& original)
 
 
 
-// Destructor
 Vector::~Vector()
 {
     cudaFree(real_part);
@@ -100,41 +93,40 @@ Vector::~Vector()
 }
 
 
-// Add the "other" vector to the current vector. This is the kernel
+
+
 __global__ void gpu_add_state
-(int n, real *g_state_in_real, real *g_state_in_imag, real *g_state_out_real, real *g_state_out_imag)
+(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
     {
-        g_state_out_real[i] += g_state_in_real[i]; 
-        g_state_out_imag[i] += g_state_in_imag[i];  
+        out_real[i] += in_real[i]; 
+        out_imag[i] += in_imag[i];  
     }
 }
 
 
-// Add the "other" vector to the current vector. This is a wrapper function
+
+
 void Vector::add(Vector& other, real coeff)
 {
-    gpu_add_state<<<grid_size, BLOCK_SIZE>>>(n, other.real_part, other.imag_part, real_part, imag_part);
+    gpu_add_state<<<grid_size, BLOCK_SIZE>>>
+    (n, other.real_part, other.imag_part, real_part, imag_part);
 }
 
 
-// Sets this vector to the same state as "other" vector
+
+
 void Vector::copy(Vector& other)
 {
-    if (other.n == n)
-    {
-        gpu_copy_state<<<grid_size, BLOCK_SIZE>>>(n, other.real_part, other.imag_part, real_part, imag_part);	
-    }
-    else
-    {
-        std::cout << "Array sizes do not match in copy." << std::endl;	
-    }
+    gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
+    (n, other.real_part, other.imag_part, real_part, imag_part);	
 }
 
 
-// Copy from a host vector to the current vector
+
+
 void Vector::copy_from_host(real* other_real, real* other_imag)
 {
     cudaMemcpy(real_part, other_real, array_size, cudaMemcpyHostToDevice);
@@ -142,7 +134,8 @@ void Vector::copy_from_host(real* other_real, real* other_imag)
 }
 
 
-// Copy the current vector to a host vector
+
+
 void Vector::copy_to_host(real* target_real, real* target_imag)
 {
     cudaMemcpy(target_real, real_part, array_size, cudaMemcpyDeviceToHost);
@@ -150,7 +143,8 @@ void Vector::copy_to_host(real* target_real, real* target_imag)
 }
 
 
-// Exchange the pointers of the current vector and the "other" vector
+
+
 void Vector::swap(Vector& other)
 {
     real* tmp_real = real_part;
@@ -162,9 +156,8 @@ void Vector::swap(Vector& other)
 }
 
 
-/*
-	Device function which performs sum reduction over warp
-*/
+
+
 __device__ void warp_reduce(volatile real *s, int t)
 {
     s[t] += s[t + 32]; s[t] += s[t + 16]; s[t] += s[t + 8];
@@ -172,7 +165,8 @@ __device__ void warp_reduce(volatile real *s, int t)
 }
 
 
-// The first step of calculating the inner products. This is the kernel
+
+
 __global__ void gpu_find_inner_product_1
 (
     int number_of_atoms,
@@ -205,13 +199,32 @@ __global__ void gpu_find_inner_product_1
     }
     __syncthreads();
 
-    if (tid < 256) {m = tid + 256; s_data_real[tid] += s_data_real[m]; s_data_imag[tid] += s_data_imag[m];}
+    if (tid < 256) 
+    {
+        m = tid + 256; 
+        s_data_real[tid] += s_data_real[m]; 
+        s_data_imag[tid] += s_data_imag[m];
+    }
     __syncthreads();
-    if (tid < 128) {m = tid + 128; s_data_real[tid] += s_data_real[m]; s_data_imag[tid] += s_data_imag[m];}
+    if (tid < 128) 
+    {
+        m = tid + 128; 
+        s_data_real[tid] += s_data_real[m]; 
+        s_data_imag[tid] += s_data_imag[m];
+    }
     __syncthreads();
-    if (tid < 64)  {m = tid + 64;  s_data_real[tid] += s_data_real[m]; s_data_imag[tid] += s_data_imag[m];}
+    if (tid < 64)  
+    {
+        m = tid + 64;  
+        s_data_real[tid] += s_data_real[m]; 
+        s_data_imag[tid] += s_data_imag[m];
+    }
     __syncthreads();
-    if (tid < 32)  {warp_reduce(s_data_real, tid); warp_reduce(s_data_imag, tid);}
+    if (tid < 32)  
+    {
+        warp_reduce(s_data_real, tid); 
+        warp_reduce(s_data_imag, tid);
+    }
     if (tid == 0) 
     {        
         g_inner_product_real[blockIdx.x + g_offset] = s_data_real[0];
@@ -220,8 +233,10 @@ __global__ void gpu_find_inner_product_1
 }
 
 
-// The first step of calculating the inner products. This is a wrapper function
-void Vector::inner_product_1(int number_of_atoms, Vector& other, Vector& target, int offset)
+
+
+void Vector::inner_product_1
+(int number_of_atoms, Vector& other, Vector& target, int offset)
 {
     gpu_find_inner_product_1<<<grid_size, 512>>>
     (
@@ -232,7 +247,8 @@ void Vector::inner_product_1(int number_of_atoms, Vector& other, Vector& target,
 }
 
 
-// The second step of calculating the inner products. This is the kernel
+
+
 __global__ void gpu_find_inner_product_2
 (
     int number_of_atoms,	
@@ -265,13 +281,32 @@ __global__ void gpu_find_inner_product_2
     }
     __syncthreads();
   
-    if (tid < 256) {m = tid + 256; s_data_real[tid] += s_data_real[m]; s_data_imag[tid] += s_data_imag[m];}
+    if (tid < 256) 
+    {
+        m = tid + 256; 
+        s_data_real[tid] += s_data_real[m]; 
+        s_data_imag[tid] += s_data_imag[m];
+    }
     __syncthreads();
-    if (tid < 128) {m = tid + 128; s_data_real[tid] += s_data_real[m]; s_data_imag[tid] += s_data_imag[m];}
+    if (tid < 128) 
+    {
+        m = tid + 128; 
+        s_data_real[tid] += s_data_real[m]; 
+        s_data_imag[tid] += s_data_imag[m];
+    }
     __syncthreads();
-    if (tid < 64) {m = tid + 64; s_data_real[tid] += s_data_real[m]; s_data_imag[tid] += s_data_imag[m];}
+    if (tid < 64) 
+    {
+        m = tid + 64; 
+        s_data_real[tid] += s_data_real[m]; 
+        s_data_imag[tid] += s_data_imag[m];
+    }
     __syncthreads();
-    if (tid < 32) {warp_reduce(s_data_real, tid); warp_reduce(s_data_imag, tid);}
+    if (tid < 32) 
+    {
+        warp_reduce(s_data_real, tid); 
+        warp_reduce(s_data_imag, tid);
+    }
     if (tid == 0) 
     {        
         g_inner_product_2_real[blockIdx.x] = s_data_real[0];
@@ -280,8 +315,10 @@ __global__ void gpu_find_inner_product_2
 }
 
 
-// The second step of calculating the inner products. This is a wrapper function
-void Vector::inner_product_2(int number_of_atoms, int number_of_moments, Vector& target)
+
+
+void Vector::inner_product_2
+(int number_of_atoms, int number_of_moments, Vector& target)
 {
     gpu_find_inner_product_2<<<number_of_moments, 512>>>
     (
@@ -289,6 +326,7 @@ void Vector::inner_product_2(int number_of_atoms, int number_of_moments, Vector&
         target.real_part, target.imag_part
     );	
 }
+
 
 
 
