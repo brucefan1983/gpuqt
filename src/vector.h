@@ -18,33 +18,39 @@
 */
 
 
+
+
 #pragma once
 #include "common.h"
 
 
+
+
 class Vector
 {
- 
 public:
+
     Vector(int n);
     Vector(Vector& original);
     ~Vector();
-    void add(Vector& other, real coeff=1.0);
+
+    void add(Vector& other);
     void copy(Vector& other);
     void copy_from_host(real* other_real, real* other_imag);
-    void copy_to_host(real* target_real, real* target_imag);	
+    void copy_to_host(real* target_real, real* target_imag);
     void swap(Vector& other);
     void inner_product_1(int, Vector& other, Vector& target, int offset);
-    void inner_product_2(int, int, Vector& target);	
+    void inner_product_2(int, int, Vector& target);
     
     real* real_part;
     real* imag_part;
     
 private:
+
     void initialize_parameters(int n);
     int n;
     size_t array_size;
-    size_t grid_size; 
+    size_t grid_size;
 };
 
 

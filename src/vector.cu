@@ -109,7 +109,7 @@ __global__ void gpu_add_state
 
 
 
-void Vector::add(Vector& other, real coeff)
+void Vector::add(Vector& other)
 {
     gpu_add_state<<<grid_size, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
