@@ -58,6 +58,7 @@ private:
     real* xx;
     size_t grid_size;
     int n;
+    int max_neighbor;
     real energy_max;
 };
 

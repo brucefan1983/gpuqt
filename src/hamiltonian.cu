@@ -32,9 +32,9 @@
 void Hamiltonian::initialize_gpu(Model& model)
 {
     n = model.number_of_atoms;
+    max_neighbor = model.max_neighbor;
     energy_max = model.energy_max;
     grid_size = (model.number_of_atoms - 1) / BLOCK_SIZE + 1;
-    int max_neighbor = model.max_neighbor;
 
     cudaMalloc((void**)&neighbor_number, sizeof(int)  * n);
     cudaMalloc((void**)&neighbor_list,   sizeof(int)  * model.number_of_pairs);
@@ -109,6 +109,7 @@ void Hamiltonian::initialize_gpu(Model& model)
 void Hamiltonian::initialize_cpu(Model& model)
 {
     n = model.number_of_atoms;
+    max_neighbor = model.max_neighbor;
     energy_max = model.energy_max;
     int number_of_pairs = model.number_of_pairs;
 
@@ -217,6 +218,48 @@ __global__ void gpu_apply_hamiltonian
 
 
 
+void cpu_apply_hamiltonian
+(
+    int number_of_atoms,
+    int max_neighbor,
+    real energy_max,
+    int *g_neighbor_number,
+    int *g_neighbor_list,
+    real *g_potential,
+    real *g_hopping_real,
+    real *g_hopping_imag,
+    real *g_state_in_real,
+    real *g_state_in_imag,
+    real *g_state_out_real,
+    real *g_state_out_imag
+)
+{
+    for (int n = 0; n < number_of_atoms; ++n)
+    { 
+        real temp_real = g_potential[n] * g_state_in_real[n]; // on-site
+        real temp_imag = g_potential[n] * g_state_in_imag[n]; // on-site
+
+        for (int m = 0; m < g_neighbor_number[n]; ++m) 
+        {
+            int index_1 = n * max_neighbor + m;
+            int index_2 = g_neighbor_list[index_1];
+            real a = g_hopping_real[index_1];
+            real b = g_hopping_imag[index_1];
+            real c = g_state_in_real[index_2];
+            real d = g_state_in_imag[index_2];
+            temp_real += a * c - b * d; // hopping
+            temp_imag += a * d + b * c; // hopping
+        }
+        temp_real /= energy_max; // scale
+        temp_imag /= energy_max; // scale
+        g_state_out_real[n] = temp_real;
+        g_state_out_imag[n] = temp_imag;
+    }
+}
+
+
+
+
 // |output> = H |input>
 void Hamiltonian::apply(Vector& input, Vector& output)
 {
@@ -228,7 +271,12 @@ void Hamiltonian::apply(Vector& input, Vector& output)
         output.real_part, output.imag_part
     );
 #else
-    //TODO
+    cpu_apply_hamiltonian
+    (
+        n, max_neighbor, energy_max, neighbor_number, neighbor_list, potential,
+        hopping_real, hopping_imag, input.real_part, input.imag_part,
+        output.real_part, output.imag_part
+    );
 #endif
 }
 
@@ -275,6 +323,46 @@ __global__ void gpu_apply_commutator
 
 
 
+void cpu_apply_commutator
+(
+    int number_of_atoms,
+    int max_neighbor,
+    real energy_max,
+    int *g_neighbor_number,
+    int *g_neighbor_list,
+    real *g_hopping_real,
+    real *g_hopping_imag,
+    real *g_xx,
+    real *g_state_in_real,
+    real *g_state_in_imag,
+    real *g_state_out_real,
+    real *g_state_out_imag
+)
+{
+    real temp_real = 0.0;
+    real temp_imag = 0.0;
+    for (int n = 0; n < number_of_atoms; ++n)
+    {   
+        for (int m = 0; m < g_neighbor_number[n]; ++m)
+        {
+            int index_1 = n * max_neighbor + m;
+            int index_2 = g_neighbor_list[index_1];
+            real a = g_hopping_real[index_1];
+            real b = g_hopping_imag[index_1];
+            real c = g_state_in_real[index_2];
+            real d = g_state_in_imag[index_2];
+            real xx = g_xx[index_1]; 
+            temp_real -= (a * c - b * d) * xx;
+            temp_imag -= (a * d + b * c) * xx;
+        }
+        g_state_out_real[n] = temp_real / energy_max; // scale
+        g_state_out_imag[n] = temp_imag / energy_max; // scale
+    }
+}
+
+
+
+
 // |output> = [X, H] |input>
 void Hamiltonian::apply_commutator(Vector& input, Vector& output)
 {
@@ -286,7 +374,12 @@ void Hamiltonian::apply_commutator(Vector& input, Vector& output)
         output.real_part, output.imag_part
     );
 #else
-    //TODO
+    cpu_apply_commutator
+    (
+        n, max_neighbor, energy_max, neighbor_number, neighbor_list,
+        hopping_real, hopping_imag, xx, input.real_part, input.imag_part,
+        output.real_part, output.imag_part
+    );
 #endif
 }
 
@@ -334,6 +427,47 @@ __global__ void gpu_apply_current
 
 
 
+void cpu_apply_current
+(
+    int number_of_atoms,
+    int max_neighbor,
+    int *g_neighbor_number,
+    int *g_neighbor_list,
+    real *g_hopping_real,
+    real *g_hopping_imag,
+    real *g_xx,
+    real *g_state_in_real,
+    real *g_state_in_imag,
+    real *g_state_out_real,
+    real *g_state_out_imag
+)
+{
+    int m;
+    int index_1;
+    int index_2;
+    real temp_real = 0.0;
+    real temp_imag = 0.0;
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        for (m = 0; m < g_neighbor_number[n]; ++m)
+        {
+            index_1 = n * max_neighbor + m;
+            index_2 = g_neighbor_list[index_1];
+            real a = g_hopping_real[index_1];
+            real b = g_hopping_imag[index_1];
+            real c = g_state_in_real[index_2];
+            real d = g_state_in_imag[index_2];
+            temp_real += (a * c - b * d) * g_xx[index_1];
+            temp_imag += (a * d + b * c) * g_xx[index_1];
+        }
+        g_state_out_real[n] = + temp_imag;
+        g_state_out_imag[n] = - temp_real;
+    }
+}
+
+
+
+
 // |output> = V |input>
 void Hamiltonian::apply_current(Vector& input, Vector& output)
 {
@@ -344,7 +478,12 @@ void Hamiltonian::apply_current(Vector& input, Vector& output)
         input.real_part, input.imag_part, output.real_part, output.imag_part
     );
 #else
-    //TODO
+    cpu_apply_current
+    (
+        n, max_neighbor, neighbor_number, neighbor_list, 
+        hopping_real, hopping_imag, xx, input.real_part, input.imag_part, 
+        output.real_part, output.imag_part
+    );
 #endif
 }
 
@@ -382,6 +521,34 @@ __global__ void gpu_chebyshev_01
 
 
 
+void cpu_chebyshev_01
+(
+    int number_of_atoms,
+    real *g_state_0_real,
+    real *g_state_0_imag,
+    real *g_state_1_real,
+    real *g_state_1_imag,
+    real *g_state_real,
+    real *g_state_imag,
+    real b0,
+    real b1,
+    int  direction
+)
+{
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        real bessel_0 = b0;
+        real bessel_1 = b1 * direction;
+        g_state_real[n] = bessel_0 * g_state_0_real[n]
+                        + bessel_1 * g_state_1_imag[n];
+        g_state_imag[n] = bessel_0 * g_state_0_imag[n]
+                        - bessel_1 * g_state_1_real[n];
+    }
+}
+
+
+
+
 //Wrapper for the kernel above
 void Hamiltonian::chebyshev_01
 (
@@ -397,7 +564,12 @@ void Hamiltonian::chebyshev_01
         bessel_0, bessel_1, direction
     );
 #else
-    //TODO
+    cpu_chebyshev_01
+    (
+        n, state_0.real_part, state_0.imag_part,
+        state_1.real_part, state_1.imag_part, state.real_part, state.imag_part,
+        bessel_0, bessel_1, direction
+    );
 #endif
 }
 
@@ -484,6 +656,84 @@ __global__ void gpu_chebyshev_2
 
 
 
+void cpu_chebyshev_2
+(
+    int number_of_atoms,
+    int max_neighbor,
+    real energy_max,
+    int *g_neighbor_number,
+    int *g_neighbor_list,
+    real *g_potential,
+    real *g_hopping_real,
+    real *g_hopping_imag,
+    real *g_state_0_real,
+    real *g_state_0_imag,
+    real *g_state_1_real,
+    real *g_state_1_imag,
+    real *g_state_2_real,
+    real *g_state_2_imag,
+    real *g_state_real,
+    real *g_state_imag,
+    real bessel_m,
+    int  label
+)
+{
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+
+        for (int m = 0; m < g_neighbor_number[n]; ++m)
+        {
+            int index_1 = n * max_neighbor + m;
+            int index_2 = g_neighbor_list[index_1];
+            real a = g_hopping_real[index_1];
+            real b = g_hopping_imag[index_1];
+            real c = g_state_1_real[index_2];
+            real d = g_state_1_imag[index_2];
+            temp_real += a * c - b * d; // hopping
+            temp_imag += a * d + b * c; // hopping
+        }
+        temp_real /= energy_max; // scale
+        temp_imag /= energy_max; // scale
+
+        temp_real = 2.0 * temp_real - g_state_0_real[n];
+        temp_imag = 2.0 * temp_imag - g_state_0_imag[n];
+        switch (label)
+        {
+            case 1:
+            {
+                g_state_real[n] += bessel_m * temp_real;
+                g_state_imag[n] += bessel_m * temp_imag;
+                break;
+            }
+            case 2:
+            {
+                g_state_real[n] -= bessel_m * temp_real;
+                g_state_imag[n] -= bessel_m * temp_imag;
+                break;
+            }
+            case 3:
+            {
+                g_state_real[n] += bessel_m * temp_imag;
+                g_state_imag[n] -= bessel_m * temp_real;
+                break;
+            }
+            case 4:
+            {
+                g_state_real[n] -= bessel_m * temp_imag;
+                g_state_imag[n] += bessel_m * temp_real;
+                break;
+            }
+        }
+        g_state_2_real[n] = temp_real;
+        g_state_2_imag[n] = temp_imag;
+    }
+}
+
+
+
+
 // Wrapper for the kernel above
 void Hamiltonian::chebyshev_2
 (
@@ -501,7 +751,14 @@ void Hamiltonian::chebyshev_2
         bessel_m, label
     );
 #else
-    //TODO
+    cpu_chebyshev_2
+    (
+        n, max_neighbor, energy_max, neighbor_number, neighbor_list, potential,
+        hopping_real, hopping_imag, state_0.real_part, state_0.imag_part,
+        state_1.real_part, state_1.imag_part,
+        state_2.real_part, state_2.imag_part, state.real_part, state.imag_part,
+        bessel_m, label
+    );
 #endif
 }
 
@@ -532,6 +789,27 @@ __global__ void gpu_chebyshev_1x
 
 
 
+void cpu_chebyshev_1x
+(
+    int number_of_atoms,
+    real *g_state_1x_real,
+    real *g_state_1x_imag,
+    real *g_state_real,
+    real *g_state_imag,
+    real  g_bessel_1
+)
+{
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        real b1 = g_bessel_1;
+        g_state_real[n] = + b1 * g_state_1x_imag[n];
+        g_state_imag[n] = - b1 * g_state_1x_real[n];
+    }
+}
+
+
+
+
 // Wrapper for kernel above
 void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
 {
@@ -542,7 +820,11 @@ void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
         output.real_part, output.imag_part, bessel_1
     );
 #else
-    //TODO
+    cpu_chebyshev_1x
+    (
+        n, input.real_part, input.imag_part,
+        output.real_part, output.imag_part, bessel_1
+    );
 #endif
 }
 
@@ -656,6 +938,112 @@ __global__ void gpu_chebyshev_2x
 
 
 
+void cpu_chebyshev_2x
+(
+    int number_of_atoms,
+    int max_neighbor,
+    real energy_max,
+    int *g_neighbor_number,
+    int *g_neighbor_list,
+    real *g_potential,
+    real *g_hopping_real,
+    real *g_hopping_imag,
+    real *g_xx,
+    real *g_state_0_real, 
+    real *g_state_0_imag, 
+    real *g_state_0x_real, 
+    real *g_state_0x_imag, 
+    real *g_state_1_real, 
+    real *g_state_1_imag,
+    real *g_state_1x_real, 
+    real *g_state_1x_imag, 
+    real *g_state_2_real, 
+    real *g_state_2_imag,
+    real *g_state_2x_real, 
+    real *g_state_2x_imag, 
+    real *g_state_real, 
+    real *g_state_imag, 
+    real  g_bessel_m,
+    int   g_label
+)
+{
+    for (int n = 0; n < number_of_atoms; ++n)
+    {   
+        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        real temp_x_real = g_potential[n] * g_state_1x_real[n]; // on-site
+        real temp_x_imag = g_potential[n] * g_state_1x_imag[n]; // on-site
+
+        for (int m = 0; m < g_neighbor_number[n]; ++m)
+        {
+            int index_1 = n * max_neighbor + m;
+            int index_2 = g_neighbor_list[index_1];
+
+            real a = g_hopping_real[index_1];
+            real b = g_hopping_imag[index_1];
+            real c = g_state_1_real[index_2];
+            real d = g_state_1_imag[index_2];
+            temp_real += a * c - b * d; // hopping
+            temp_imag += a * d + b * c; // hopping
+
+            real cx = g_state_1x_real[index_2];
+            real dx = g_state_1x_imag[index_2];
+            temp_x_real += a * cx - b * dx; // hopping
+            temp_x_imag += a * dx + b * cx; // hopping
+
+            real xx = g_xx[index_1];
+            temp_x_real -= (a * c - b * d) * xx; // hopping
+            temp_x_imag -= (a * d + b * c) * xx; // hopping
+        }
+
+        temp_real /= energy_max; // scale
+        temp_imag /= energy_max; // scale
+        temp_real = 2.0 * temp_real - g_state_0_real[n];
+        temp_imag = 2.0 * temp_imag - g_state_0_imag[n];
+        g_state_2_real[n] = temp_real;
+        g_state_2_imag[n] = temp_imag;
+
+        temp_x_real /= energy_max; // scale
+        temp_x_imag /= energy_max; // scale
+        temp_x_real = 2.0 * temp_x_real - g_state_0x_real[n];
+        temp_x_imag = 2.0 * temp_x_imag - g_state_0x_imag[n];
+        g_state_2x_real[n] = temp_x_real;
+        g_state_2x_imag[n] = temp_x_imag;
+
+        real bessel_m = g_bessel_m;
+        switch (g_label)
+        {
+            case 1:
+            {
+                g_state_real[n] += bessel_m * temp_x_real;
+                g_state_imag[n] += bessel_m * temp_x_imag;
+                break;
+            }
+            case 2:
+            {
+                g_state_real[n] -= bessel_m * temp_x_real;
+                g_state_imag[n] -= bessel_m * temp_x_imag;
+                break;
+            }
+            case 3:
+            {
+                g_state_real[n] += bessel_m * temp_x_imag;
+                g_state_imag[n] -= bessel_m * temp_x_real;
+                break;
+            }
+            case 4:
+            {
+                g_state_real[n] -= bessel_m * temp_x_imag;
+                g_state_imag[n] += bessel_m * temp_x_real;
+                break;
+            }
+        }
+    }
+}
+
+
+
+
 // Wrapper for the kernel above
 void Hamiltonian::chebyshev_2x
 (
@@ -674,7 +1062,15 @@ void Hamiltonian::chebyshev_2x
         state_2x.imag_part, state.real_part, state.imag_part, bessel_m, label
     );
 #else
-    //TODO
+    cpu_chebyshev_2x
+    (
+        n, max_neighbor, energy_max, neighbor_number, neighbor_list, potential,
+        hopping_real, hopping_imag, xx, state_0.real_part, state_0.imag_part,
+        state_0x.real_part, state_0x.imag_part, state_1.real_part,
+        state_1.imag_part, state_1x.real_part, state_1x.imag_part,
+        state_2.real_part, state_2.imag_part, state_2x.real_part,
+        state_2x.imag_part, state.real_part, state.imag_part, bessel_m, label
+    );
 #endif
 }
 
@@ -730,6 +1126,54 @@ __global__ void gpu_kernel_polynomial
 
 
 
+void cpu_kernel_polynomial
+(
+    int number_of_atoms,
+    int max_neighbor,
+    real energy_max,
+    int *g_neighbor_number,
+    int *g_neighbor_list,
+    real *g_potential,
+    real *g_hopping_real,
+    real *g_hopping_imag,
+    real *g_state_0_real,
+    real *g_state_0_imag,
+    real *g_state_1_real,
+    real *g_state_1_imag,
+    real *g_state_2_real,
+    real *g_state_2_imag
+)
+{
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        
+        for (int m = 0; m < g_neighbor_number[n]; ++m)
+        {
+            int index_1 = n * max_neighbor + m;
+            int index_2 = g_neighbor_list[index_1];
+            real a = g_hopping_real[index_1];
+            real b = g_hopping_imag[index_1];
+            real c = g_state_1_real[index_2];
+            real d = g_state_1_imag[index_2];
+            temp_real += a * c - b * d; // hopping
+            temp_imag += a * d + b * c; // hopping
+        }
+
+        temp_real /= energy_max; // scale
+        temp_imag /= energy_max; // scale
+
+        temp_real = 2.0 * temp_real - g_state_0_real[n];
+        temp_imag = 2.0 * temp_imag - g_state_0_imag[n];
+        g_state_2_real[n] = temp_real;
+        g_state_2_imag[n] = temp_imag;
+    }
+}
+
+
+
+
 // Wrapper for the Chebyshev iteration
 void Hamiltonian::kernel_polynomial
 (Vector& state_0, Vector& state_1, Vector& state_2)
@@ -743,7 +1187,13 @@ void Hamiltonian::kernel_polynomial
         state_2.real_part, state_2.imag_part
     );
 #else
-    //TODO
+    cpu_kernel_polynomial
+    (
+        n, max_neighbor, energy_max, neighbor_number, neighbor_list, potential,
+        hopping_real, hopping_imag, state_0.real_part, state_0.imag_part,
+        state_1.real_part, state_1.imag_part,
+        state_2.real_part, state_2.imag_part
+    );
 #endif
 }
 
