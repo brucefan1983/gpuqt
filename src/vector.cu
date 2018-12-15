@@ -69,7 +69,7 @@ void Vector::initialize_cpu(int n)
 {
     this->n = n;
     array_size = n * sizeof(real);
-    grid_size = (n-1) / BLOCK_SIZE + 1; // not used
+    grid_size = (n-1) / BLOCK_SIZE + 1;
     real_part = new real[n];
     imag_part = new real[n];
 }
@@ -108,7 +108,7 @@ __global__ void gpu_copy_state
 void cpu_copy_state
 (int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
-    for (int n = 0; n < N; ++N)
+    for (int n = 0; n < N; ++n)
     {
         out_real[n] = in_real[n];
         out_imag[n] = in_imag[n];
@@ -164,10 +164,27 @@ __global__ void gpu_add_state
 
 
 
+void cpu_add_state
+(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+{
+    for (int i = 0; i < n; ++i)
+    {
+        out_real[i] += in_real[i];
+        out_imag[i] += in_imag[i];
+    }
+}
+
+
+
+
 void Vector::add(Vector& other)
 {
+#ifndef CPU_ONLY
     gpu_add_state<<<grid_size, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
+#else
+    cpu_add_state(n, other.real_part, other.imag_part, real_part, imag_part);
+#endif
 }
 
 
@@ -175,8 +192,13 @@ void Vector::add(Vector& other)
 
 void Vector::copy(Vector& other)
 {
+#ifndef CPU_ONLY
     gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
+#else
+    cpu_copy_state
+    (n, other.real_part, other.imag_part, real_part, imag_part);
+#endif
 }
 
 
@@ -290,15 +312,62 @@ __global__ void gpu_find_inner_product_1
 
 
 
+void cpu_find_inner_product_1
+(
+    int grid_size,
+    int number_of_atoms,
+    real *g_final_state_real,
+    real *g_final_state_imag,
+    real *g_random_state_real,
+    real *g_random_state_imag,
+    real *g_inner_product_real,
+    real *g_inner_product_imag,
+    int   g_offset
+)
+{
+    for (int m = 0; m < grid_size; ++m)
+    {
+        real s_data_real = 0.0;
+        real s_data_imag = 0.0;
+        for (int k = 0; k < BLOCK_SIZE; ++k)
+        {
+            int n = m * BLOCK_SIZE + k;
+            if (n < number_of_atoms)
+            {
+                real a = g_final_state_real[n];
+                real b = g_final_state_imag[n];
+                real c = g_random_state_real[n];
+                real d = g_random_state_imag[n];
+                s_data_real += (a * c + b * d);
+                s_data_imag += (b * c - a * d);
+            }
+        }
+        g_inner_product_real[m + g_offset] = s_data_real;
+        g_inner_product_imag[m + g_offset] = s_data_imag;
+    }
+}
+
+
+
+
 void Vector::inner_product_1
 (int number_of_atoms, Vector& other, Vector& target, int offset)
 {
-    gpu_find_inner_product_1<<<grid_size, 512>>>
+#ifndef CPU_ONLY
+    gpu_find_inner_product_1<<<grid_size, BLOCK_SIZE>>>
     (
         number_of_atoms, real_part, imag_part,
         other.real_part, other.imag_part, target.real_part, target.imag_part,
         offset
     );
+#else
+    cpu_find_inner_product_1
+    (
+        grid_size, number_of_atoms, real_part, imag_part,
+        other.real_part, other.imag_part, target.real_part, target.imag_part,
+        offset
+    );
+#endif
 }
 
 
@@ -372,14 +441,50 @@ __global__ void gpu_find_inner_product_2
 
 
 
+void cpu_find_inner_product_2
+(
+    int number_of_moments,
+    int grid_size,
+    real *g_inner_product_1_real,
+    real *g_inner_product_1_imag,
+    real *g_inner_product_2_real,
+    real *g_inner_product_2_imag
+)
+{
+    for (int m = 0; m < number_of_moments; ++m)
+    {
+        real s_data_real = 0.0;
+        real s_data_imag = 0.0;
+        for (int k = 0; k < grid_size; ++k)
+        {
+            int n = m * grid_size + k;
+            s_data_real += g_inner_product_1_real[n];
+            s_data_imag += g_inner_product_1_imag[n];
+        }
+        g_inner_product_2_real[m] = s_data_real;
+        g_inner_product_2_imag[m] = s_data_imag;
+    }
+}
+
+
+
+
 void Vector::inner_product_2
 (int number_of_atoms, int number_of_moments, Vector& target)
 {
-    gpu_find_inner_product_2<<<number_of_moments, 512>>>
+#ifndef CPU_ONLY
+    gpu_find_inner_product_2<<<number_of_moments, BLOCK_SIZE>>>
     (
         number_of_atoms, real_part, imag_part,
         target.real_part, target.imag_part
     );
+#else
+    cpu_find_inner_product_2
+    (
+        number_of_moments, grid_size, real_part, imag_part,
+        target.real_part, target.imag_part
+    );
+#endif
 }
 
 
