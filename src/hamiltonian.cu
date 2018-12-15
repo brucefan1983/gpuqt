@@ -20,13 +20,9 @@
 
 
 
-#include "vector.h"
 #include "hamiltonian.h"
 #include "model.h"
-
-
-
-
+#include "vector.h"
 #define BLOCK_SIZE 512     // optimized
 
 

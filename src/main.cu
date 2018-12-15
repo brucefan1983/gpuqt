@@ -20,12 +20,9 @@
 
 
 
-#include "common.h"
 #include "gpuqt.h"
-
-
-
-
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 

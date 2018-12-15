@@ -18,10 +18,16 @@
 */
 
 
+
+
 #pragma once
+#include <string>
+
+
 
 
 void gpuqt(std::string input_directory);
+
 
 
 

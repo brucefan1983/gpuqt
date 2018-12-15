@@ -21,10 +21,6 @@
 
 
 #include "vector.h"
-
-
-
-
 #define BLOCK_SIZE 512     // optimized
 
 

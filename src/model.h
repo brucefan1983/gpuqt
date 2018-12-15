@@ -21,12 +21,8 @@
 
 
 #pragma once
-#include "common.h"
 #include <random>
-
-
-
-
+typedef double real;
 class Vector;
 
 

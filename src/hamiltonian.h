@@ -21,12 +21,7 @@
 
 
 #pragma once
-#include "common.h"
-#include <chrono>
-
-
-
-
+typedef double real;
 class Vector;
 class Model;
 
@@ -37,7 +32,7 @@ class Hamiltonian
 {
 public:
 
-    Hamiltonian(Model& para);
+    Hamiltonian(Model&);
     ~Hamiltonian();
 
     void apply(Vector&, Vector&);

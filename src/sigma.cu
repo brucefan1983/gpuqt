@@ -18,18 +18,17 @@
 */
 
 
+
+
 #include "sigma.h"
 #include "vector.h"
 #include "hamiltonian.h"
 #include "model.h"
 #include <iostream>
 #include <fstream>
-
-
-
-
 #define BLOCK_SIZE 512     // optimized
 #define PI 3.141592653589793
+typedef double real;
 
 
 

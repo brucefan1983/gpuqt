@@ -22,7 +22,8 @@
 
 #include "model.h"
 #include "vector.h"
-
+#include <random>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <chrono>
