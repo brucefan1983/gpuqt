@@ -47,7 +47,8 @@ public:
     
 private:
 
-    void initialize_parameters(int n);
+    void initialize_gpu(int n);
+    void initialize_cpu(int n);
     int n;
     size_t array_size;
     size_t grid_size;

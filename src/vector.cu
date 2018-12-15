@@ -26,18 +26,6 @@
 
 
 
-void Vector::initialize_parameters(int n)
-{
-    this->n = n;
-    array_size = n * sizeof(real);
-    grid_size = (n-1) / BLOCK_SIZE + 1;
-    cudaMalloc((void**)&real_part, array_size);
-    cudaMalloc((void**)&imag_part, array_size);
-}
-
-
-
-
 __global__ void gpu_set_zero
 (int number_of_elements, real *g_state_real, real *g_state_imag)
 {
@@ -52,10 +40,52 @@ __global__ void gpu_set_zero
 
 
 
+void cpu_set_zero
+(int number_of_elements, real *g_state_real, real *g_state_imag)
+{
+    for (int n = 0; n < number_of_elements; ++n)
+    {
+        g_state_real[n] = 0;
+        g_state_imag[n] = 0;
+    }
+}
+
+
+
+
+void Vector::initialize_gpu(int n)
+{
+    this->n = n;
+    array_size = n * sizeof(real);
+    grid_size = (n-1) / BLOCK_SIZE + 1;
+    cudaMalloc((void**)&real_part, array_size);
+    cudaMalloc((void**)&imag_part, array_size);
+}
+
+
+
+
+void Vector::initialize_cpu(int n)
+{
+    this->n = n;
+    array_size = n * sizeof(real);
+    grid_size = (n-1) / BLOCK_SIZE + 1; // not used
+    real_part = new real[n];
+    imag_part = new real[n];
+}
+
+
+
+
 Vector::Vector(int n)
 {
-    initialize_parameters(n);
+#ifndef CPU_ONLY
+    initialize_gpu(n);
     gpu_set_zero<<<grid_size, BLOCK_SIZE>>>(n, real_part, imag_part);
+#else
+    initialize_cpu(n);
+    cpu_set_zero(n, real_part, imag_part);
+#endif
 }
 
 
@@ -75,13 +105,32 @@ __global__ void gpu_copy_state
 
 
 
+void cpu_copy_state
+(int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
+{
+    for (int n = 0; n < N; ++N)
+    {
+        out_real[n] = in_real[n];
+        out_imag[n] = in_imag[n];
+    }
+}
+
+
+
+
 Vector::Vector(Vector& original)
 {
     // Just teach myself: one can access private members of another instance
     // of the class from within the class
-    initialize_parameters(original.n);
+#ifndef CPU_ONLY
+    initialize_gpu(original.n);
     gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
     (n, original.real_part, original.imag_part, real_part, imag_part);
+#else
+    initialize_cpu(original.n);
+    cpu_copy_state
+    (n, original.real_part, original.imag_part, real_part, imag_part);
+#endif
 }
 
 
@@ -89,8 +138,13 @@ Vector::Vector(Vector& original)
 
 Vector::~Vector()
 {
+#ifndef CPU_ONLY
     cudaFree(real_part);
     cudaFree(imag_part);
+#else
+    delete[] real_part;
+    delete[] imag_part;
+#endif
 }
 
 
