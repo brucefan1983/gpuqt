@@ -27,6 +27,11 @@
 
 
 
+#define BLOCK_SIZE 512     // optimized
+
+
+
+
 Hamiltonian::Hamiltonian(Model& model)
 {
     n = model.number_of_atoms;

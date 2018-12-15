@@ -25,6 +25,11 @@
 
 
 
+#define BLOCK_SIZE 512     // optimized
+
+
+
+
 void Vector::initialize_parameters(int n)
 {
     this->n = n;
