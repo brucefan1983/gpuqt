@@ -28,8 +28,6 @@
 #include <sstream>
 #include <chrono>
 
-
-
 #define PI 3.141592653589793
 
 
@@ -93,10 +91,10 @@ Model::~Model()
 void Model::initialize_state(Vector& random_state)
 {
     std::uniform_real_distribution<real> phase(0, 2 * PI);
-    real *random_state_real = new real[number_of_atoms]; 
+    real *random_state_real = new real[number_of_atoms];
     real *random_state_imag = new real[number_of_atoms];
     for (int n = 0; n < number_of_atoms; ++n)
-    {  
+    {
         real random_phase = phase(generator);
         random_state_real[n] = cos(random_phase);
         random_state_imag[n] = sin(random_phase);
@@ -124,7 +122,7 @@ static void print_started_reading(std::string filename)
 static void print_finished_reading(std::string filename)
 {
     std::cout << std::endl;
-    std::cout << "Finished reading " + filename << std::endl; 
+    std::cout << "Finished reading " + filename << std::endl;
     std::cout << "===========================================================";
     std::cout << std::endl << std::endl;
 }
@@ -186,9 +184,10 @@ void Model::initialize_parameters()
         }
         else
         {
-            std::cout << "Unknown identifier in " + input_dir + "/para.in:" << std::endl;
-            std::cout << line << std::endl; 
-        } 
+            std::cout << "Unknown identifier in " + input_dir + "/para.in:" 
+                      << std::endl;
+            std::cout << line << std::endl;
+        }
     }
     input.close();
     
@@ -196,20 +195,20 @@ void Model::initialize_parameters()
         requires_time = true;
     
     //Verify the used parameters (make a seperate function later)
-    if (use_lattice_model) 
+    if (use_lattice_model)
         std::cout << "- Use lattice model" << std::endl;
     else
         std::cout << "- Use general model" << std::endl;
 
     if (has_anderson_disorder)
     {
-        std::cout << "- Add Anderson disorder with strength W = " 
+        std::cout << "- Add Anderson disorder with strength W = "
                   << anderson_disorder_strength << std::endl;
     }
 
     if (has_vacancy_disorder)
     {
-        std::cout << "- Add " << number_of_vacancies 
+        std::cout << "- Add " << number_of_vacancies
                   << " vacancies" << std::endl;
     }
 
@@ -221,12 +220,12 @@ void Model::initialize_parameters()
     if (calculate_msd)
         std::cout << "- MSD will be calculated" << std::endl;
     else
-        std::cout << "- MSD will not be calculated" << std::endl;    
-    std::cout << "- Number of random vectors is " 
-              << number_of_random_vectors << std::endl; 
-    std::cout << "- Number of moments is " 
+        std::cout << "- MSD will not be calculated" << std::endl;
+    std::cout << "- Number of random vectors is "
+              << number_of_random_vectors << std::endl;
+    std::cout << "- Number of moments is "
               << number_of_moments << std::endl;
-    std::cout << "- Energy maximum is " << energy_max << std::endl; 
+    std::cout << "- Energy maximum is " << energy_max << std::endl;
 
     print_finished_reading(filename);
 }
@@ -247,16 +246,16 @@ void Model::initialize_energy()
     print_started_reading(filename);
 
     input >> number_of_energy_points;
-    std::cout << "- number of energy points = " 
+    std::cout << "- number of energy points = "
               << number_of_energy_points 
               << std::endl;
     energy = new real[number_of_energy_points];
-    
+
     for (int n = 0; n < number_of_energy_points; ++n)
     {
         input >> energy[n];
     }
-      
+
     input.close();
 
     print_finished_reading(filename);
@@ -284,9 +283,9 @@ void Model::initialize_time()
     {
         input >> time_step[n];
     }
-    
+
     input.close();
-    print_finished_reading(filename);         
+    print_finished_reading(filename);
 }
 
 
@@ -296,8 +295,8 @@ void Model::initialize_neighbor()
 {
     std::string filename = input_dir + "/neighbor.in";
     std::ifstream input(filename);
-    
-    if (!input.is_open()) 
+
+    if (!input.is_open())
     {
         std::cout <<"Error: cannot open " + filename << std::endl;
         exit(1);
@@ -306,8 +305,8 @@ void Model::initialize_neighbor()
 
     input >> number_of_atoms >> max_neighbor;
     number_of_pairs = number_of_atoms * max_neighbor;
- 
-    neighbor_number = new int[number_of_atoms]; 
+
+    neighbor_number = new int[number_of_atoms];
     neighbor_list = new int[number_of_pairs];
 
     for (int n = 0; n < number_of_atoms; ++n)
@@ -321,10 +320,10 @@ void Model::initialize_neighbor()
     }
 
     input.close();
- 
+
     std::cout << "- Number of atoms is " << number_of_atoms << std::endl;
     std::cout << "- Maximum neighbor number is " << max_neighbor << std::endl;
-    print_finished_reading(filename);            
+    print_finished_reading(filename);
 }
 
 
@@ -336,7 +335,7 @@ real reduce_distance(real d, real box)
         return d-box;
     if (d < -box/2.0)
         return d+box;
-    else 
+    else
         return d;
 }
 
@@ -356,22 +355,22 @@ void Model::initialize_positions()
     print_started_reading(filename);
 
     real box;
-    input >> box >> volume;   
+    input >> box >> volume;
     real *x = new real[number_of_atoms];
 
     for (int i=0; i<number_of_atoms; ++i)
         input >> x[i];
     input.close();
   
-    std::cout << "- Box length along transport direction is " 
+    std::cout << "- Box length along transport direction is "
               << box << std::endl;
-    std::cout << "- System volume is " << volume << std::endl;      
-  
-    xx = new real[number_of_pairs];    
+    std::cout << "- System volume is " << volume << std::endl;
+
+    xx = new real[number_of_pairs];
     for (int n = 0; n < number_of_atoms; ++n)
     {
         for (int m = 0; m < neighbor_number[n]; ++m)
-        {        
+        {
             int index = n + m * number_of_atoms;
             xx[index] = reduce_distance(x[neighbor_list[index]] - x[n], box);
         }
@@ -385,7 +384,7 @@ void Model::initialize_positions()
 
 
 void Model::initialize_potential()
-{ 
+{
     std::string filename = input_dir + "/potential.in";
     print_started_reading(filename);
 
@@ -399,7 +398,7 @@ void Model::initialize_potential()
     }
 
     potential = new real[number_of_atoms];
-    
+
     for (int n = 0; n < number_of_atoms; ++n)
     {
         if (nonzero_potential)
@@ -409,7 +408,7 @@ void Model::initialize_potential()
     }
 
     input.close();
- 
+
     print_finished_reading(filename);
 }
 
@@ -428,12 +427,13 @@ void Model::initialize_hopping()
      type == 3 : uniform hoppings (hoppings.in is not read)
     */
     int type = 0;
-        
+
     if (!input.is_open())
     {
         type = 3;
         std::cout <<"- Could not open " + filename << std::endl;
-        std::cout << "- Assuming uniform hoppings with strength -1" << std::endl;
+        std::cout << "- Assuming uniform hoppings with strength -1"
+                  << std::endl;
     }
     else
     {
@@ -456,8 +456,8 @@ void Model::initialize_hopping()
             exit(1);
         }
     }
-    
-    hopping_real = new real[number_of_pairs]; 
+
+    hopping_real = new real[number_of_pairs];
     hopping_imag = new real[number_of_pairs];
     for (int n = 0; n < number_of_atoms; ++n)
     {
@@ -483,7 +483,7 @@ void Model::initialize_hopping()
 
 
 void Model::add_anderson_disorder()
-{ 
+{
     potential = new real[number_of_atoms];
     real W2 = anderson_disorder_strength * 0.5;
     std::uniform_real_distribution<real> on_site_potential(-W2, W2);
@@ -503,20 +503,20 @@ void Model::create_random_numbers
 (int max_value, int total_number, int* random_numbers)
 {
     int *permuted_numbers = new int[max_value];
-	for(int i = 0; i < max_value; ++i)
+    for(int i = 0; i < max_value; ++i)
     {
         permuted_numbers[i] = i;
     }
     std::uniform_int_distribution<int> rand_int(0, INT_MAX);
-	for(int i = 0; i < max_value; ++i)
+    for(int i = 0; i < max_value; ++i)
     {
-		int j = rand_int(generator) % (max_value - i) + i;
-		int temp = permuted_numbers[i];
-		permuted_numbers[i] = permuted_numbers[j];
-		permuted_numbers[j] = temp;
-	}
+        int j = rand_int(generator) % (max_value - i) + i;
+        int temp = permuted_numbers[i];
+        permuted_numbers[i] = permuted_numbers[j];
+        permuted_numbers[j] = temp;
+    }
     for (int i = 0; i < total_number; ++i)
-    {      
+    {
         random_numbers[i] = permuted_numbers[i];
     }
     delete[] permuted_numbers;
@@ -564,7 +564,7 @@ void Model::find_new_atom_index
 
 
 void Model::add_vacancies()
-{ 
+{
     // copy some data
     int *neighbor_number_pristine = new int[number_of_atoms];
     int *neighbor_list_pristine = new int[number_of_pairs];
@@ -606,11 +606,11 @@ void Model::add_vacancies()
     // specify the distribution of the vacancies
     int *is_vacancy = new int[number_of_atoms_pristine];
     specify_vacancies(is_vacancy, number_of_atoms_pristine);
-           
-    // find the new indices of the atoms    
+
+    // find the new indices of the atoms
     int *new_atom_index = new int[number_of_atoms_pristine];
     find_new_atom_index(is_vacancy, new_atom_index, number_of_atoms_pristine);
-       
+
     // get the new neighbor structure and related data
     int count_atom = 0;
     for (int n = 0; n < number_of_atoms_pristine; ++n)
@@ -652,7 +652,7 @@ void Model::add_vacancies()
 
 static int find_index
 (int nx, int ny, int nz, int Nx, int Ny, int Nz, int m, int N_orbital)
-{ 
+{
     if (nx < 0) nx += Nx;
     if (nx >= Nx) nx -= Nx;
     if (ny < 0) ny += Ny;
@@ -709,11 +709,12 @@ void Model::initialize_lattice_model()
         box[d] = lattice_constant[d] * N_cell[d];
     volume = box[0] * box[1] * box[2];
     std::cout << "box = " << box[0] << " " << box[1] << " " << box[2] << " "
-         << std::endl;
+              << std::endl;
 
     input >> N_orbital >> max_neighbor;
     std::cout << "nnumber of orbitals per cell = " << N_orbital << std::endl;
-    std::cout << "maximum number of hoppings per orbital = " << max_neighbor << std::endl;
+    std::cout << "maximum number of hoppings per orbital = " << max_neighbor
+              << std::endl;
     number_of_atoms = N_orbital * N_cell[0] * N_cell[1] * N_cell[2];
     std::cout << "number_of_atoms = " << number_of_atoms << std::endl;
 
@@ -729,7 +730,7 @@ void Model::initialize_lattice_model()
     int number_of_hoppings_per_cell = N_orbital * max_neighbor;
     std::vector<std::vector<int>> hopping_data;
     hopping_data.assign(6, std::vector<int>(number_of_hoppings_per_cell, 0));
- 
+
     std::cout << std::endl << "orbital\tx" << std::endl;
     for (int n = 0; n < N_orbital; ++n)
     {
@@ -742,14 +743,14 @@ void Model::initialize_lattice_model()
     for (int m = 0; m < N_orbital; m++)
     {
         input >> number_of_hoppings[m];
-        std::cout << std::endl << "number_of_hoppings for orbital " << m << " = " 
-             << number_of_hoppings[m] << std::endl;
+        std::cout << std::endl << "number_of_hoppings for orbital " << m
+                  << " = " << number_of_hoppings[m] << std::endl;
 
         for (int n = 0; n < number_of_hoppings[m]; ++n)
         {
             int nx, ny, nz, m_neighbor;
             real hopping_real, hopping_imag;
-            input >> nx >> ny >> nz >> m_neighbor >> hopping_real 
+            input >> nx >> ny >> nz >> m_neighbor >> hopping_real
                   >> hopping_imag;
 
             hopping_data[0][m*max_neighbor+n] = nx;
@@ -763,8 +764,7 @@ void Model::initialize_lattice_model()
                  << nx << "," << ny << "," << nz << "," << m_neighbor << ") = "
                  << hopping_real << " + i " << hopping_imag << std::endl;
         }
-    }  
-
+    }
 
     for (int nx1 = 0; nx1 < N_cell[0]; ++nx1)
     {
@@ -801,16 +801,16 @@ void Model::initialize_lattice_model()
                         );
 
                         real x12 = lattice_constant[transport_direction]
-                                   * hopping_data[transport_direction][k];
+                                 * hopping_data[transport_direction][k];
                         x12 += x_cell[hopping_data[3][k]] - x_cell[m];
                         xx[neighbor_index] = x12;
 
-                        hopping_real[neighbor_index] = hopping_data[4][k]; 
-                        hopping_imag[neighbor_index] = hopping_data[5][k]; 
+                        hopping_real[neighbor_index] = hopping_data[4][k];
+                        hopping_imag[neighbor_index] = hopping_data[5][k];
 
                         ++count;
                     } 
-                    neighbor_number[n1] = count;  
+                    neighbor_number[n1] = count;
                 }
             }
         }
