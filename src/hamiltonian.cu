@@ -299,10 +299,10 @@ __global__ void gpu_apply_commutator
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
-    real temp_real = 0.0;
-    real temp_imag = 0.0;
     if (n < number_of_atoms)
-    {   
+    {
+        real temp_real = 0.0;
+        real temp_imag = 0.0;
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = m * number_of_atoms + n;
@@ -339,10 +339,10 @@ void cpu_apply_commutator
     real *g_state_out_imag
 )
 {
-    real temp_real = 0.0;
-    real temp_imag = 0.0;
     for (int n = 0; n < number_of_atoms; ++n)
-    {   
+    {  
+        real temp_real = 0.0;
+        real temp_imag = 0.0; 
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = n * max_neighbor + m;
@@ -401,17 +401,14 @@ __global__ void gpu_apply_current
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
-    int m;
-    int index_1;
-    int index_2;
-    real temp_real = 0.0;
-    real temp_imag = 0.0;
     if (n < number_of_atoms)
     {
-        for (m = 0; m < g_neighbor_number[n]; ++m)
+        real temp_real = 0.0;
+        real temp_imag = 0.0;
+        for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
-            index_1 = m * number_of_atoms + n;
-            index_2 = g_neighbor_list[index_1];
+            int index_1 = m * number_of_atoms + n;
+            int index_2 = g_neighbor_list[index_1];
             real a = g_hopping_real[index_1];
             real b = g_hopping_imag[index_1];
             real c = g_state_in_real[index_2];
@@ -442,17 +439,14 @@ void cpu_apply_current
     real *g_state_out_imag
 )
 {
-    int m;
-    int index_1;
-    int index_2;
-    real temp_real = 0.0;
-    real temp_imag = 0.0;
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        for (m = 0; m < g_neighbor_number[n]; ++m)
+        real temp_real = 0.0;
+        real temp_imag = 0.0;
+        for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
-            index_1 = n * max_neighbor + m;
-            index_2 = g_neighbor_list[index_1];
+            int index_1 = n * max_neighbor + m;
+            int index_2 = g_neighbor_list[index_1];
             real a = g_hopping_real[index_1];
             real b = g_hopping_imag[index_1];
             real c = g_state_in_real[index_2];
