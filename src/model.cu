@@ -314,7 +314,7 @@ void Model::initialize_neighbor()
         input >> neighbor_number[n];
         for (int m = 0; m < neighbor_number[n]; ++m)
         {        
-            int index = n + m * number_of_atoms;
+            int index = n * max_neighbor + m;
             input >> neighbor_list[index];
         }
     }
@@ -371,7 +371,7 @@ void Model::initialize_positions()
     {
         for (int m = 0; m < neighbor_number[n]; ++m)
         {
-            int index = n + m * number_of_atoms;
+            int index = n * max_neighbor + m;
             xx[index] = reduce_distance(x[neighbor_list[index]] - x[n], box);
         }
     }
@@ -463,7 +463,7 @@ void Model::initialize_hopping()
     {
         for (int m = 0; m < neighbor_number[n]; ++m)
         {
-            int index = n + m * number_of_atoms;
+            int index = n * max_neighbor + m;
             if (type < 3)
                 input >> hopping_real[index];
             else
@@ -620,11 +620,11 @@ void Model::add_vacancies()
             int count_neighbor = 0;
             for (int m = 0; m < neighbor_number_pristine[n]; ++m)
             {
-                int index_old = m * number_of_atoms_pristine + n;
+                int index_old = n * max_neighbor + m;
                 int k = neighbor_list_pristine[index_old];
                 if (is_vacancy[k] == 0)
                 {
-                    int index_new = count_neighbor*number_of_atoms + count_atom;
+                    int index_new = count_atom * max_neighbor + count_neighbor;
                     neighbor_list[index_new] = new_atom_index[k];
                     hopping_real[index_new] = hopping_real_pristine[index_old];
                     hopping_imag[index_new] = hopping_imag_pristine[index_old];
@@ -783,7 +783,7 @@ void Model::initialize_lattice_model()
                     int count = 0;
                     for (int i = 0; i < number_of_hoppings[m]; ++i)
                     {
-                        int neighbor_index = n1 + count * number_of_atoms;
+                        int neighbor_index = n1 * max_neighbor + count;
                         int k = m*max_neighbor+i;
 
                         int nx2 = hopping_data[0][k] + nx1;

@@ -33,26 +33,67 @@ Hamiltonian::Hamiltonian(Model& model)
     n = model.number_of_atoms;
     energy_max = model.energy_max;
     grid_size = (model.number_of_atoms - 1) / BLOCK_SIZE + 1;
+    int max_neighbor = model.max_neighbor;
 
-    cudaMalloc((void**)&neighbor_number, sizeof(int)*n);
-    cudaMalloc((void**)&neighbor_list, sizeof(int)*n*model.max_neighbor);
-    cudaMalloc((void**)&potential, sizeof(real)*n);
-    cudaMalloc((void**)&hopping_real, sizeof(real)*n*model.max_neighbor);
-    cudaMalloc((void**)&hopping_imag, sizeof(real)*n*model.max_neighbor);
-    cudaMalloc((void**)&xx, sizeof(real)*n*model.max_neighbor);
+    cudaMalloc((void**)&neighbor_number, sizeof(int)  * n);
+    cudaMalloc((void**)&neighbor_list,   sizeof(int)  * model.number_of_pairs);
+    cudaMalloc((void**)&potential,       sizeof(real) * n);
+    cudaMalloc((void**)&hopping_real,    sizeof(real) * model.number_of_pairs);
+    cudaMalloc((void**)&hopping_imag,    sizeof(real) * model.number_of_pairs);
+    cudaMalloc((void**)&xx,              sizeof(real) * model.number_of_pairs);
 
-    cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int)*n,
+    cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int) * n,
         cudaMemcpyHostToDevice);
-    cudaMemcpy(neighbor_list, model.neighbor_list,
-        sizeof(int)*n*model.max_neighbor, cudaMemcpyHostToDevice);
-    cudaMemcpy(potential, model.potential, sizeof(real)*n,
+    cudaMemcpy(potential, model.potential, sizeof(real) * n,
         cudaMemcpyHostToDevice);
-    cudaMemcpy(hopping_real, model.hopping_real,
-        sizeof(real)*n*model.max_neighbor, cudaMemcpyHostToDevice);
-    cudaMemcpy(hopping_imag, model.hopping_imag,
-        sizeof(real)*n*model.max_neighbor, cudaMemcpyHostToDevice);
-    cudaMemcpy(xx, model.xx, sizeof(real)*n*model.max_neighbor,
-        cudaMemcpyHostToDevice);
+
+    int *neighbor_list_new = new int[model.number_of_pairs];
+    for (int m = 0; m < max_neighbor; ++m)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            neighbor_list_new[m*n+i] = model.neighbor_list[i*max_neighbor+m];
+        }
+    }
+    cudaMemcpy(neighbor_list, neighbor_list_new,
+        sizeof(int) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    delete[] neighbor_list_new;
+
+    real *hopping_real_new = new real[model.number_of_pairs];
+    for (int m = 0; m < max_neighbor; ++m)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            hopping_real_new[m*n+i] = model.hopping_real[i*max_neighbor+m];
+        }
+    }
+    cudaMemcpy(hopping_real, hopping_real_new,
+        sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    delete[] hopping_real_new;
+
+    real *hopping_imag_new = new real[model.number_of_pairs];
+    for (int m = 0; m < max_neighbor; ++m)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            hopping_imag_new[m*n+i] = model.hopping_imag[i*max_neighbor+m];
+        }
+    }
+    cudaMemcpy(hopping_imag, hopping_imag_new,
+        sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    delete[] hopping_imag_new;
+
+    real *xx_new = new real[model.number_of_pairs];
+    for (int m = 0; m < max_neighbor; ++m)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            xx_new[m * n + i] = model.xx[i * max_neighbor + m];
+        }
+    }
+    cudaMemcpy(xx, xx_new, 
+        sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    delete[] xx_new;
 }
 
 
