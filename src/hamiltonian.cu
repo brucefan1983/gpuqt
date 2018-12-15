@@ -28,7 +28,8 @@
 
 
 
-Hamiltonian::Hamiltonian(Model& model)
+//#ifndef CPU_ONLY
+void Hamiltonian::initialize_gpu(Model& model)
 {
     n = model.number_of_atoms;
     energy_max = model.energy_max;
@@ -44,8 +45,10 @@ Hamiltonian::Hamiltonian(Model& model)
 
     cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int) * n,
         cudaMemcpyHostToDevice);
+    delete[] model.neighbor_number;
     cudaMemcpy(potential, model.potential, sizeof(real) * n,
         cudaMemcpyHostToDevice);
+    delete[] model.potential;
 
     int *neighbor_list_new = new int[model.number_of_pairs];
     for (int m = 0; m < max_neighbor; ++m)
@@ -55,9 +58,11 @@ Hamiltonian::Hamiltonian(Model& model)
             neighbor_list_new[m*n+i] = model.neighbor_list[i*max_neighbor+m];
         }
     }
+    delete[] model.neighbor_list;
     cudaMemcpy(neighbor_list, neighbor_list_new,
         sizeof(int) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] neighbor_list_new;
+
 
     real *hopping_real_new = new real[model.number_of_pairs];
     for (int m = 0; m < max_neighbor; ++m)
@@ -67,6 +72,7 @@ Hamiltonian::Hamiltonian(Model& model)
             hopping_real_new[m*n+i] = model.hopping_real[i*max_neighbor+m];
         }
     }
+    delete[] model.hopping_real;
     cudaMemcpy(hopping_real, hopping_real_new,
         sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] hopping_real_new;
@@ -79,6 +85,7 @@ Hamiltonian::Hamiltonian(Model& model)
             hopping_imag_new[m*n+i] = model.hopping_imag[i*max_neighbor+m];
         }
     }
+    delete[] model.hopping_imag;
     cudaMemcpy(hopping_imag, hopping_imag_new,
         sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] hopping_imag_new;
@@ -91,9 +98,56 @@ Hamiltonian::Hamiltonian(Model& model)
             xx_new[m * n + i] = model.xx[i * max_neighbor + m];
         }
     }
+    delete[] model.xx;
     cudaMemcpy(xx, xx_new, 
         sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] xx_new;
+}
+
+//#else
+
+void Hamiltonian::initialize_cpu(Model& model)
+{
+    n = model.number_of_atoms;
+    energy_max = model.energy_max;
+    int number_of_pairs = model.number_of_pairs;
+
+    neighbor_number = new int[n];
+    memcpy(neighbor_number, model.neighbor_number, sizeof(int) * n);
+    delete[] model.neighbor_number;
+
+    neighbor_list = new int[number_of_pairs];
+    memcpy(neighbor_list, model.neighbor_list, sizeof(int) * number_of_pairs);
+    delete[] model.neighbor_list;
+
+    potential = new real[n];
+    memcpy(potential, model.potential, sizeof(real) * n);
+    delete[] model.potential;
+
+    hopping_real = new real[number_of_pairs];
+    memcpy(hopping_real, model.hopping_real, sizeof(real) * number_of_pairs);
+    delete[] model.hopping_real;
+
+    hopping_imag = new real[number_of_pairs];
+    memcpy(hopping_imag, model.hopping_imag, sizeof(real) * number_of_pairs);
+    delete[] model.hopping_imag;
+
+    xx = new real[number_of_pairs];
+    memcpy(xx, model.xx, sizeof(real) * number_of_pairs);
+    delete[] model.xx;
+}
+//#endif
+
+
+
+
+Hamiltonian::Hamiltonian(Model& model)
+{
+#ifndef CPU_ONLY
+    initialize_gpu(model);
+#else
+    initialize_cpu(model);
+#endif
 }
 
 
@@ -101,12 +155,21 @@ Hamiltonian::Hamiltonian(Model& model)
 
 Hamiltonian::~Hamiltonian()
 {
+#ifndef CPU_ONLY
     cudaFree(neighbor_number);
     cudaFree(neighbor_list);
     cudaFree(potential);
     cudaFree(hopping_real);
     cudaFree(hopping_imag);
     cudaFree(xx);
+#else
+    delete[] neighbor_number;
+    delete[] neighbor_list;
+    delete[] potential;
+    delete[] hopping_real;
+    delete[] hopping_imag;
+    delete[] xx;
+#endif
 }
 
 
@@ -157,12 +220,16 @@ __global__ void gpu_apply_hamiltonian
 // |output> = H |input>
 void Hamiltonian::apply(Vector& input, Vector& output)
 {
+#ifndef CPU_ONLY
     gpu_apply_hamiltonian<<<grid_size, BLOCK_SIZE>>>
     (
         n, energy_max, neighbor_number, neighbor_list, potential,
         hopping_real, hopping_imag, input.real_part, input.imag_part,
         output.real_part, output.imag_part
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -211,12 +278,16 @@ __global__ void gpu_apply_commutator
 // |output> = [X, H] |input>
 void Hamiltonian::apply_commutator(Vector& input, Vector& output)
 {
+#ifndef CPU_ONLY
     gpu_apply_commutator<<<grid_size, BLOCK_SIZE>>>
     (
         n, energy_max, neighbor_number, neighbor_list,
         hopping_real, hopping_imag, xx, input.real_part, input.imag_part,
         output.real_part, output.imag_part
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -266,11 +337,15 @@ __global__ void gpu_apply_current
 // |output> = V |input>
 void Hamiltonian::apply_current(Vector& input, Vector& output)
 {
+#ifndef CPU_ONLY
     gpu_apply_current<<<grid_size, BLOCK_SIZE>>>
     (
         n, neighbor_number, neighbor_list, hopping_real, hopping_imag, xx,
         input.real_part, input.imag_part, output.real_part, output.imag_part
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -314,12 +389,16 @@ void Hamiltonian::chebyshev_01
     real bessel_0, real bessel_1, int direction
 )
 {
+#ifndef CPU_ONLY
     gpu_chebyshev_01<<<grid_size, BLOCK_SIZE>>>
     (
         n, state_0.real_part, state_0.imag_part,
         state_1.real_part, state_1.imag_part, state.real_part, state.imag_part,
         bessel_0, bessel_1, direction
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -412,6 +491,7 @@ void Hamiltonian::chebyshev_2
     real bessel_m, int label
 )
 {
+#ifndef CPU_ONLY
     gpu_chebyshev_2<<<grid_size, BLOCK_SIZE>>>
     (
         n, energy_max, neighbor_number, neighbor_list, potential,
@@ -420,6 +500,9 @@ void Hamiltonian::chebyshev_2
         state_2.real_part, state_2.imag_part, state.real_part, state.imag_part,
         bessel_m, label
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -452,11 +535,15 @@ __global__ void gpu_chebyshev_1x
 // Wrapper for kernel above
 void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
 {
+#ifndef CPU_ONLY
     gpu_chebyshev_1x<<<grid_size, BLOCK_SIZE>>>
     (
         n, input.real_part, input.imag_part,
         output.real_part, output.imag_part, bessel_1
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -576,6 +663,7 @@ void Hamiltonian::chebyshev_2x
     Vector& state_2, Vector& state_2x, Vector& state, real bessel_m, int label
 )
 {
+#ifndef CPU_ONLY
     gpu_chebyshev_2x<<<grid_size, BLOCK_SIZE>>>
     (
         n, energy_max, neighbor_number, neighbor_list, potential,
@@ -585,6 +673,9 @@ void Hamiltonian::chebyshev_2x
         state_2.real_part, state_2.imag_part, state_2x.real_part,
         state_2x.imag_part, state.real_part, state.imag_part, bessel_m, label
     );
+#else
+    //TODO
+#endif
 }
 
 
@@ -643,6 +734,7 @@ __global__ void gpu_kernel_polynomial
 void Hamiltonian::kernel_polynomial
 (Vector& state_0, Vector& state_1, Vector& state_2)
 {
+#ifndef CPU_ONLY
     gpu_kernel_polynomial<<<grid_size, BLOCK_SIZE>>>
     (
         n, energy_max, neighbor_number, neighbor_list, potential,
@@ -650,6 +742,9 @@ void Hamiltonian::kernel_polynomial
         state_1.real_part, state_1.imag_part,
         state_2.real_part, state_2.imag_part
     );
+#else
+    //TODO
+#endif
 }
 
 

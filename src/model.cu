@@ -75,14 +75,9 @@ Model::Model(std::string input_dir)
 
 Model::~Model()
 { 
+    // other memory will be freed when constructing the Hamiltonian
     delete[] energy;
     delete[] time_step;
-    delete[] potential;
-    delete[] hopping_real;
-    delete[] hopping_imag;
-    delete[] neighbor_number;
-    delete[] neighbor_list;
-    delete[] xx;
 }
 
 
