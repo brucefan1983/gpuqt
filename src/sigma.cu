@@ -280,15 +280,20 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
     real *inner_product_real; 
     real *inner_product_imag;
     real *vac;
-    real *vac_total;
-    
+
     vac = new real[model.number_of_energy_points];
-    vac_total = new real[model.number_of_energy_points 
-                       * model.number_of_steps_correlation];
     inner_product_real = new real[model.number_of_moments];
     inner_product_imag = new real[model.number_of_moments];
 
     H.apply_current(state_left, state_right);
+
+    std::ofstream output(model.input_dir + "/vac.out", std::ios::app);
+    if (!output.is_open())
+    {
+        std::cout <<"Error: cannot open " + model.input_dir + "/vac.out"
+                  << std::endl;
+        exit(1);
+    }
 
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
@@ -303,8 +308,9 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
 
         for (int n = 0; n < model.number_of_energy_points; ++n)
         {
-            vac_total[m * model.number_of_energy_points + n] = vac[n];
+            output << vac[n] << " ";
         }
+        output << std::endl;
 
         if (m < model.number_of_steps_correlation - 1)
         {
@@ -314,27 +320,11 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
         }
     }
 
-    std::ofstream output(model.input_dir + "/vac.out", std::ios::app);
-    if (!output.is_open())
-    {
-        std::cout <<"Error: cannot open " + model.input_dir + "/vac.out"
-                  << std::endl;
-        exit(1);
-    }
-    for (int m = 0; m < model.number_of_steps_correlation; ++m)
-    {
-        for (int n = 0; n < model.number_of_energy_points; ++n)
-        {
-            output << vac_total[m * model.number_of_energy_points + n] << " ";
-        }
-        output << std::endl;
-    }
     output.close();
 
     delete[] inner_product_real;
     delete[] inner_product_imag;
     delete[] vac;
-    delete[] vac_total;
 }
 
 
@@ -352,17 +342,22 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
     real *inner_product_real;
     real *inner_product_imag;
     real *msd;
-    real *msd_total;
 
     msd = new real[model.number_of_energy_points];
-    msd_total = new real[model.number_of_energy_points 
-                       * model.number_of_steps_correlation];
     inner_product_real = new real[model.number_of_moments];
     inner_product_imag = new real[model.number_of_moments];
 
     real time_step_scaled = model.time_step[0] * model.energy_max;
     evolve(model, 1, time_step_scaled, H, state);
     evolvex(model, 1, time_step_scaled, H, state_x);
+
+    std::ofstream output(model.input_dir + "/msd.out", std::ios::app);
+    if (!output.is_open())
+    {
+        std::cout << "Error: cannot open " + model.input_dir + "/msd.out"
+                  << std::endl;
+        exit(1);
+    }
 
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
@@ -375,8 +370,9 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
 
         for (int n = 0; n < model.number_of_energy_points; ++n)
         {
-            msd_total[m * model.number_of_energy_points + n] = msd[n];
+            output << msd[n] << " ";
         }
+        output << std::endl;
 
         if (m < model.number_of_steps_correlation - 1)
         {
@@ -396,28 +392,11 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
         }
     }
 
-    std::ofstream output(model.input_dir + "/msd.out", std::ios::app);
-    if (!output.is_open())
-    {
-        std::cout << "Error: cannot open " + model.input_dir + "/msd.out"
-                  << std::endl;
-        exit(1);
-    }
-
-    for (int m = 0; m < model.number_of_steps_correlation; ++m)
-    {
-        for (int n = 0; n < model.number_of_energy_points; ++n)
-        {
-            output << msd_total[m * model.number_of_energy_points + n] << " ";
-        }
-        output << std::endl;
-    }
     output.close();
 
     delete[] inner_product_real;
     delete[] inner_product_imag;
     delete[] msd;
-    delete[] msd_total;
 }
 
 
