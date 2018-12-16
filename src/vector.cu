@@ -57,7 +57,6 @@ void Vector::initialize_gpu(int n)
 {
     this->n = n;
     array_size = n * sizeof(real);
-    grid_size = (n-1) / BLOCK_SIZE + 1;
     cudaMalloc((void**)&real_part, array_size);
     cudaMalloc((void**)&imag_part, array_size);
 }
@@ -69,7 +68,6 @@ void Vector::initialize_cpu(int n)
 {
     this->n = n;
     array_size = n * sizeof(real);
-    grid_size = (n-1) / BLOCK_SIZE + 1;
     real_part = new real[n];
     imag_part = new real[n];
 }
@@ -81,7 +79,8 @@ Vector::Vector(int n)
 {
 #ifndef CPU_ONLY
     initialize_gpu(n);
-    gpu_set_zero<<<grid_size, BLOCK_SIZE>>>(n, real_part, imag_part);
+    gpu_set_zero<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
+    (n, real_part, imag_part);
 #else
     initialize_cpu(n);
     cpu_set_zero(n, real_part, imag_part);
@@ -124,7 +123,7 @@ Vector::Vector(Vector& original)
     // of the class from within the class
 #ifndef CPU_ONLY
     initialize_gpu(original.n);
-    gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
+    gpu_copy_state<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, original.real_part, original.imag_part, real_part, imag_part);
 #else
     initialize_cpu(original.n);
@@ -180,7 +179,7 @@ void cpu_add_state
 void Vector::add(Vector& other)
 {
 #ifndef CPU_ONLY
-    gpu_add_state<<<grid_size, BLOCK_SIZE>>>
+    gpu_add_state<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
 #else
     cpu_add_state(n, other.real_part, other.imag_part, real_part, imag_part);
@@ -193,7 +192,7 @@ void Vector::add(Vector& other)
 void Vector::copy(Vector& other)
 {
 #ifndef CPU_ONLY
-    gpu_copy_state<<<grid_size, BLOCK_SIZE>>>
+    gpu_copy_state<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
 #else
     cpu_copy_state
@@ -363,6 +362,7 @@ void cpu_find_inner_product_1
 void Vector::inner_product_1
 (int number_of_atoms, Vector& other, Vector& target, int offset)
 {
+    int grid_size = (number_of_atoms - 1) / BLOCK_SIZE + 1;
 #ifndef CPU_ONLY
     gpu_find_inner_product_1<<<grid_size, BLOCK_SIZE>>>
     (
@@ -489,6 +489,7 @@ void Vector::inner_product_2
         target.real_part, target.imag_part
     );
 #else
+    int grid_size = (number_of_atoms - 1) / BLOCK_SIZE + 1;
     cpu_find_inner_product_2
     (
         number_of_moments, grid_size, real_part, imag_part,
