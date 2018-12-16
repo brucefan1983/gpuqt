@@ -206,8 +206,13 @@ void Vector::copy(Vector& other)
 
 void Vector::copy_from_host(real* other_real, real* other_imag)
 {
+#ifndef CPU_ONLY 
     cudaMemcpy(real_part, other_real, array_size, cudaMemcpyHostToDevice);
     cudaMemcpy(imag_part, other_imag, array_size, cudaMemcpyHostToDevice);
+#else
+    memcpy(real_part, other_real, array_size);
+    memcpy(imag_part, other_imag, array_size);
+#endif
 }
 
 
@@ -215,8 +220,13 @@ void Vector::copy_from_host(real* other_real, real* other_imag)
 
 void Vector::copy_to_host(real* target_real, real* target_imag)
 {
+#ifndef CPU_ONLY
     cudaMemcpy(target_real, real_part, array_size, cudaMemcpyDeviceToHost);
     cudaMemcpy(target_imag, imag_part, array_size, cudaMemcpyDeviceToHost);
+#else
+    memcpy(target_real, real_part, array_size);
+    memcpy(target_imag, imag_part, array_size);
+#endif
 }
 
 
