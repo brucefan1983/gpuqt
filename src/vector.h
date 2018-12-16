@@ -50,7 +50,7 @@ private:
     void initialize_gpu(int n);
     void initialize_cpu(int n);
     int n;
-    size_t array_size;
+    int array_size;
 };
 
 

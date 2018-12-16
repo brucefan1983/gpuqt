@@ -21,11 +21,13 @@
 
 
 #include "vector.h"
+#include <string.h>        // memcpy
 #define BLOCK_SIZE 512     // optimized
 
 
 
 
+#ifndef CPU_ONLY 
 __global__ void gpu_set_zero
 (int number_of_elements, real *g_state_real, real *g_state_imag)
 {
@@ -36,10 +38,7 @@ __global__ void gpu_set_zero
         g_state_imag[n] = 0;
     }
 }
-
-
-
-
+#else
 void cpu_set_zero
 (int number_of_elements, real *g_state_real, real *g_state_imag)
 {
@@ -49,10 +48,12 @@ void cpu_set_zero
         g_state_imag[n] = 0;
     }
 }
+#endif
 
 
 
 
+#ifndef CPU_ONLY
 void Vector::initialize_gpu(int n)
 {
     this->n = n;
@@ -60,10 +61,7 @@ void Vector::initialize_gpu(int n)
     cudaMalloc((void**)&real_part, array_size);
     cudaMalloc((void**)&imag_part, array_size);
 }
-
-
-
-
+#else
 void Vector::initialize_cpu(int n)
 {
     this->n = n;
@@ -71,6 +69,7 @@ void Vector::initialize_cpu(int n)
     real_part = new real[n];
     imag_part = new real[n];
 }
+#endif
 
 
 
@@ -90,6 +89,7 @@ Vector::Vector(int n)
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_copy_state
 (int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
@@ -100,10 +100,7 @@ __global__ void gpu_copy_state
         out_imag[n] = in_imag[n];
     }
 }
-
-
-
-
+#else
 void cpu_copy_state
 (int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
@@ -113,6 +110,7 @@ void cpu_copy_state
         out_imag[n] = in_imag[n];
     }
 }
+#endif
 
 
 
@@ -149,6 +147,7 @@ Vector::~Vector()
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_add_state
 (int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
@@ -159,10 +158,7 @@ __global__ void gpu_add_state
         out_imag[i] += in_imag[i];
     }
 }
-
-
-
-
+#else
 void cpu_add_state
 (int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
 {
@@ -172,6 +168,7 @@ void cpu_add_state
         out_imag[i] += in_imag[i];
     }
 }
+#endif
 
 
 
@@ -244,15 +241,18 @@ void Vector::swap(Vector& other)
 
 
 
+#ifndef CPU_ONLY
 __device__ void warp_reduce(volatile real *s, int t)
 {
     s[t] += s[t + 32]; s[t] += s[t + 16]; s[t] += s[t + 8];
     s[t] += s[t + 4];  s[t] += s[t + 2];  s[t] += s[t + 1];
 }
+#endif
 
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_find_inner_product_1
 (
     int number_of_atoms,
@@ -317,10 +317,7 @@ __global__ void gpu_find_inner_product_1
         g_inner_product_imag[blockIdx.x + g_offset] = s_data_imag[0];
     }
 }
-
-
-
-
+#else
 void cpu_find_inner_product_1
 (
     int grid_size,
@@ -355,6 +352,7 @@ void cpu_find_inner_product_1
         g_inner_product_imag[m + g_offset] = s_data_imag;
     }
 }
+#endif
 
 
 
@@ -383,6 +381,7 @@ void Vector::inner_product_1
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_find_inner_product_2
 (
     int number_of_atoms,
@@ -447,10 +446,7 @@ __global__ void gpu_find_inner_product_2
         g_inner_product_2_imag[blockIdx.x] = s_data_imag[0];
     }
 }
-
-
-
-
+#else
 void cpu_find_inner_product_2
 (
     int number_of_moments,
@@ -475,6 +471,7 @@ void cpu_find_inner_product_2
         g_inner_product_2_imag[m] = s_data_imag;
     }
 }
+#endif
 
 
 

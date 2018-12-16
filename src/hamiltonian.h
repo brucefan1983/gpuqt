@@ -56,7 +56,7 @@ private:
     real* hopping_real;
     real* hopping_imag;
     real* xx;
-    size_t grid_size;
+    int grid_size;
     int n;
     int max_neighbor;
     real energy_max;

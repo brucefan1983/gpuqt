@@ -23,12 +23,13 @@
 #include "hamiltonian.h"
 #include "model.h"
 #include "vector.h"
+#include <string.h>        // memcpy
 #define BLOCK_SIZE 512     // optimized
 
 
 
 
-//#ifndef CPU_ONLY
+#ifndef CPU_ONLY
 void Hamiltonian::initialize_gpu(Model& model)
 {
     n = model.number_of_atoms;
@@ -103,9 +104,7 @@ void Hamiltonian::initialize_gpu(Model& model)
         sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] xx_new;
 }
-
-//#else
-
+#else
 void Hamiltonian::initialize_cpu(Model& model)
 {
     n = model.number_of_atoms;
@@ -137,7 +136,7 @@ void Hamiltonian::initialize_cpu(Model& model)
     memcpy(xx, model.xx, sizeof(real) * number_of_pairs);
     delete[] model.xx;
 }
-//#endif
+#endif
 
 
 
@@ -176,6 +175,7 @@ Hamiltonian::~Hamiltonian()
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_apply_hamiltonian
 (
     int number_of_atoms,
@@ -214,10 +214,7 @@ __global__ void gpu_apply_hamiltonian
         g_state_out_imag[n] = temp_imag;
     }
 }
-
-
-
-
+#else
 void cpu_apply_hamiltonian
 (
     int number_of_atoms,
@@ -256,6 +253,7 @@ void cpu_apply_hamiltonian
         g_state_out_imag[n] = temp_imag;
     }
 }
+#endif
 
 
 
@@ -283,6 +281,7 @@ void Hamiltonian::apply(Vector& input, Vector& output)
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_apply_commutator
 (
     int number_of_atoms,
@@ -319,10 +318,7 @@ __global__ void gpu_apply_commutator
         g_state_out_imag[n] = temp_imag / energy_max; // scale
     }
 }
-
-
-
-
+#else
 void cpu_apply_commutator
 (
     int number_of_atoms,
@@ -359,6 +355,7 @@ void cpu_apply_commutator
         g_state_out_imag[n] = temp_imag / energy_max; // scale
     }
 }
+#endif
 
 
 
@@ -386,6 +383,7 @@ void Hamiltonian::apply_commutator(Vector& input, Vector& output)
 
 
 
+#ifndef CPU_ONLY
 __global__ void gpu_apply_current
 (
     int number_of_atoms,
@@ -420,10 +418,7 @@ __global__ void gpu_apply_current
         g_state_out_imag[n] = - temp_real;
     }
 }
-
-
-
-
+#else
 void cpu_apply_current
 (
     int number_of_atoms,
@@ -458,6 +453,7 @@ void cpu_apply_current
         g_state_out_imag[n] = - temp_real;
     }
 }
+#endif
 
 
 
@@ -486,6 +482,7 @@ void Hamiltonian::apply_current(Vector& input, Vector& output)
 
 // Kernel which calculates the two first terms of time evolution as described by
 // Eq. (36) in [Comput. Phys. Commun.185, 28 (2014)].
+#ifndef CPU_ONLY
 __global__ void gpu_chebyshev_01
 (
     int number_of_atoms,
@@ -511,10 +508,7 @@ __global__ void gpu_chebyshev_01
                         - bessel_1 * g_state_1_real[n];
     }
 }
-
-
-
-
+#else
 void cpu_chebyshev_01
 (
     int number_of_atoms,
@@ -539,6 +533,7 @@ void cpu_chebyshev_01
                         - bessel_1 * g_state_1_real[n];
     }
 }
+#endif
 
 
 
@@ -572,6 +567,7 @@ void Hamiltonian::chebyshev_01
 
 //Kernel for calculating further terms of Eq. (36)
 // in [Comput. Phys. Commun.185, 28 (2014)].
+#ifndef CPU_ONLY
 __global__ void gpu_chebyshev_2
 (
     int number_of_atoms,
@@ -646,10 +642,7 @@ __global__ void gpu_chebyshev_2
         g_state_2_imag[n] = temp_imag;
     }
 }
-
-
-
-
+#else
 void cpu_chebyshev_2
 (
     int number_of_atoms,
@@ -724,6 +717,7 @@ void cpu_chebyshev_2
         g_state_2_imag[n] = temp_imag;
     }
 }
+#endif
 
 
 
@@ -761,6 +755,7 @@ void Hamiltonian::chebyshev_2
 
 // Kernel which calculates the two first terms of commutator [X, U(dt)]
 // Corresponds to Eq. (37) in [Comput. Phys. Commun.185, 28 (2014)].
+#ifndef CPU_ONLY
 __global__ void gpu_chebyshev_1x
 (
     int number_of_atoms,
@@ -779,10 +774,7 @@ __global__ void gpu_chebyshev_1x
         g_state_imag[n] = - b1 * g_state_1x_real[n];
     }
 }
-
-
-
-
+#else
 void cpu_chebyshev_1x
 (
     int number_of_atoms,
@@ -800,6 +792,7 @@ void cpu_chebyshev_1x
         g_state_imag[n] = - b1 * g_state_1x_real[n];
     }
 }
+#endif
 
 
 
@@ -826,6 +819,7 @@ void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
 
 
 // Kernel which calculates the further terms of [X, U(dt)]
+#ifndef CPU_ONLY
 __global__ void gpu_chebyshev_2x
 (
     int number_of_atoms,
@@ -928,10 +922,7 @@ __global__ void gpu_chebyshev_2x
         }
     }
 }
-
-
-
-
+#else
 void cpu_chebyshev_2x
 (
     int number_of_atoms,
@@ -1034,6 +1025,7 @@ void cpu_chebyshev_2x
         }
     }
 }
+#endif
 
 
 
@@ -1072,6 +1064,7 @@ void Hamiltonian::chebyshev_2x
 
 
 // Kernel for doing the Chebyshev iteration phi_2 = 2 * H * phi_1 - phi_0.
+#ifndef CPU_ONLY
 __global__ void gpu_kernel_polynomial
 (
     int number_of_atoms,
@@ -1116,10 +1109,7 @@ __global__ void gpu_kernel_polynomial
         g_state_2_imag[n] = temp_imag;
     }
 }
-
-
-
-
+#else 
 void cpu_kernel_polynomial
 (
     int number_of_atoms,
@@ -1164,6 +1154,7 @@ void cpu_kernel_polynomial
         g_state_2_imag[n] = temp_imag;
     }
 }
+#endif
 
 
 

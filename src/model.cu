@@ -27,6 +27,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+#include <limits.h>
 
 #define PI 3.141592653589793
 
