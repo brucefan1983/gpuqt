@@ -51,7 +51,6 @@ private:
     void initialize_cpu(int n);
     int n;
     size_t array_size;
-    size_t grid_size;
 };
 
 
