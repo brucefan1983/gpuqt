@@ -447,7 +447,7 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
             // update U^m |phi> to U^(m+1) |phi>
             real time_step_scaled = model.time_step[m] * model.energy_max;
             evolve(model, 1, time_step_scaled, H, state);
- 		}
+        }
     }
 
     output.close();

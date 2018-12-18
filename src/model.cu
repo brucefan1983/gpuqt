@@ -200,8 +200,9 @@ void Model::initialize_parameters()
         std::cout << "- Use lattice model" << std::endl;
         if (calculate_spin)
         {
-            std::cout << "- lattice model does not support spin calculation yet"
-                      << std::endl;
+            std::cout << "Error: lattice model does not support "
+                      << "spin calculation yet" << std::endl;
+            exit(1);
         }
     }
     else
@@ -237,12 +238,18 @@ void Model::initialize_parameters()
         std::cout << "- spin polarization will not be calculated" << std::endl;
 
     if (calculate_spin && calculate_vac)
+    {
         std::cout << "Error: spin and VAC cannot be calculated together"
                   << std::endl;
+        exit(1);
+    }
 
     if (calculate_spin && calculate_msd)
+    {
         std::cout << "Error: spin and MSD cannot be calculated together"
                   << std::endl;
+        exit(1);
+    }
 
     std::cout << "- Number of random vectors is "
               << number_of_random_vectors << std::endl;
