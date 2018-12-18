@@ -89,11 +89,27 @@ void Model::initialize_state(Vector& random_state)
     std::uniform_real_distribution<real> phase(0, 2 * PI);
     real *random_state_real = new real[number_of_atoms];
     real *random_state_imag = new real[number_of_atoms];
-    for (int n = 0; n < number_of_atoms; ++n)
+
+    // spin degeneracy is considered in perform_chebyshev_summation
+    if (calculate_spin) // normalize to N/2 to remove spin degeneracy
     {
-        real random_phase = phase(generator);
-        random_state_real[n] = cos(random_phase);
-        random_state_imag[n] = sin(random_phase);
+        for (int n = 0; n < number_of_atoms; n += 2)
+        {
+            real random_phase = phase(generator);
+            random_state_real[n] = cos(random_phase);
+            random_state_imag[n] = sin(random_phase);
+            random_state_real[n+1] = 0.0;
+            random_state_imag[n+1] = 0.0;
+        }
+    }
+    else // normalize to N to keep spin degeneracy
+    {
+        for (int n = 0; n < number_of_atoms; ++n)
+        {
+            real random_phase = phase(generator);
+            random_state_real[n] = cos(random_phase);
+            random_state_imag[n] = sin(random_phase);
+        }
     }
     random_state.copy_from_host(random_state_real, random_state_imag);
     delete[] random_state_real;
