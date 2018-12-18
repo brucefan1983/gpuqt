@@ -166,6 +166,10 @@ void Model::initialize_parameters()
         {
             calculate_msd = true;
         }
+        else if (token == "calculate_spin")
+        {
+            calculate_spin = true;
+        }
         else if (token == "number_of_random_vectors")
         {
             ss >> number_of_random_vectors;
@@ -192,7 +196,14 @@ void Model::initialize_parameters()
     
     //Verify the used parameters (make a seperate function later)
     if (use_lattice_model)
+    {
         std::cout << "- Use lattice model" << std::endl;
+        if (calculate_spin)
+        {
+            std::cout << "- lattice model does not support spin calculation yet"
+                      << std::endl;
+        }
+    }
     else
         std::cout << "- Use general model" << std::endl;
 
@@ -209,14 +220,30 @@ void Model::initialize_parameters()
     }
 
     std::cout << "- DOS will be calculated" << std::endl;
+
     if (calculate_vac)
         std::cout << "- VAC will be calculated" << std::endl;
     else
         std::cout << "- VAC will not be calculated" << std::endl;
+
     if (calculate_msd)
         std::cout << "- MSD will be calculated" << std::endl;
     else
         std::cout << "- MSD will not be calculated" << std::endl;
+
+    if (calculate_spin)
+        std::cout << "- spin polarization will be calculated" << std::endl;
+    else
+        std::cout << "- spin polarization will not be calculated" << std::endl;
+
+    if (calculate_spin && calculate_vac)
+        std::cout << "Error: spin and VAC cannot be calculated together"
+                  << std::endl;
+
+    if (calculate_spin && calculate_msd)
+        std::cout << "Error: spin and MSD cannot be calculated together"
+                  << std::endl;
+
     std::cout << "- Number of random vectors is "
               << number_of_random_vectors << std::endl;
     std::cout << "- Number of moments is "

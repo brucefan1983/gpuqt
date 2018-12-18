@@ -37,6 +37,7 @@ public:
 
     bool calculate_vac = false;
     bool calculate_msd = false;
+    bool calculate_spin = false;
 
     int number_of_random_vectors = 1; 
     int number_of_atoms = 0; 

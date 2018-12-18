@@ -69,6 +69,7 @@ void gpuqt(std::string input_directory)
     for (int i = 0; i < model.number_of_random_vectors; ++i)
     {
         print_started_random_vector(i);
+
         model.initialize_state(random_state);
 
         // Always calculate the DOS, since it is very cheap
@@ -98,6 +99,17 @@ void gpuqt(std::string input_directory)
             time_finish = clock();
             time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
             std::cout << "- Time used for finding VAC = " 
+                      << time_used << " s" << std::endl;
+        }
+
+        // Calculate the spin polarization only if you want to
+        if (model.calculate_spin == 1)  
+        {
+            time_begin = clock();
+            find_spin_polarization(model, H, random_state);
+            time_finish = clock();
+            time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+            std::cout << "- Time used for finding spin polarization = " 
                       << time_used << " s" << std::endl;
         }
 

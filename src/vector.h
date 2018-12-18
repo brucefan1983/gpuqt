@@ -36,6 +36,7 @@ public:
 
     void add(Vector& other);
     void copy(Vector& other);
+    void apply_sz(Vector& other);
     void copy_from_host(real* other_real, real* other_imag);
     void copy_to_host(real* target_real, real* target_imag);
     void swap(Vector& other);

@@ -200,6 +200,61 @@ void Vector::copy(Vector& other)
 
 
 
+#ifndef CPU_ONLY
+__global__ void gpu_apply_sz
+(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n)
+    {
+        if (i % 2 == 0)
+        {
+            out_real[i] = in_real[i];
+            out_imag[i] = in_imag[i];
+        }
+        else
+        {
+            out_real[i] = -in_real[i];
+            out_imag[i] = -in_imag[i];
+        }
+    }
+}
+#else
+void cpu_apply_sz
+(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+{
+    for (int i = 0; i < n; ++i)
+    {
+        if (i % 2 == 0)
+        {
+            out_real[i] = in_real[i];
+            out_imag[i] = in_imag[i];
+        }
+        else
+        {
+            out_real[i] = -in_real[i];
+            out_imag[i] = -in_imag[i];
+        }
+    }
+}
+#endif
+
+
+
+
+void Vector::apply_sz(Vector& other)
+{
+#ifndef CPU_ONLY
+    gpu_apply_sz<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
+    (n, other.real_part, other.imag_part, real_part, imag_part);
+#else
+    cpu_apply_sz(n, other.real_part, other.imag_part, real_part, imag_part);
+#endif
+}
+
+
+
+
 void Vector::copy_from_host(real* other_real, real* other_imag)
 {
 #ifndef CPU_ONLY 
