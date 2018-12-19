@@ -7,21 +7,21 @@ CC = nvcc
 CFLAGS = -O3 -std=c++11 -arch=sm_35 -use_fast_math -DDEBUG
 
 
-SOURCES = main.cu gpuqt.cu sigma.cu vector.cu hamiltonian.cu model.cu model_general.cu model_lattice.cu
-_OBJ = main.o gpuqt.o sigma.o vector.o hamiltonian.o model.o model_general.o model_lattice.o
-HEADERS = sigma.h vector.h gpuqt.h hamiltonian.h model.h
+SOURCES = main.cu lsqt.cu sigma.cu vector.cu hamiltonian.cu model.cu model_general.cu model_lattice.cu
+_OBJ = main.o lsqt.o sigma.o vector.o hamiltonian.o model.o model_general.o model_lattice.o
+HEADERS = sigma.h vector.h lsqt.h hamiltonian.h model.h
 
 
 ODIR = obj
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-all: gpuqt
+all: lsqt
 
 $(ODIR)/%.o: %.cu $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-gpuqt: $(OBJ)
+lsqt: $(OBJ)
 	$(CC) $^ -o $@
 
 clean:
-	rm $(ODIR)/*o gpuqt
+	rm $(ODIR)/*o lsqt

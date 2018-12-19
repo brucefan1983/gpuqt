@@ -20,7 +20,7 @@
 
 
 
-#include "gpuqt.h"
+#include "lsqt.h"
 #include "vector.h"
 #include "hamiltonian.h"
 #include "sigma.h"
@@ -55,7 +55,7 @@ static void print_finished_random_vector(int i)
 
 
 
-void gpuqt(std::string input_directory)
+void lsqt(std::string input_directory)
 {
     // Initialize model on the CPU
     Model model(input_directory);

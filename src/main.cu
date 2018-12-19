@@ -20,7 +20,7 @@
 
 
 
-#include "gpuqt.h"
+#include "lsqt.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
         clock_t time_begin = clock();
          
         // call the driver function
-        gpuqt(directory);
+        lsqt(directory);
 
         clock_t time_finish = clock();
         double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;

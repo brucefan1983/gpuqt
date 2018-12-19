@@ -26,7 +26,7 @@
 
 
 
-void gpuqt(std::string input_directory);
+void lsqt(std::string input_directory);
 
 
 
