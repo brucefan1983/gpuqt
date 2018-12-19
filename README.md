@@ -22,7 +22,6 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 * The folder "src" contains all the source files (with suffix .h or .cu) of the main code and a makefile. The source files are:
     * main.cu                          - the main function
-    * common.h                         - some constants
     * gpuqt.h and gpuqt.cu             - the "driver function"
     * sigma.h and sigma.cu             - functions to obtain the transport properties
     * model.h and model.cu             - class to define the simulation model
@@ -35,23 +34,27 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Prerequisites
 
-Need a computer/workstation/cluster equipped with one or more CUDA-enabled GPUs with compute capability of 2.0 or higher, a g++ compiler and a CUDA toolkit. The code has only been tested in linux systems.
+* The first version only supports GPU computing and it requires a computer/workstation/cluster equipped with one or more CUDA-enabled GPUs with compute capability of 2.0 or higher, a g++ compiler and a CUDA toolkit. 
+* Now the code also supports pure CPU computing and in this case it only requires a g++ compiler.
+* The code has only been tested in linux systems.
 
 ## Installing
 
-Go to "src" and type "make" to compile the gpuqt code. This will produce an executable "gpuqt" in the "src" folder.
+* Go to "src" and type "make" to compile the gpuqt code. This will produce an executable "gpuqt" in the "src" folder.
+* One can choose to use pure CPU computing or GPU computing by editing the makefile. It is very easy. Just check the first few lines in the makefile. You will understand it immediately.
+ 
 
 ## Running the examples
 
-* Go to the folders "diffusive" and "localized", compile the C++ codes with the "-std=c++11" option, and run the executables. This will produce all the input files (with suffix .in) for the examples.
+* Here I only show how to run the examples corresponding to Ref. [3].
+
+* Go to the folders "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized", compile the C++ codes with the "-std=c++11" option, and run the executables. This will produce all the input files (with suffix .in) for the examples.
   
-* Go to the main folder where you can see the "src" folder and type "src/gpuqt examples/input.txt" to run the examples. The data will be written into the output files (with suffix .out) in the "diffusive" and "localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
+* Go to the main folder where you can see the "src" folder and type "src/gpuqt examples/input.txt" to run the examples. The data will be written into the output files (with suffix .out) in the "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
 
 ## Analyzing the results
 
-Go to the folders "diffusive" and "localized" and run the MATLAB scripts. You should get similar figures as in the following paper:
-
-* Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, Comput. Phys. Commun. 230, 113 (2018). https://doi.org/10.1016/j.cpc.2018.04.013
+Go to the folders "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized" and run the MATLAB scripts. You should get similar figures as in Ref. [3].
 
 
 ## Authors
