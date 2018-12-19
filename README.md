@@ -1,4 +1,4 @@
-# GPUQT (will be changed to LSQT later)
+# LSQT
 
 An efficient implementation of a linear scaling quantum transport (LSQT) method which supports both pure CPU and GPU+CPU computations. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian.
 
@@ -40,7 +40,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Installing
 
-* Go to "src" and type "make" to compile the gpuqt code. This will produce an executable "gpuqt" in the "src" folder.
+* Go to "src" and type "make" to compile the gpuqt code. This will produce an executable "lsqt" in the "src" folder.
 * One can choose to use pure CPU computing or GPU computing by editing the makefile. It is very easy. Just check the first few lines in the makefile. You will understand it immediately.
  
 
@@ -50,7 +50,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 * Go to the folders "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized", compile the C++ codes with the "-std=c++11" option, and run the executables. This will produce all the input files (with suffix .in) for the examples.
   
-* Go to the main folder where you can see the "src" folder and type "src/gpuqt examples/input.txt" to run the examples. The data will be written into the output files (with suffix .out) in the "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
+* Go to the main folder where you can see the "src" folder and type "src/lsqt examples/input.txt" to run the examples. The data will be written into the output files (with suffix .out) in the "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
 
 ## Analyzing the results
 
@@ -67,5 +67,5 @@ Go to the folders "examples/cpc2018/general/diffusive" and "examples/cpc2018/gen
 
 ## Contact
 
-* Zheyong Fan: brucenju(at)gmail.com; zheyong.fan(at)aalto.fi; zheyongfan(at)163.com
+* Zheyong Fan: brucenju(at)gmail.com; zheyong.fan(at)aalto.fi;
 
