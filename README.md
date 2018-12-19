@@ -1,6 +1,6 @@
 # GPUQT (will be changed to LSQT later)
 
-An efficient implementation of a linear scaling quantum transport (LSQT) method which support both pure CPU and GPU+CPU computations. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian.
+An efficient implementation of a linear scaling quantum transport (LSQT) method which supports both pure CPU and GPU+CPU computations. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian.
 
 ## References
 
