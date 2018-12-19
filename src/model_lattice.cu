@@ -197,6 +197,64 @@ void Model::add_vacancies()
 
 
 
+void Model::add_charged_impurities()
+{
+    real charged_impurity_range_square = charged_impurity_range
+                                       * charged_impurity_range;
+    real box_length_half[3];
+    for (int d = 0; d < 3; ++d) 
+        box_length_half[d] = box_length[d] * 0.5;
+
+    int *impurity_indices = new int[number_of_charged_impurities];
+    real *impurity_strength = new real[number_of_charged_impurities];
+
+    create_random_numbers
+    (number_of_atoms, number_of_charged_impurities, impurity_indices);
+
+    real W2 = charged_impurity_strength * 0.5;
+    std::uniform_real_distribution<real> strength(-W2, W2);
+    for (int i = 0; i < number_of_charged_impurities; ++i)
+    {
+        impurity_strength[i] = strength(generator);
+    }
+
+    for (int n1 = 0; n1 < number_of_atoms; ++n1)
+    {
+        potential[n1] = 0.0;
+        
+        real x1 = x[n1];
+        real y1 = y[n1];
+        real z1 = z[n1];
+        for (int i = 0; i < number_of_charged_impurities; ++i)
+        {
+            int n2 = impurity_indices[i];
+            real r12[3];
+            r12[0] = x[n2] - x1;
+            r12[1] = y[n2] - y1;
+            r12[2] = z[n2] - z1;
+            real d12_square = 0.0;
+            for (int d = 0; d < 3; ++d)
+            {
+                r12[d] = fabs(r12[d]);
+                if (pbc[d] == 1 && r12[d] > box_length_half[d])
+                {
+                    r12[d] = box_length[d] - r12[d];
+                }
+                d12_square += r12[d] * r12[d];
+            }
+ 
+            d12_square /= charged_impurity_range_square;
+            potential[n1] += impurity_strength[i]*exp(-d12_square*0.5);
+        }
+    }
+    
+    delete[] impurity_indices;
+    delete[] impurity_strength;
+}
+
+
+
+
 static int find_index
 (int nx, int ny, int nz, int Nx, int Ny, int Nz, int m, int N_orbital)
 {

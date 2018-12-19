@@ -82,6 +82,7 @@ private:
     void initialize_lattice_model();
     void add_anderson_disorder();
     void add_vacancies();
+    void add_charged_impurities();
     void create_random_numbers(int, int, int*);
     void specify_vacancies(int*, int);
     void find_new_atom_index(int*, int*, int);
@@ -95,6 +96,15 @@ private:
 
     bool has_vacancy_disorder = false;
     int number_of_vacancies;
+
+    bool has_charged_impurities = false;
+    real charged_impurity_strength;
+    real charged_impurity_range;
+    int number_of_charged_impurities;
+
+    int pbc[3];
+    real box_length[3];
+    real *x, *y, *z;
     
     std::mt19937 generator;
 };
