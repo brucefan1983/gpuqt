@@ -7,8 +7,8 @@ CC = nvcc
 CFLAGS = -O3 -std=c++11 -arch=sm_35 -use_fast_math -DDEBUG
 
 
-SOURCES = main.cu gpuqt.cu sigma.cu vector.cu hamiltonian.cu model.cu model_general.cu
-_OBJ = main.o gpuqt.o sigma.o vector.o hamiltonian.o model.o model_general.o
+SOURCES = main.cu gpuqt.cu sigma.cu vector.cu hamiltonian.cu model.cu model_general.cu model_lattice.cu
+_OBJ = main.o gpuqt.o sigma.o vector.o hamiltonian.o model.o model_general.o model_lattice.o
 HEADERS = sigma.h vector.h gpuqt.h hamiltonian.h model.h
 
 
