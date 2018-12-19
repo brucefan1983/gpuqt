@@ -62,22 +62,30 @@ public:
     real volume;
     
 private:
+
+    void print_started_reading(std::string filename);
+    void print_finished_reading(std::string filename);
+
+    // for both lattice and general models
     void initialize_parameters();
     void initialize_energy();
     void initialize_time();
+
+    // only for general model
     void initialize_neighbor();
     void initialize_positions();
     void initialize_potential();
     void initialize_hopping();
+    void initialize_model_general();
+
+    // only for lattice model
     void initialize_lattice_model();
-
     void add_anderson_disorder();
-
     void add_vacancies();
     void create_random_numbers(int, int, int*);
     void specify_vacancies(int*, int);
     void find_new_atom_index(int*, int*, int);
-    	
+    
     bool requires_time = false;
     bool use_lattice_model = false;
 
