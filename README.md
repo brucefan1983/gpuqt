@@ -40,9 +40,9 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Installing
 
-* Go to "src" and type "make" to compile the gpuqt code. This will produce an executable "lsqt" in the "src" folder.
-* One can choose to use pure CPU computing or GPU computing by editing the makefile. It is very easy. Just check the first few lines in the makefile. You will understand it immediately.
- 
+* Go to "src" and 
+    * type "make -f makefile.cpu" to build the CPU version. This will produce an executable called "lsqt_cpu" in the "src" folder.
+    * type "make -f makefile.gpu" to build the GPU version. This will produce an executable called "lsqt_gpu" in the "src" folder.
 
 ## Running the examples
 
@@ -50,7 +50,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 * Go to the folders "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized", compile the C++ codes with the "-std=c++11" option, and run the executables. This will produce all the input files (with suffix .in) for the examples.
   
-* Go to the main folder where you can see the "src" folder and type "src/lsqt examples/input.txt" to run the examples. The data will be written into the output files (with suffix .out) in the "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
+* Go to the main folder where you can see the "src" folder and type "src/lsqt_gpu examples/input.txt" (or "src/lsqt_gpu examples/input.txt" if you use the CPU version) to run the examples. The data will be written into the output files (with suffix .out) in the "examples/cpc2018/general/diffusive" and "examples/cpc2018/general/localized" folders. If you run a simulation multiple times, new data will be appended to the existing output files.
 
 ## Analyzing the results
 
