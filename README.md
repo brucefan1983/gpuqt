@@ -1,6 +1,6 @@
 # GPUQT
 
-A CUDA implementation of a linear scaling quantum transport method. This code can be used to obtain intrinsic electronic transport properties of large systems described by a real-space tight-binding Hamiltonian.
+A CUDA implementation of a linear scaling quantum transport method. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian.
 
 ## References
 
