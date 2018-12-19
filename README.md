@@ -3,10 +3,13 @@
 A CUDA implementation of a linear scaling quantum transport method. This code can be used to obtain intrinsic electronic transport properties of large systems described by a real-space tight-binding Hamiltonian.
 
 The major reference for the CUDA implementation is 
-* Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014). https://doi.org/10.1016/j.cpc.2013.08.009
+* [1] Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014). https://doi.org/10.1016/j.cpc.2013.08.009
+
+This code was first published along with the following paper:
+* [2] Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, Comput. Phys. Commun. 230, 113 (2018). https://doi.org/10.1016/j.cpc.2018.04.013
 
 There is a comprehensive review article discussing the linear scaling quantum transport methods:
-* Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, submitted to Reviews of Modern Physics, https://arxiv.org/abs/1811.07387
+* [3] Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, submitted to Reviews of Modern Physics, https://arxiv.org/abs/1811.07387
 
 ## File organizations
 
@@ -20,8 +23,8 @@ There is a comprehensive review article discussing the linear scaling quantum tr
     * model.h and model.cu             - class to define the simulation model
     * hamiltonian.h and hamiltonian.cu - class to perform the matrix-related operations
     * vector.h and vector.cu           - class to perform the vector-related operations
-
-* The folder "examples" contains two sub-folders with names "diffusive" and "localized", both containing the files "make_inputs.cpp" and "plot_results.m".
+    
+* The folder "examples" contains two sub-folders with names "cpc2018" and "rmp", containing examples in Refs. [2] and [3] mentioned above.
 
 * There is also a file named "input.txt" in the "examples" folder, which is a "driver input file".
 
