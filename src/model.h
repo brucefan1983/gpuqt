@@ -68,6 +68,7 @@ private:
 
     // for both lattice and general models
     void initialize_parameters();
+    void verify_parameters();
     void initialize_energy();
     void initialize_time();
 

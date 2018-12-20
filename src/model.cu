@@ -35,10 +35,11 @@
 
 Model::Model(std::string input_dir)
 {
-    // Use higher accuracy clock for the RNG seed
     #ifdef DEBUG
+        // use the same seed for different runs
         generator = std::mt19937(12345678);
     #else
+        // use different seeds for different runs
         generator = std::mt19937
         (std::chrono::system_clock::now().time_since_epoch().count());
     #endif
@@ -49,12 +50,12 @@ Model::Model(std::string input_dir)
     // read in para.in
     initialize_parameters();
 
-    // read in energy.in and time_step.in
+    // always need to read in energies
     initialize_energy();
+
+    // only read in time steps when needed
     if (requires_time)
         initialize_time();
-    else
-        time_step = 0;
 
     // initialize the model
     if (use_lattice_model) // use a lattice model
@@ -63,10 +64,7 @@ Model::Model(std::string input_dir)
     }
     else // use general inputs to build the model
     {
-        initialize_neighbor();
-        initialize_positions();
-        initialize_potential();
-        initialize_hopping();
+        initialize_model_general();
     }
 }
 
@@ -77,12 +75,15 @@ Model::~Model()
 { 
     // other memory will be freed when constructing the Hamiltonian
     delete[] energy;
-    delete[] time_step;
+    if (requires_time)
+        delete[] time_step;
 }
 
 
 
 
+// This function is called by the lsqt function in the lsqt.cu file
+// It initialize a random vector
 void Model::initialize_state(Vector& random_state)
 {
     std::uniform_real_distribution<real> phase(0, 2 * PI);
@@ -141,74 +142,12 @@ void Model::print_finished_reading(std::string filename)
 
 
 
-void Model::initialize_parameters()
+void Model::verify_parameters()
 {
-    std::string filename = input_dir + "/para.in";
-    std::ifstream input(filename);
-    if (!input.is_open())
-    {
-        std::cout << "Error: cannot open " + filename << std::endl;
-        exit(1);
-    }
-    print_started_reading(filename);
-
-    std::string line;
-    while (std::getline(input, line))
-    {
-        std::stringstream ss(line);
-        std::string token;
-        ss >> token;
-        if (token == "") continue;
-        if (token == "model")
-        {
-            ss >> use_lattice_model;
-        }
-        else if (token == "anderson_disorder")
-        {
-            has_anderson_disorder = true;
-            ss >> anderson_disorder_strength;
-        }
-        else if (token == "vacancy_disorder")
-        {
-            has_vacancy_disorder = true;
-            ss >> number_of_vacancies;
-        }
-        else if (token == "calculate_vac")
-        {
-            calculate_vac = true;
-        }
-        else if (token == "calculate_msd")
-        {
-            calculate_msd = true;
-        }
-        else if (token == "calculate_spin")
-        {
-            calculate_spin = true;
-        }
-        else if (token == "number_of_random_vectors")
-        {
-            ss >> number_of_random_vectors;
-        }
-        else if (token == "number_of_moments")
-        {
-            ss >> number_of_moments;
-        }
-        else if (token == "energy_max")
-        {
-            ss >> energy_max;
-        }
-        else
-        {
-            std::cout << "Unknown identifier in " + input_dir + "/para.in:" 
-                      << std::endl;
-            std::cout << line << std::endl;
-        }
-    }
-    input.close();
-    
-    if (calculate_vac || calculate_msd)
+    // determine whether or not we need to read in time steps
+    if (calculate_vac || calculate_msd || calculate_spin)
         requires_time = true;
-    
+
     //Verify the used parameters (make a seperate function later)
     if (use_lattice_model)
     {
@@ -216,23 +155,69 @@ void Model::initialize_parameters()
         if (calculate_spin)
         {
             std::cout << "Error: lattice model does not support "
-                      << "spin calculation yet" << std::endl;
+                      << "spin calculations yet" << std::endl;
             exit(1);
+        }
+
+        if (has_anderson_disorder)
+        {
+            std::cout << "- Add Anderson disorder with strength W = "
+                      << anderson_disorder_strength << std::endl;
+        }
+        else
+        {
+            std::cout << "- No Anderson disorder" << std::endl;
+        }
+
+        if (has_charged_impurities)
+        {
+            std::cout << "- Add charged impurities with " << std::endl
+                      << "  N = " << number_of_charged_impurities << std::endl
+                      << "  W = " << charged_impurity_strength << std::endl
+                      << "  xi = " << charged_impurity_range << std::endl;
+        }
+        else
+        {
+            std::cout << "- No charged impurity" << std::endl;
+        }
+
+        if (has_vacancy_disorder)
+        {
+            std::cout << "- Add " << number_of_vacancies
+                      << " vacancies" << std::endl;
+            if (number_of_vacancies <= 0)
+            {
+                std::cout << "Error: number of vacancies should > 0"
+                          << std::endl;
+                exit(1);
+            }
+        }
+        else
+        {
+            std::cout << "- No vacancy disorder" << std::endl;
         }
     }
     else
+    {
         std::cout << "- Use general model" << std::endl;
-
-    if (has_anderson_disorder)
-    {
-        std::cout << "- Add Anderson disorder with strength W = "
-                  << anderson_disorder_strength << std::endl;
-    }
-
-    if (has_vacancy_disorder)
-    {
-        std::cout << "- Add " << number_of_vacancies
-                  << " vacancies" << std::endl;
+        if (has_anderson_disorder)
+        {
+            std::cout << "Error: General model does not allowed to add "
+                      << "Anderson disorder" << std::endl;
+            exit(1);
+        }
+        if (has_vacancy_disorder)
+        {
+            std::cout << "Error: General model does not allowed to add "
+                      << "vacancy disorder" << std::endl;
+            exit(1);
+        }
+        if (has_charged_impurities)
+        {
+            std::cout << "Error: General model does not allowed to add "
+                      << "charged impurities" << std::endl;
+            exit(1);
+        }
     }
 
     std::cout << "- DOS will be calculated" << std::endl;
@@ -266,12 +251,116 @@ void Model::initialize_parameters()
         exit(1);
     }
 
-    std::cout << "- Number of random vectors is "
-              << number_of_random_vectors << std::endl;
-    std::cout << "- Number of moments is "
-              << number_of_moments << std::endl;
-    std::cout << "- Energy maximum is " << energy_max << std::endl;
+    std::cout << "- Number of random vectors is " << number_of_random_vectors
+              << std::endl;
+    if (number_of_random_vectors <= 0)
+    {
+        std::cout << "Error: Number of random vectors should > 0" << std::endl;
+        exit(1);
+    }
 
+    std::cout << "- Number of moments is " << number_of_moments << std::endl;
+    if (number_of_moments <= 0)
+    {
+        std::cout << "Error: Number of moments should > 0" << std::endl;
+        exit(1);
+    }
+
+    std::cout << "- Energy maximum is " << energy_max << std::endl;
+    if (energy_max <= 0)
+    {
+        std::cout << "Error: Energy maximum should > 0" << std::endl;
+        exit(1);
+    }
+}
+
+
+
+
+void Model::initialize_parameters()
+{
+    std::string filename = input_dir + "/para.in";
+    std::ifstream input(filename);
+    if (!input.is_open())
+    {
+        std::cout << "Error: cannot open " + filename << std::endl;
+        exit(1);
+    }
+    print_started_reading(filename);
+
+    std::string line;
+    while (std::getline(input, line))
+    {
+        std::stringstream ss(line);
+        std::string token;
+        ss >> token;
+        if (token == "") continue;
+        if (token == "model")
+        {
+            ss >> use_lattice_model;
+        }
+        else if (token == "anderson_disorder")
+        {
+            has_anderson_disorder = true;
+            ss >> anderson_disorder_strength;
+        }
+        else if (token == "charged_impurity")
+        {
+            has_charged_impurities = true;
+            ss >> number_of_charged_impurities;
+            ss >> charged_impurity_strength;
+            ss >> charged_impurity_range;
+        }
+        else if (token == "vacancy_disorder")
+        {
+            has_vacancy_disorder = true;
+            ss >> number_of_vacancies;
+        }
+        else if (token == "calculate_vac")
+        {
+            calculate_vac = true;
+        }
+        else if (token == "calculate_msd")
+        {
+            calculate_msd = true;
+        }
+        else if (token == "calculate_spin")
+        {
+            calculate_spin = true;
+        }
+        else if (token == "number_of_random_vectors")
+        {
+            ss >> number_of_random_vectors;
+        }
+        else if (token == "number_of_moments")
+        {
+            ss >> number_of_moments;
+        }
+        else if (token == "energy_max")
+        {
+            ss >> energy_max;
+        }
+        else
+        {
+            std::cout << "Error: Unknown identifier in "
+                      << input_dir + "/para.in: " + line
+                      << std::endl;
+            std::cout << "Valid keywords include: " << std::endl
+                      << "--model" << std::endl
+                      << "--anderson_disorder" << std::endl
+                      << "--charged_impurity" << std::endl
+                      << "--vacancy_disorder" << std::endl
+                      << "--calculate_vac" << std::endl
+                      << "--calculate_msd" << std::endl
+                      << "--calculate_spin" << std::endl
+                      << "--number_of_random_vectors" << std::endl
+                      << "--number_of_moments" << std::endl
+                      << "--energy_max" << std::endl;
+            exit(1);
+        }
+    }
+    input.close();
+    verify_parameters();
     print_finished_reading(filename);
 }
 
@@ -292,7 +381,7 @@ void Model::initialize_energy()
 
     input >> number_of_energy_points;
     std::cout << "- number of energy points = "
-              << number_of_energy_points 
+              << number_of_energy_points
               << std::endl;
     energy = new real[number_of_energy_points];
 
@@ -322,6 +411,9 @@ void Model::initialize_time()
     print_started_reading(filename);
 
     input >> number_of_steps_correlation;
+    std::cout << "- number of time steps = "
+              << number_of_steps_correlation
+              << std::endl;
     time_step = new real[number_of_steps_correlation];
 
     for (int n = 0; n < number_of_steps_correlation; ++n)
