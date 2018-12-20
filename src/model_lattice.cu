@@ -31,15 +31,11 @@
 
 void Model::add_anderson_disorder()
 {
-    potential = new real[number_of_atoms];
     real W2 = anderson_disorder_strength * 0.5;
     std::uniform_real_distribution<real> on_site_potential(-W2, W2);
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        if (has_anderson_disorder)
-            potential[n] = on_site_potential(generator);
-        else
-            potential[n] = 0.0;
+        potential[n] = on_site_potential(generator);
     }
 }
 
@@ -221,7 +217,7 @@ void Model::add_charged_impurities()
     for (int n1 = 0; n1 < number_of_atoms; ++n1)
     {
         potential[n1] = 0.0;
-        
+
         real x1 = x[n1];
         real y1 = y[n1];
         real z1 = z[n1];
@@ -242,12 +238,12 @@ void Model::add_charged_impurities()
                 }
                 d12_square += r12[d] * r12[d];
             }
- 
+
             d12_square /= charged_impurity_range_square;
             potential[n1] += impurity_strength[i]*exp(-d12_square*0.5);
         }
     }
-    
+
     delete[] impurity_indices;
     delete[] impurity_strength;
 }
@@ -437,9 +433,19 @@ void Model::initialize_lattice_model()
     hopping_real = new real[number_of_pairs];
     hopping_imag = new real[number_of_pairs];
     xx = new real[number_of_pairs];
-    x.resize(number_of_atoms);
-    y.resize(number_of_atoms);
-    z.resize(number_of_atoms);
+    potential = new real[number_of_atoms];
+    for (int n = 0; n < number_of_atoms; ++n)
+    {
+        potential[n] = 0.0;
+    }
+
+    // currently, I only need the positions in this case
+    if (has_charged_impurities)
+    {
+        x.resize(number_of_atoms);
+        y.resize(number_of_atoms);
+        z.resize(number_of_atoms);
+    }
 
     std::vector<real> x_cell, y_cell, z_cell;
     x_cell.resize(N_orbital);
@@ -501,6 +507,14 @@ void Model::initialize_lattice_model()
                         m, N_orbital
                     );
 
+                    // currently, I only need the positions in this case
+                    if (has_charged_impurities)
+                    {
+                        x[n1] = x_cell[m] + lattice_constant[0] * nx1;
+                        y[n1] = y_cell[m] + lattice_constant[1] * ny1;
+                        z[n1] = z_cell[m] + lattice_constant[2] * nz1;
+                    }
+
                     int count = 0;
                     for (int i = 0; i < number_of_hoppings[m]; ++i)
                     {
@@ -537,11 +551,21 @@ void Model::initialize_lattice_model()
         }
     }
 
-    if (has_vacancy_disorder && number_of_vacancies > 0)
+    if (has_vacancy_disorder)
     {
         add_vacancies();
     }
-    add_anderson_disorder();
+
+    if (has_anderson_disorder)
+    {
+        add_anderson_disorder();
+    }
+
+    if (has_charged_impurities)
+    {
+        add_charged_impurities();
+    }
+
     print_finished_reading(filename);
 }
 
