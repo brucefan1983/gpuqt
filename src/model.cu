@@ -83,7 +83,7 @@ Model::~Model()
 
 
 // This function is called by the lsqt function in the lsqt.cu file
-// It initialize a random vector
+// It initializes a random vector
 void Model::initialize_state(Vector& random_state)
 {
     std::uniform_real_distribution<real> phase(0, 2 * PI);

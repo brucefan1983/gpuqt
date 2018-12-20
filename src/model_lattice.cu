@@ -190,7 +190,7 @@ void Model::add_vacancies()
     delete[] hopping_real_pristine;
     delete[] hopping_imag_pristine;
     delete[] xx_pristine;
-    delete[] is_vacancy;  
+    delete[] is_vacancy;
     delete[] new_atom_index;
 }
 
@@ -281,22 +281,99 @@ void Model::initialize_lattice_model()
         std::cout <<"Could not open " + filename << std::endl;
         exit(1);
     }
- 
+
     int N_orbital;
     int transport_direction;
     int N_cell[3];
-    int pbc[3];
-    real box[3];
     real lattice_constant[3];
 
     input >> N_cell[0] >> N_cell[1] >> N_cell[2];
-    std::cout << "number of cells  = " 
-         << N_cell[0] << " " << N_cell[1] << " " << N_cell[2] << std::endl;
+    std::cout << "- Number of cells in the x direction = "
+              << N_cell[0] << std::endl;
+    if (N_cell[0] <= 0)
+    {
+        std::cout << "Error: Number of cells in the x direction should > 0"
+                  << std::endl;
+        exit(1);
+    }
+    std::cout << "- Number of cells in the y direction = "
+              << N_cell[1] << std::endl;
+    if (N_cell[1] <= 0)
+    {
+        std::cout << "Error: Number of cells in the y direction should > 0"
+                  << std::endl;
+        exit(1);
+    }
+    std::cout << "- Number of cells in the z direction = "
+              << N_cell[2] << std::endl;
+    if (N_cell[2] <= 0)
+    {
+        std::cout << "Error: Number of cells in the z direction should > 0"
+                  << std::endl;
+        exit(1);
+    }
 
     input >> pbc[0] >> pbc[1] >> pbc[2] >> transport_direction;
-    std::cout << "pbc = " << pbc[0] << " " << pbc[1] << " " << pbc[2] 
-              << std::endl;
-    std::cout << "transport direction = " << transport_direction << std::endl;
+
+    if (pbc[0] == 1)
+    {
+        std::cout << "- x direction has periodic boundary" << std::endl;
+    }
+    else if (pbc[0] == 0)
+    {
+        std::cout << "- x direction has open boundary" << std::endl;
+    }
+    else
+    {
+        std::cout << "Error: x direction has wrong boundary" << std::endl;
+        exit(1);
+    }
+
+    if (pbc[1] == 1)
+    {
+        std::cout << "- y direction has periodic boundary" << std::endl;
+    }
+    else if (pbc[1] == 0)
+    {
+        std::cout << "- y direction has open boundary" << std::endl;
+    }
+    else
+    {
+        std::cout << "Error: y direction has wrong boundary" << std::endl;
+        exit(1);
+    }
+
+    if (pbc[2] == 1)
+    {
+        std::cout << "- z direction has periodic boundary" << std::endl;
+    }
+    else if (pbc[2] == 0)
+    {
+        std::cout << "- z direction has open boundary" << std::endl;
+    }
+    else
+    {
+        std::cout << "Error: z direction has wrong boundary" << std::endl;
+        exit(1);
+    }
+
+    if (transport_direction == 0)
+    {
+        std::cout << "- transport in x direction" << std::endl;
+    }
+    else if (transport_direction == 1)
+    {
+        std::cout << "- transport in y direction" << std::endl;
+    }
+    else if (transport_direction == 2)
+    {
+        std::cout << "- transport in z direction" << std::endl;
+    }
+    else 
+    {
+        std::cout << "Error: wrong transport direction" << std::endl;
+        exit(1);
+    }
 
     if (pbc[transport_direction] != 1)
     {
@@ -305,23 +382,54 @@ void Model::initialize_lattice_model()
     }
 
     input >> lattice_constant[0] >> lattice_constant[1] >> lattice_constant[2];
-    std::cout << "lattice constant = " 
-         << lattice_constant[0] << " "
-         << lattice_constant[1] << " "
-         << lattice_constant[2] << " "
-         << std::endl;
+
+    std::cout << "- lattice constant in x direction = "
+              << lattice_constant[0] << std::endl;
+    if (lattice_constant[0] <= 0) 
+    {
+        std::cout << "Error: lattice constant in x direction < 0" << std::endl;
+        exit(1);
+    }
+
+    std::cout << "- lattice constant in y direction = "
+              << lattice_constant[1] << std::endl;
+    if (lattice_constant[1] <= 0) 
+    {
+        std::cout << "Error: lattice constant in y direction < 0" << std::endl;
+        exit(1);
+    }
+
+    std::cout << "- lattice constant in z direction = "
+              << lattice_constant[2] << std::endl;
+    if (lattice_constant[2] <= 0) 
+    {
+        std::cout << "Error: lattice constant in z direction < 0" << std::endl;
+        exit(1);
+    }
+
     for (int d = 0; d < 3; ++d)
-        box[d] = lattice_constant[d] * N_cell[d];
-    volume = box[0] * box[1] * box[2];
-    std::cout << "box = " << box[0] << " " << box[1] << " " << box[2] << " "
-              << std::endl;
+        box_length[d] = lattice_constant[d] * N_cell[d];
+    volume = box_length[0] * box_length[1] * box_length[2];
 
     input >> N_orbital >> max_neighbor;
-    std::cout << "nnumber of orbitals per cell = " << N_orbital << std::endl;
-    std::cout << "maximum number of hoppings per orbital = " << max_neighbor
+    std::cout << "- number of orbitals per cell = " << N_orbital << std::endl;
+    if (N_orbital <= 0)
+    {
+        std::cout << "Error: number of orbitals per cell should > 0";
+        exit(1);
+    }
+
+    std::cout << "- maximum number of hoppings per orbital = " << max_neighbor
               << std::endl;
+    if (max_neighbor <= 0)
+    {
+        std::cout << "Error: maximum number of hoppings per orbital should > 0";
+        exit(1);
+    }
+
     number_of_atoms = N_orbital * N_cell[0] * N_cell[1] * N_cell[2];
-    std::cout << "number_of_atoms = " << number_of_atoms << std::endl;
+    std::cout << "- total number of orbitals = "
+              << number_of_atoms << std::endl;
 
     number_of_pairs = number_of_atoms * max_neighbor;
     neighbor_number = new int[number_of_atoms];
@@ -329,18 +437,26 @@ void Model::initialize_lattice_model()
     hopping_real = new real[number_of_pairs];
     hopping_imag = new real[number_of_pairs];
     xx = new real[number_of_pairs];
+    x.resize(number_of_atoms);
+    y.resize(number_of_atoms);
+    z.resize(number_of_atoms);
 
-    std::vector<real> x_cell;
+    std::vector<real> x_cell, y_cell, z_cell;
     x_cell.resize(N_orbital);
+    y_cell.resize(N_orbital);
+    z_cell.resize(N_orbital);
     int number_of_hoppings_per_cell = N_orbital * max_neighbor;
     std::vector<std::vector<int>> hopping_data;
     hopping_data.assign(6, std::vector<int>(number_of_hoppings_per_cell, 0));
 
-    std::cout << std::endl << "orbital\tx" << std::endl;
+    std::cout << std::endl << "\torbital\tx\ty\tz" << std::endl;
     for (int n = 0; n < N_orbital; ++n)
     {
-        input >> x_cell[n];
-        std::cout << n << "\t" << x_cell[n] << std::endl;
+        input >> x_cell[n] >> y_cell[n] >> z_cell[n];
+        std::cout << "\t" << n << "\t" << x_cell[n]
+                               << "\t" << y_cell[n]
+                               << "\t" << z_cell[n]
+                               << std::endl;
     }
 
     std::vector<int> number_of_hoppings;
@@ -348,7 +464,7 @@ void Model::initialize_lattice_model()
     for (int m = 0; m < N_orbital; m++)
     {
         input >> number_of_hoppings[m];
-        std::cout << std::endl << "number_of_hoppings for orbital " << m
+        std::cout << std::endl << "- number of hoppings for orbital " << m
                   << " = " << number_of_hoppings[m] << std::endl;
 
         for (int n = 0; n < number_of_hoppings[m]; ++n)
@@ -365,7 +481,7 @@ void Model::initialize_lattice_model()
             hopping_data[4][m*max_neighbor+n] = hopping_real;
             hopping_data[5][m*max_neighbor+n] = hopping_imag;
 
-            std::cout << "H(0,0,0," << m << "; " 
+            std::cout << "\tH(0,0,0," << m << "; " 
                  << nx << "," << ny << "," << nz << "," << m_neighbor << ") = "
                  << hopping_real << " + i " << hopping_imag << std::endl;
         }
@@ -374,7 +490,7 @@ void Model::initialize_lattice_model()
     for (int nx1 = 0; nx1 < N_cell[0]; ++nx1)
     {
         for (int ny1 = 0; ny1 < N_cell[1]; ++ny1)
-        {  
+        {
             for (int nz1 = 0; nz1 < N_cell[2]; ++nz1)
             {
                 for (int m = 0; m < N_orbital; ++m)
@@ -414,7 +530,7 @@ void Model::initialize_lattice_model()
                         hopping_imag[neighbor_index] = hopping_data[5][k];
 
                         ++count;
-                    } 
+                    }
                     neighbor_number[n1] = count;
                 }
             }

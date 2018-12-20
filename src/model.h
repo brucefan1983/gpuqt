@@ -105,8 +105,8 @@ private:
 
     int pbc[3];
     real box_length[3];
-    real *x, *y, *z;
-    
+    std::vector<real> x, y, z;
+
     std::mt19937 generator;
 };
 
