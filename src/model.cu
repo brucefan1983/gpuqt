@@ -94,7 +94,7 @@ void Model::initialize_state(Vector& random_state, int orbital)
     {
         for (int n = 0; n < number_of_atoms; ++n)
         {
-            random_state_real[n] = 1.0;
+            random_state_real[n] = 0.0;
             random_state_imag[n] = 0.0;
         }
         random_state_real[orbital] = sqrt(1.0 * number_of_atoms);
@@ -424,7 +424,7 @@ void Model::initialize_local_orbitals()
     print_started_reading(filename);
 
     input >> number_of_local_orbitals;
-    std::cout << "- number of local_orbitals = "
+    std::cout << "- number of local orbitals = "
               << number_of_local_orbitals
               << std::endl;
     local_orbitals.resize(number_of_local_orbitals);
@@ -432,6 +432,12 @@ void Model::initialize_local_orbitals()
     for (int n = 0; n < number_of_local_orbitals; ++n)
     {
         input >> local_orbitals[n];
+        if (local_orbitals[n] < 0 || local_orbitals[n] >= number_of_atoms)
+        {
+            std::cout << "Error: wrong local orbital index: "
+                      << local_orbitals[n] << std::endl;
+            exit(1);
+        }
     }
 
     input.close();
