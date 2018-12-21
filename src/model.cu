@@ -84,14 +84,22 @@ Model::~Model()
 
 // This function is called by the lsqt function in the lsqt.cu file
 // It initializes a random vector
-void Model::initialize_state(Vector& random_state)
+void Model::initialize_state(Vector& random_state, int orbital)
 {
     std::uniform_real_distribution<real> phase(0, 2 * PI);
     real *random_state_real = new real[number_of_atoms];
     real *random_state_imag = new real[number_of_atoms];
 
-    // spin degeneracy is considered in perform_chebyshev_summation
-    if (calculate_spin) // normalize to N/2 to remove spin degeneracy
+    if (orbital >= 0)
+    {
+        for (int n = 0; n < number_of_atoms; ++n)
+        {
+            random_state_real[n] = 1.0;
+            random_state_imag[n] = 0.0;
+        }
+        random_state_real[orbital] = sqrt(1.0 * number_of_atoms);
+    }
+    else if (calculate_spin) // normalize to N/2 to remove spin degeneracy
     {
         for (int n = 0; n < number_of_atoms; n += 2)
         {
@@ -328,6 +336,11 @@ void Model::initialize_parameters()
         {
             calculate_spin = true;
         }
+        else if (token == "calculate_ldos")
+        {
+            calculate_ldos = true;
+            initialize_local_orbitals();
+        }
         else if (token == "number_of_random_vectors")
         {
             ss >> number_of_random_vectors;
@@ -392,6 +405,36 @@ void Model::initialize_energy()
 
     input.close();
 
+    print_finished_reading(filename);
+}
+
+
+
+
+void Model::initialize_local_orbitals()
+{
+    std::string filename = input_dir + "/local_orbitals.in";
+    std::ifstream input(filename);
+
+    if (!input.is_open())
+    {
+        std::cout <<"Error: cannot open " + filename << std::endl;
+        exit(1);
+    }
+    print_started_reading(filename);
+
+    input >> number_of_local_orbitals;
+    std::cout << "- number of local_orbitals = "
+              << number_of_local_orbitals
+              << std::endl;
+    local_orbitals.resize(number_of_local_orbitals);
+
+    for (int n = 0; n < number_of_local_orbitals; ++n)
+    {
+        input >> local_orbitals[n];
+    }
+
+    input.close();
     print_finished_reading(filename);
 }
 

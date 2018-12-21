@@ -33,11 +33,12 @@ class Model
 public:
     Model(std::string input_dir);
     ~Model();
-    void initialize_state(Vector& random_state);
+    void initialize_state(Vector& random_state, int orbital);
 
     bool calculate_vac = false;
     bool calculate_msd = false;
     bool calculate_spin = false;
+    bool calculate_ldos = false;
 
     int number_of_random_vectors = 1; 
     int number_of_atoms = 0; 
@@ -46,11 +47,13 @@ public:
     int number_of_energy_points = 0; 
     int number_of_moments = 1000; 
     int number_of_steps_correlation = 0;
+    int number_of_local_orbitals = 0;
     std::string input_dir;
     real energy_max = 10;
 
     real *energy;
     real *time_step;
+    std::vector<int> local_orbitals;
     
     int *neighbor_number;
     int *neighbor_list;  
@@ -71,6 +74,7 @@ private:
     void verify_parameters();
     void initialize_energy();
     void initialize_time();
+    void initialize_local_orbitals();
 
     // only for general model
     void initialize_neighbor();

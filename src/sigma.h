@@ -28,7 +28,7 @@ class Vector;
 
 
 
-void find_dos(Model &para, Hamiltonian& H, Vector& random_state);
+void find_dos(Model &para, Hamiltonian& H, Vector& random_state, int flag);
 void find_vac(Model &para, Hamiltonian& H, Vector& random_state);
 void find_msd(Model &para, Hamiltonian& H, Vector& random_state);
 void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state);

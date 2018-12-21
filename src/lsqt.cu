@@ -64,17 +64,18 @@ void lsqt(std::string input_directory)
 
     clock_t time_begin, time_finish;
     real time_used;
-    
+
     // Loop over different random vectors
     for (int i = 0; i < model.number_of_random_vectors; ++i)
     {
         print_started_random_vector(i);
 
-        model.initialize_state(random_state);
+        int orbital = -1; // using random vectors rather than a local orbital
+        model.initialize_state(random_state, orbital);
 
         // Always calculate the DOS, since it is very cheap
         time_begin = clock(); 
-        find_dos(model, H, random_state);
+        find_dos(model, H, random_state, 0);
         time_finish = clock();
         time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding DOS = " 
@@ -114,8 +115,25 @@ void lsqt(std::string input_directory)
         }
 
         print_finished_random_vector(i);
-    }  
-      	
+    }
+
+    // Calculate the LDOS only if you want to
+    if (model.calculate_ldos)
+    {
+        time_begin = clock();
+        // loop over the local orbitals
+        for (int i = 0; i < model.number_of_local_orbitals; ++i)
+        {
+            int orbital = model.local_orbitals[i];
+            model.initialize_state(random_state, orbital);
+            find_dos(model, H, random_state, orbital);
+            std::cout << "- Finished orbital " << orbital << std::endl;
+        }
+        time_finish = clock();
+        time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+        std::cout << "- Time used for finding LDOS = "
+                  << time_used << " s" << std::endl;
+    }
 }
 
 

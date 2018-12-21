@@ -223,7 +223,7 @@ void evolvex
 
 // calculate the DOS as a function of Fermi energy
 // See Algorithm 1 in [Comput. Phys. Commun.185, 28 (2014)].
-void find_dos(Model& model, Hamiltonian& H, Vector& random_state)
+void find_dos(Model& model, Hamiltonian& H, Vector& random_state, int flag)
 {
     Vector inner_product_2(model.number_of_moments);
 
@@ -243,12 +243,12 @@ void find_dos(Model& model, Hamiltonian& H, Vector& random_state)
     perform_chebyshev_summation
     (model, inner_product_real, inner_product_imag, dos);
 
-
-    std::ofstream output(model.input_dir + "/dos.out", std::ios::app);
+    std::string filename = (flag == 0) ? "/dos.out" : "/ldos.out";
+    std::ofstream output(model.input_dir + filename, std::ios::app);
 
     if (!output.is_open())
     {
-        std::cout <<"Error: cannot open " + model.input_dir + "/dos.out"
+        std::cout <<"Error: cannot open " + model.input_dir + filename
                   << std::endl;
         exit(1);
     }
