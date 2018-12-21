@@ -55,6 +55,27 @@ static void print_finished_random_vector(int i)
 
 
 
+static void print_started_ldos()
+{
+    std::cout << std::endl;
+    std::cout << "===========================================================";
+    std::cout << std::endl;
+    std::cout << "Started LDOS calculation" << std::endl;
+    std::cout << std::endl;
+}
+
+
+
+static void print_finished_ldos()
+{
+    std::cout << std::endl;
+    std::cout << "Finished LDOS calculation" << std::endl; 
+    std::cout << "===========================================================";
+    std::cout << std::endl << std::endl;
+}
+
+
+
 void lsqt(std::string input_directory)
 {
     // Initialize model on the CPU
@@ -120,21 +141,23 @@ void lsqt(std::string input_directory)
     // Calculate the LDOS only if you want to
     if (model.calculate_ldos)
     {
+        print_started_ldos();
         time_begin = clock();
         // loop over the local orbitals
         for (int i = 0; i < model.number_of_local_orbitals; ++i)
         {
             int orbital = model.local_orbitals[i];
             model.initialize_state(random_state, orbital);
-            find_dos(model, H, random_state, orbital);
-            std::cout << "- Finished orbital " << orbital << std::endl;
+            find_dos(model, H, random_state, 1);
         }
         time_finish = clock();
         time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding LDOS = "
                   << time_used << " s" << std::endl;
+        print_finished_ldos();
     }
 }
+
 
 
 

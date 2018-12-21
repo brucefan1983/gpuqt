@@ -50,13 +50,6 @@ Model::Model(std::string input_dir)
     // read in para.in
     initialize_parameters();
 
-    // always need to read in energies
-    initialize_energy();
-
-    // only read in time steps when needed
-    if (requires_time)
-        initialize_time();
-
     // initialize the model
     if (use_lattice_model) // use a lattice model
     {
@@ -66,6 +59,17 @@ Model::Model(std::string input_dir)
     {
         initialize_model_general();
     }
+
+    // always need to read in energies
+    initialize_energy();
+
+    // only read in time steps when needed
+    if (requires_time)
+        initialize_time();
+
+    // only read in local orbitals when needed
+    if (calculate_ldos)
+        initialize_local_orbitals();
 }
 
 
@@ -339,7 +343,6 @@ void Model::initialize_parameters()
         else if (token == "calculate_ldos")
         {
             calculate_ldos = true;
-            initialize_local_orbitals();
         }
         else if (token == "number_of_random_vectors")
         {
