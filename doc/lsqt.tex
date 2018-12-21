@@ -1,0 +1,522 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[round]{natbib}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage[usenames,dvipsnames,svgnames]{xcolor}
+\usepackage{url}
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\usepackage{hyperref}
+\hypersetup{
+pdfnewwindow=true,      % links in new window
+colorlinks=true,        % false: boxed links; true: colored links
+linkcolor=Blue,         % color of internal links (change box color with linkbordercolor)
+citecolor=Blue,         % color of links to bibliography
+filecolor=Blue,         % color of file links
+urlcolor=Blue           % color of external links
+}
+
+\begin{document}
+
+\begin{center}
+  \huge
+  {
+   \vspace*{1.0cm}
+   LSQT: \\
+   Linear Scaling Quantum Transport \\
+   \vspace*{1.0cm}
+   Reference Manual\\
+   \vspace*{1.0cm}
+   Version 0.9 \\
+   (change to 1.0 upon official release)\\
+   \vspace*{1.0cm}
+   (Dec 21, 2018)\\
+  \vspace*{2.0cm}
+  }
+  \large
+  {
+  Authors: \\
+  Zheyong Fan (Aalto University)\\
+  Ville Vierimaa (Aalto University)\\
+  Ari Harju (Aalto University)\\
+  Jose Hugo Garcia (ICN2)\\
+  Aron W. Cummings (ICN2)\\
+  Stephan Roche (ICN2)\\
+  }
+  \vspace*{1.0cm}
+\end{center}
+
+\tableofcontents
+
+\chapter{Introduction\label{chapter:introduction}}
+
+\section{What is LSQT?}
+
+\verb"LSQT" is an efficient and flexible implementation of the linear scaling quantum transport (LSQT) methods reviewed in \citet{fan2018arxiv}. It is an extension of the \verb"GPUQT" code \citet{fan2018cpc}. The \verb"LSQT" code is not fully finished yet, and we aim to complete version 1.0 within a few months.
+
+Here are the major available features in the current code:
+\begin{itemize}
+\item It supports both pure CPU and GPU+CPU computations. One can build a CPU or a GPU version. Both versions give consistent results for a given simulation.
+\item It can be used to study large systems with millions or even tens of millions of atoms. The major limitation on the system size comes from the limited amount of CPU and/or GPU memory available.
+\item It can be used to calculate the total electronic density of states (typically within a few seconds for the GPU version).
+\item It can be used to calculate the velocity auto-correlation (VAC) function and/or the mean square displacement (MSD), from which one can deduce other transport quantities such as electrical conductivity, propagating length, electrical conductance, diffusivity, group velocity, mobility, relaxation time, mean free path, localization length, etc.
+\item It can be used to calculate the spin polarization, from which one can deduce the spin relaxation time.
+\end{itemize}
+
+TODO list up to version 1.0:
+\begin{itemize}
+\item Improve the features related to model building
+\item Local density of states
+\item Kubo-Bastin formula for Hall transport
+\end{itemize}
+
+
+TODO list for future versions:
+\begin{itemize}
+\item Optical conductivity
+\item Lattice thermal transport
+\item Python wrapper
+\item Interface with other tight-binding related codes
+\item openmp acceleration for the CPU version
+\item mpi acceleration for both the CPU and the GPU versions
+\end{itemize}
+
+\section{Citations}
+\begin{itemize}
+\item If you use \verb"LSQT" in your published work, we kindly ask you to cite the review paper \cite{fan2018arxiv} which describes the various algorithms used in \verb"LSQT".
+\item The most important original paper is \cite{roche1997prl} which introduced the concept of MSD. 
+\item When you use \verb"LSQT" to do calculations related to Hall transport, you can cite \citet{ortmann2015prb} and \citet{garcia2015prl}.
+\item When you use \verb"LSQT" to do calculations related to spin transport, you can cite one or more of these papers: \citet{vantuan2014np}, \citet{vierimaa2017prb}, and \cite{Cummings2017prl}.
+\item When you use the GPU version, you can cite \cite{fan2018cpc} and/or \cite{fan2014cpc}.
+\end{itemize}
+
+\section{Feedbacks}
+
+You can email the first author if you find errors in the manual or bugs in the source code, or have any suggestions/questions about the manual and code. The following email addresses can be used:
+\begin{itemize}
+\item zheyong.fan(at)aalto.fi (valid at least up to the end of 2019)
+\item brucenju(at)gmail.com
+\end{itemize}
+
+
+\section{Acknowledgments}
+We acknowledge the computational resources provided by Aalto Science-IT project and Finland's IT Center for Science (CSC).
+
+\chapter{Theoretical formalisms\label{section:theory}}
+
+The theoretical formalisms for the LSQT methods have been comprehensively reviewed in \cite{fan2018arxiv}. Here we only give a brief review on the formulas that are implemented in \verb"LSQT". The major purpose here is to set up the necessary notations.
+
+\section{Quantities to be calculated}
+
+\subsection{Total density of states}
+The total density of states (DOS) is defined as
+\begin{equation}
+\rho(E) = \frac{2}{\Omega}\textmd{Tr}\left[\delta(E-\hat{H})\right],
+\end{equation}
+where $\Omega$ is the volume of the system, $E$ is the Fermi energy, $\hat{H}$ is the system Hamiltonian. The factor 2 stands for spin degeneracy. The normalization by the volume is not necessary; one can also change $\Omega$ to the total number of orbitals $N$. The choice of our definition makes the later expressions for the conductivity simpler.
+
+\subsection{Local density of states}
+The local density of states (LDOS) for orbital $|i\rangle$ is defined as
+\begin{equation}
+\rho_i(E) = 2 \langle i| \delta(E-\hat{H}) |i\rangle
+\end{equation}
+
+
+\subsection{Dissipative conductivity from velocity auto-correlation}
+
+One can express the time-dependent electrical conductivity $\sigma^{\rm VAC}(E, t)$
+as a time integral of the velocity auto-correlation (VAC) $C_{vv}(E, t)$,
+\begin{equation}
+\label{equation:REC_VAC}
+\sigma^{\rm VAC}(E, t) = e^2 \rho(E) \int_0^{t} C_{vv}(E,t) d t;
+\end{equation}
+\begin{equation}
+\rho(E) C_{vv}(E, t) = \frac{2}{\Omega} \textmd{Re}
+ \left[ \textmd{Tr} \left[\hat{U}(t) \hat{V} \delta(E - \hat{H}) \hat{U}(t)^{\dagger} \hat{V} \right] \right];
+\end{equation}
+where $\hat{V}(t) = \hat{U}^{\dagger}(t) \hat{V} \hat{U}(t) = e^{i\hat{H}t/\hbar} \hat{V} e^{-i\hat{H}t/\hbar}$
+is the velocity operator in the transport direction in the Heisenberg representation. 
+
+\subsection{Dissipative conductivity from mean square displacement}
+
+Equivalently, one can expresses the time-dependent electrical conductivity as a time derivative of the mean square displacement (MSD) $\Delta X^2(E, t)$,
+\begin{equation}
+\label{equation:REC_MSD}
+\sigma^{\rm MSD}(E, t) = e^2 \rho(E) \frac{d}{2 d t}
+            \Delta X^2(E, t);
+\end{equation}
+\begin{equation}
+\rho(E)\Delta X^2(E, t) =\frac{2}{\Omega} 
+\textmd{Tr}\left[[\hat{X}, \hat{U}(t)]^{\dagger}\delta(E - \hat{H}) [\hat{X}, \hat{U}(t)]\right],
+\end{equation}
+where $\hat{X}$ is the position operator in the transport direction. 
+
+
+\subsection{Spin polarization}
+
+The time-dependent spin polarization $S(E, t)$ is defined as
+\begin{equation}
+\label{equation:spin_polarization}
+S(E, t) = 
+\frac{\textmd{Tr}\left[ (\hat{I}_N \otimes \hat{s}_z(t)) \delta(E - \hat{H}_{2N}) \right]}
+{\textmd{Tr}\left[ \delta(E - \hat{H}_{2N}) \right]},
+\end{equation}
+where $\hat{I}_N \otimes \hat{s}_z(t) = U^{\dagger}(t) (\hat{I}_N \otimes \hat{s}_z) U(t)$, $\hat{I}_N$ is an identity matrix of size $N\times N$ ($N$ is the number of orbitals for one spin), and $\hat{s}_z(t)=\begin{bmatrix} 1 & 0 \\0  &-1\\ \end{bmatrix}$  is the Pauli $z$-matrix. Here we assume that the initial spin polarization is along the $z$ direction. Note that the Hamiltonian $\hat{H}_{2N}$ is defined in the compound Hilbert space formed by the tensor product of the $N$-dimensional orbital space and the $2$-dimensional spin space. 
+
+\subsection{Kubo-Bastin conductivity}
+
+To be written.
+
+\subsection{Optical conductivity}
+
+To be written.
+
+\subsection{Lattice thermal conductivity}
+
+To be written.
+
+\section{Linear-scaling techniques\label{section:numerical}}
+
+\subsection{Linear-scaling evaluation of the trace}
+
+We use the random vector approximation method \cite{weisse2006rmp} to evaluate the trace in the above equations. In this method, the trace of a general operator $\hat{A}$ of size $N\times N$ is written as
+\begin{equation}
+ \textmd{Tr}\left[ A \right] \approx N \langle \phi | \hat{A} |\phi \rangle,
+\end{equation}
+where $|\phi\rangle$ is a random vector normalized to $1$, $\langle \phi | \phi \rangle = 1$. The error introduced by this approximation decreases with increasing $N$, scaling as $\sim 1/\sqrt{N}$ \cite{weisse2006rmp}. For a given $N$, the accuracy can also be increased by taking average over independent random vectors. Usually, it is enough to use a few random vectors.
+
+With this approximation, we have
+\begin{equation}
+\label{equation:trace_DOS}
+ \rho(E) \approx \frac{2}{\Omega} \langle \phi | \delta(E - \hat{H}) |\phi \rangle;
+\end{equation}
+\begin{equation}
+\label{equation:trace_VAC}
+ \rho (E) C_{vv}(E, t) \approx
+ \frac{2}{\Omega} \textmd{Re}
+ \left[ \langle\phi|\hat{U}(t)V \delta(E - \hat{H}) \hat{U}(t)^{\dagger}V|\phi \rangle \right];
+\end{equation}
+\begin{equation}
+\label{equation:trace_MSD}
+ \rho (E) \Delta X^2(E, t) \approx
+ \frac{2}{\Omega}
+ \langle\phi|[X, \hat{U}(t)]^{\dagger} \delta(E - \hat{H})[X, \hat{U}(t)]|\phi \rangle.
+\end{equation}
+
+
+\subsection{Linear-scaling evaluation of the time evolution}
+
+The time evolution operator $\hat{U}(t)$ in the above equations can be evaluated by using Chebyshev polynomial expansion. For one time step $\Delta t$, we have the following Chebyshev polynomial expansions \cite{ezer1984jcp}:
+\begin{equation}
+\label{equation:cheb_1}
+ \hat{U}(\pm \Delta t) |\psi\rangle
+ \approx \sum_{m=0}^{N_p-1} (2-\delta_{0m}) (\mp i)^m
+         J_m\left( \frac{\widetilde{\Delta t}}{\hbar} \right)
+         T_m( \widetilde{H}) |\psi\rangle;
+\end{equation}
+\begin{equation}
+\label{equation:cheb_2}
+ [X, \hat{U}(\Delta t)] |\psi\rangle
+ \approx \sum_{m=0}^{N_p-1} (2-\delta_{0m}) (-i)^m
+J_m\left( \frac{\widetilde{\Delta t}}{\hbar} \right)
+[X, T_m(\widetilde{H})] |\psi\rangle,
+\end{equation}
+where $J_m$ is the $m$th order Bessel function of the first kind and $T_m$ is the $m$th order Chebyshev polynomial of the first kind.
+Note that $T_m$ is defined in the interval $[-1,1]$ and the Hamiltonian and time step have to be scaled in the opposite way:
+\begin{equation}
+\widetilde{H}=\hat{U}/\Delta E;
+\end{equation}
+\begin{equation}
+\widetilde{\Delta t}= \Delta E \Delta t,
+\end{equation}
+where $\Delta E$ is sufficiently large such that the spectrum of the scaled Hamiltonian $\widetilde{H}$ lies within the interval $[-1,1]$. The Chebyshev polynomial expansions of the time evolution operators can be evaluated up to machine precision and the order of expansion $N_p$ needed for achieving this is proportional to the time interval. 
+
+The above summations can be efficiently evaluated
+by using the following  recurrence relations ($m \geq 2$)  ($T_m(\widetilde{H})$ is written as $T_m$ for simplicity):
+\begin{equation}
+ T_m = 2 \widetilde{H} T_{m-1} - T_{m-2};
+\end{equation}
+\begin{equation}
+[X, T_m] = 2[X, \widetilde{H}] T_{m-1} + 2\widetilde{H} [X, T_{m-1}] - [X, T_{m-2}];
+\end{equation}
+\begin{equation}
+ T_0 = 1 \quad
+ T_1 = \widetilde{H};
+\end{equation}
+\begin{equation}
+ [X, T_0] = 0, \quad
+ [X, T_1] = [X,\widetilde{H}].
+\end{equation}
+
+
+
+\subsection{Linear-scaling evaluation of the quantum resolution operator}
+
+We use the kernel polynomial method (KMP) \cite{weisse2006rmp} to approximate the quantum resolution operator:
+\begin{equation}
+\label{equation:KPM_DOS}
+ \rho(E) \approx \frac{2}{\pi \Omega \Delta E \sqrt{1-\widetilde{E}^2}}
+ \sum_{n=0}^{N_m-1} g_n (2-\delta_{n0}) T_n(\widetilde{E})
+     C_n^{\rm DOS};
+\end{equation}
+\begin{equation}
+\label{equation:KPM_VAC}
+ \rho (E) C_{vv}(E, t) \approx
+ \frac{2}{\pi \Omega \Delta E \sqrt{1-\widetilde{E}^2}}
+ \sum_{n=0}^{N_m-1} g_n (2-\delta_{n0})
+     T_n(\widetilde{E}) C_n^{\rm VAC} (t);
+\end{equation}
+\begin{equation}
+\label{equation:KPM_MSD}
+ \rho (E) \Delta X^2(E, t) \approx
+ \frac{2}{\pi \Omega \Delta E \sqrt{1-\widetilde{E}^2}}
+ \sum_{n=0}^{N_m-1} g_n (2-\delta_{n0}) T_n(\widetilde{E})
+     C_n^{\rm MSD} (t).
+\end{equation}
+Here, $C_n^{\rm DOS}$, $C_n^{\rm VAC}(t)$,
+and $C_n^{\rm MSD}(t)$ are the Chebyshev moments:
+\begin{equation}
+\label{equation:C_n_DOS}
+ C_n^{\rm DOS} \approx \langle \phi | T_n(\widetilde{H}) |\phi \rangle;
+\end{equation}
+\begin{equation}
+\label{equation:C_n_VAC}
+ C_n^{\rm VAC}(t) \approx \textmd{Re}
+ \left[
+ \langle\phi|\hat{U}(t)\hat{V} T_n(\widetilde{H}) \hat{U}(t)^{\dagger}\hat{V}|\phi \rangle
+ \right];
+\end{equation}
+\begin{equation}
+\label{equation:C_n_MSD}
+ C_n^{\rm MSD}(t) \approx
+ \langle\phi|[\hat{X}, \hat{U}(t)]^{\dagger} T_n(\widetilde{H}) [\hat{X}, \hat{U}(t)]|\phi \rangle.
+\end{equation}
+and 
+\begin{equation}
+ g_n = \left(1 - n \alpha \right) \cos\left(\pi n \alpha \right)
+     + \alpha \sin\left(\pi n \alpha \right) \cot\left(\pi \alpha\right); \; \alpha = \frac{1}{N_m+1}
+\end{equation}
+is the Jackson damping factor used to suppress Gibbs oscillations. The energy resolution achieved scales as $\delta \sim 1/N_m$ \cite{weisse2006rmp}. Therefore, to achieve a finer energy resolution, one needs to use a larger $N_m$. Usually, a value of $N_m=3000$ is more than enough.
+
+
+
+\chapter{Using LSQT \label{section:usage}}
+
+The code has only been tested in linux operating systems and we assume that the user is using a linux operating system to compile and run this code.
+
+\section{Compile the code and run the examples}
+
+\subsection{Compiling}
+
+After downloading and unpacking \verb"LSQT", one can see three folders:  \verb"src",  \verb"doc", and \verb"examples". The folder \verb"src" contains all the source files. The folder \verb"examples" contains all the examples. The folder \verb"doc" contains the pdf file you are reading and the source files generating it.
+
+To compile the code, first go to the \verb"src" folder. Then one can build either a CPU version or a GPU version or both. 
+\begin{itemize}
+\item To build the CPU version, type
+\begin{verbatim}
+    make -f makefile.cpu
+\end{verbatim}
+in the command line. This will produce an executable called \verb"lsqt_cpu" in the \verb"src" folder. The second line of \verb"makefile.cpu" reads
+\begin{verbatim}
+    CFLAGS = -O3 -std=c++11 -x c++ -DDEBUG -DCPU_ONLY
+\end{verbatim}
+The flag \verb"-DDEBUG" means that a fixed seed for the random number generator will be used in different runs. This will result in identical results from two independent runs with the same inputs. This is useful for debugging, but usually is not good for production runs. Remember to remove \verb"-DDEBUG" if you want to build a version which uses different seeds for the random number generator in different runs. 
+\item To build the GPU version, type 
+\begin{verbatim}
+    make -f makefile.gpu
+\end{verbatim}
+in the command line. This will produce an executable called \verb"lsqt_gpu" in the \verb"src" folder. To build the GPU version, you need to have a CUDA toolkit and a CUDA-enabled GPU with compute capability of 2.0 or higher. The second line of \verb"makefile.gpu" reads
+\begin{verbatim}
+    CFLAGS = -O3 -std=c++11 -arch=sm_35 -use_fast_math -DDEBUG
+\end{verbatim}
+The option \verb"-arch=sm_35" means that the code is built with a target compute capability of 3.5. It is usually a good idea to set the compute capability as the same one for your GPU.
+\end{itemize}
+
+
+
+\subsection{Running}
+
+To do calculations, one has to first prepare a ``driver input file'' to specify the paths of the working directories containing the actual input files. For example, the following ``driver input file'' specifies two working directories:
+\begin{verbatim}
+    examples/cpc2018/lattice/diffusive
+    examples/cpc2018/lattice/localized
+\end{verbatim}
+Here I used relative paths starting from the directory where you can see the \verb"src" folder. One can also use absolute paths.
+
+Suppose that the ``driver input file'' is named as \verb"input.txt" and is in the \verb"examples" folder, one can run the code by typing
+\begin{verbatim}
+    src/lsqt_gpu examples/input.txt
+\end{verbatim}
+or 
+\begin{verbatim}
+    src/lsqt_cpu examples/input.txt
+\end{verbatim}
+
+We now turn to describe the actual input files needed for \verb"LSQT".
+
+\section{Input files for LSQT}
+
+The input files are used to specify the Hamiltonian and related quantities of a simulated system and some controlling parameters. All the input files for a simulation should be in a single folder. We currently provide two ways to specify the Hamiltonian and related quantities. One way is to use \textbf{the general model} and the other is to use \textbf{the lattice model}. In both cases, one needs to prepare a file called \verb"para.in" which contains the controlling parameters, a file called \verb"energy.in" which contains the Fermi energies, and possibly a file called \verb"time_step.in" which contains the time steps.
+
+\subsection{The para.in input file}
+
+This file contains the controlling parameters defining the simulation process. In this input file, blank lines are ignored. Each non-empty line starts with a keyword possibly followed by one or more parameters. The valid keywords and their parameters are listed below.
+\begin{enumerate}
+\item  \verb"model"\\
+This keyword needs one parameter, which can only be 0 or 1, where 0 means using the general model to construct the Hamiltonian and related quantities and 1 means using the lattice model instead.
+\item  \verb"anderson_disorder" $W$ \\
+This keyword can only be used when using the lattice model. It needs one parameter, which is the strength $W$ of the Anderson disorder. This keyword is used to add the Anderson disorder to the system. It cannot be used together with the \verb"charged_impurity" keyword.
+\item  \verb"charged_impurity" $N_i$ $W$ $\xi$ \\
+This keyword can only be used when using the lattice model. It needs three parameters, which are consecutively the number of charged impurities $N_i$, the impurity strength $W$, and the impurity range $\xi$. This keyword is used to add charged impurities to the system. It cannot be used together with the \verb"anderson_disorder" keyword.
+\item  \verb"vacancy_disorder" $N_v$ \\
+This keyword can only be used when using the lattice model. It needs one parameter, which is the number of vacancies $N_v$. This keyword is used to create vacancies in the system.
+\item \verb"calculate_vac"\\
+This keyword does not need any parameter. If this keyword appears, the VAC will be calculated. Otherwise, the VAC will not be calculated. It cannot be used simultaneously with \verb"calculate_spin".
+\item \verb"calculate_msd"\\
+This keyword does not need any parameter. If this keyword appears, the MSD will be calculated. Otherwise, the MSD will not be calculated. It cannot be used simultaneously with \verb"calculate_spin".
+\item \verb"calculate_spin" \\
+This keyword does not need any parameter. If this keyword appears, the spin polarization will be calculated. Otherwise, the spin polarization will not be calculated. It cannot be used simultaneously with \verb"calculate_vac" or \verb"calculate_msd". Currently, one cannot calculate the spin polarization when using the lattice mode.
+\item \verb"number_of_random_vectors" $N_r$\\
+This keyword needs one parameter, which is the number of random vectors $N_r$ used in the simulation. If this keyword is absent, the default value $N_r=1$ will be used. If you want to use 10 random vectors for a given problem, you can either set this number to 10, or set it to 1 and then run the simulation 10 times. Increasing $N_r$ can improve the accuracy of the results.
+\item \verb"number_of_moments" $N_m$\\
+This keyword needs one parameter, which is the number of Chebyshev moments $N_m$ used in the kernel polynomial method. If this keyword is absent, the default value $N_m=1000$ will be used. A larger $N_m$ gives a finer energy resolution and one usually needs to test the effects of this parameter.
+\item \verb"energy_max" $\Delta E$ \\
+This keyword needs one parameter, which is a scaling parameter $\Delta E$ used to scale the Hamiltonian. The scaled Hamiltonian $\hat{H}/\Delta E$ must have all of its eigenvalues lying within the interval $[-1, 1]$. If this keyword is absent, the default value $\Delta E =10$ will be used. Using a value larger than needed will only effectively reduce the energy resolution, but using a value smaller than needed will cause big problems as this will lead to calculating the square roots of negative numbers.
+\end{enumerate}
+
+\subsection{The energy.in input file}
+
+This file contains the Fermi energy points to be considered in the simulations. There is a single column in this file. The first line should be an integer, which is the number of energy points to be read in. Starting from the second line, the $n$th line contains the $(n-1)$th energy value. Note that the method is parallel in energy and using one thousand energy points takes roughly as much time as using a single energy point. 
+Here is an example:
+\begin{verbatim}
+    601
+    -3.00
+    -2.99
+    ...
+    0.00
+    ...
+    3.00
+\end{verbatim}
+This file tells that there would be 601 energy points to be calculated, from $-3$ to $3$, with a spacing of $0.01$. 
+
+
+\subsection{The time$\textunderscore$step.in input file}
+
+
+This file contains the time steps in the VAC, MSD, and spin polarization calculations. There is a single column in this fie. The first line should be an integer, which is the number of time steps to be read in. Starting from the second line, the $n$th line is the $(n-1)$th time step. Here is an example:
+\begin{verbatim}
+    20
+    1
+    2
+    ...
+    19
+    20
+\end{verbatim}
+This file tells that there would be 20 (non-uniform) time steps, from $t_0$ to 20 $t_0$, with a spacing of $t_0$. One should note that the data here are the time steps, not the cumulative times. The cumulative times for this example should be $t_0$, $3t_0$, $6t_0$, $10t_0$, $\cdots$. The unit of time, $t_0$ is fixed by the energy unit, as we set the reduced Planck constant to 1 in \verb"LSQT". Suppose the unit of energy is $\gamma$, the unit of time is then $t_0=\hbar/\gamma$.
+
+\subsection{Other input files when using the general model}
+
+Essentially, to build the simulation model, we need information regarding the Hamiltonian and the velocity operators.
+
+In the tight-binding approximation, the Hamiltonian can be written as
+\begin{equation}
+ H = \sum_m\sum_n H_{mn} |m\rangle \langle n| 
+ + \sum_m U_m |m\rangle \langle m|,
+\end{equation}
+where $H_{mn}$ is the hopping integral between orbitals $m$ and $n$ and $U_m$ is the on-site potential of site $m$. Similarly, the position and velocity operators can be expressed as
+\begin{equation}
+ X = \sum_{m} X_m |m\rangle \langle m|;
+\end{equation}
+\begin{equation}
+ V = \frac{i}{\hbar} [H,X]
+= \frac{i}{\hbar} \sum_m\sum_n
+ (X_n-X_m) H_{mn} |m\rangle \langle n|.
+\end{equation}
+When using the general model, one has to specify four sets of data: 1) the neighbor list structure that determines which hopping integrals are non-vanishing, 2) the non-vanishing hopping integrals, 3) the on-site potentials, and 4) the positions $X_m$ of the sites projected onto the transport direction.
+
+\begin{itemize}
+\item The \verb"neighbour.in" input file\\
+This file specifies the topology of the problem using a neighbour list. This will be used to build the sparse Hamiltonian. The first line should have two integer numbers. The first number is the total number of sites in the simulated system. The second number is the maximum possible number of nonzero hopping integrals originated from a given site. For example, in a square lattice with nearest-neighbour hopping only, this number can be set as 4. Using a larger number than needed will waste memory. Starting from the second line, the $n$th line contains the number of neighbours and the indices of the neighbouring sites of the $(n-1)$th site.
+\item The \verb"hopping.in" input file\\
+This is an optional input file, which contains the hopping integrals (the off-diagonal terms in the Hamiltonian). If this file is not prepared, \verb"LSQT" assumes that all the hopping integrals between pairs of neighbouring sites (specified in the neighbour.in file) are $-1$. 
+The first line should be either the word \verb"real" or \verb"complex".
+If the word is \verb"real", it means that all the hopping integrals are real numbers. Then, starting from the second line, the $n$th line contains the real hopping integrals between the $(n-1)$th site and its neighbouring sites, and the order should be consistent with that in the neighbour.in file. The file will look like this:
+\begin{verbatim}
+    real
+    real_1 real_2 real_3 ...
+    ...
+\end{verbatim}
+If the word is \verb"complex", it means that not all the hopping integrals are real numbers. Then, each real hopping integral as described above should be substituted by two real numbers, the real and imaginary parts of the complex hopping integral. The file will look like this:
+\begin{verbatim}
+    complex
+    real_1 imag_1 real_2 imag_2 real_3 imag_3 ...
+    ...
+\end{verbatim}
+The unit of energy is determined by the user. One should consistently use the same unit in other input files such as \verb"potential.in", \verb"energy.in" and \verb"para.in".
+\item The \verb"potential.in" input file\\
+This is an optional input file, which contains the on-site potentials (the diagonal terms in the Hamiltonian). If this file is not prepared, \verb"LSQT" assumes that all the on-site potentials are zero. The $n$th line is the on-site potential of the $n$th site.
+\item The \verb"position.in"  input file\\
+This file specifies the coordinates of the sites in the simulated system. This will be used to build the velocity (current) operator. The first line should have two numbers, which are the length of the simulated system in the transport direction and the volume of the system. Be careful with periodic boundary conditions. For example, consider a $1~000 \times 1~000$ regular square lattice with a lattice constant of $a=1$, the length in the $x$ direction should be 1 000, even though the distance between a leftmost site and a rightmost site is only 999. Starting from the second line, the $n$th line is the position component of the $(n-1)$th site in the transport direction. The unit of length is determined by the user. One can either set the lattice constant to 1 or some values in unit of nm or \AA. What is important is to be consistent when reporting the results.
+\end{itemize}
+
+\subsection{Other input files when using the lattice model}
+
+The general model approach is flexible, but is not convenient for ``simple'' systems. We therefore provide an alternative method to constructing the simulation model. In the method, one needs to prepare a file called \verb"lattice.in" of the following form:
+\begin{verbatim}
+    Nx Ny Nz
+    pbc_x pbc_y pbc_z transport direction
+    ax ay az
+    N_cell  M
+    x0 y0 y0 # coordinates of orbital 0
+    # coordinates of orbital 1
+    ...
+    M0
+    nx ny nz Hr Hi
+    ...
+\end{verbatim}
+
+We are still working on optimize the lattice model. 
+
+\section{Output files of LSQT}
+
+We now describe the data format of the output files produced by running \verb"LSQT". We note that for all the output files, results from a new simulation will append to, rather than overwrite existing data.
+
+\subsection{The dos.out file}
+
+The $n$th column of this file corresponds to the value of $\rho(E_n)$ at the $n$th energy point $E_n$ specified in the \verb"energy.in" file. Each row corresponds to the results obtained by using one random vector. The unit of DOS is $1/\gamma/a^2$ in 2D and $1/\gamma/a^3$ in 3D, where $\gamma$ is the unit of energy and $a$ is the unit of length.
+
+
+\subsection{The vac.out file}
+
+The $n$th column of this file corresponds to the value of $\rho(E_n)C_{vv}(E_n,t)$ at the $n$th energy point $E_n$ specified in the \verb"energy.in" file. If the number of time steps specified in the \verb"time_step.in" file is $N_t$, the first $N_t$ rows correspond to the results obtained by using one random vector. Integrating this quantity with respect to time gives the running electrical conductivity. In 2D, the unit of conductivity is $e^2/\hbar$. In 3D, the unit is $e^2/\hbar/a$, where $a$ is the unit of length. As expected, the unit in 3D can be converted to S/cm.
+
+\subsection{The msd.out file}
+
+The $n$th column of this file corresponds to the value of $\rho(E_n) \Delta X^2(E_n,t)$ at the $n$th energy point $E_n$ specified in the \verb"energy.in" file. If the number of time steps specified in the \verb"time_step.in" file is $N_t$, the first $N_t$ rows correspond to the results obtained by using one random vector. Taking derivative of this quantity with respect to time and then dividing by 2 gives the running electrical conductivity. 
+
+
+
+
+
+
+\bibliographystyle{plainnat}
+
+\bibliography{refs}
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
