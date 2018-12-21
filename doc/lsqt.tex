@@ -63,7 +63,7 @@ Here are the major available features in the current code:
 \begin{itemize}
 \item It supports both pure CPU and GPU+CPU computations. One can build a CPU or a GPU version. Both versions give consistent results for a given simulation.
 \item It can be used to study large systems with millions or even tens of millions of atoms. The major limitation on the system size comes from the limited amount of CPU and/or GPU memory available.
-\item It can be used to calculate the total electronic density of states (typically within a few seconds for the GPU version).
+\item It can be used to calculate the total and local electronic density of states (DOS).
 \item It can be used to calculate the velocity auto-correlation (VAC) function and/or the mean square displacement (MSD), from which one can deduce other transport quantities such as electrical conductivity, propagating length, electrical conductance, diffusivity, group velocity, mobility, relaxation time, mean free path, localization length, etc.
 \item It can be used to calculate the spin polarization, from which one can deduce the spin relaxation time.
 \end{itemize}
@@ -71,7 +71,6 @@ Here are the major available features in the current code:
 TODO list up to version 1.0:
 \begin{itemize}
 \item Improve the features related to model building
-\item Local density of states
 \item Kubo-Bastin formula for Hall transport
 \end{itemize}
 
@@ -82,8 +81,8 @@ TODO list for future versions:
 \item Lattice thermal transport
 \item Python wrapper
 \item Interface with other tight-binding related codes
-\item openmp acceleration for the CPU version
-\item mpi acceleration for both the CPU and the GPU versions
+\item OpenMP acceleration for the CPU version
+\item MPI acceleration for both the CPU and the GPU versions
 \end{itemize}
 
 \section{Citations}
