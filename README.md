@@ -50,7 +50,11 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 * Go to the folders `examples/cpc2018/general/diffusive` and `examples/cpc2018/general/localized`, compile the `C++` codes with the `-std=c++11` option, and run the executables. This will produce all the input files (with suffix `.in`) for the examples.
   
-* Go to the main folder where you can see the `src` folder and type `src/lsqt_gpu examples/input.txt` (or `src/lsqt_cpu examples/input.txt` if you use the CPU version) to run the examples. The data will be written into the output files (with suffix `.out`) in the `examples/cpc2018/general/diffusive` and `examples/cpc2018/general/localized` folders. If you run a simulation multiple times, new data will be appended to the existing output files.
+* Go to the main folder where you can see the `src` folder and type 
+    * `src/lsqt_gpu examples/input.txt` 
+or 
+    * `src/lsqt_cpu examples/input.txt`
+to run the examples. The data will be written into the output files (with suffix `.out`) in the `examples/cpc2018/general/diffusive` and `examples/cpc2018/general/localized` folders. If you run a simulation multiple times, new data will be appended to the existing output files.
 
 ## Analyzing the results
 
