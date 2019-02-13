@@ -21,12 +21,12 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 * After downloading and unpacking this code, one can see two folders: `src` and `examples`. 
 
 * The folder `src` contains all the source files (with suffix `.h` or `.cu`) of the main code and two makefiles. The source files are:
-    * `main.cu`                            - the main function
-    * `gpuqt.h` and `gpuqt.cu`             - the "driver function"
-    * `sigma.h` and `sigma.cu`             - functions to obtain the transport properties
-    * `model.h` and `model.cu`             - class to define the simulation model
+    * `main.cu` - the main function
+    * `gpuqt.h` and `gpuqt.cu` - the "driver function"
+    * `sigma.h` and `sigma.cu` - functions to obtain the transport properties
+    * `model.h`, `model.cu`, `model_general.cu`, and `model_lattice.cu` - class to define the simulation model
     * `hamiltonian.h` and `hamiltonian.cu` - class to perform the matrix-related operations
-    * `vector.h` and `vector.cu`           - class to perform the vector-related operations
+    * `vector.h` and `vector.cu` - class to perform the vector-related operations
     
 * The folder `examples` contains two sub-folders with names `cpc2018` and `rmp`, containing examples in Refs. [3] and [4] mentioned above.
 
