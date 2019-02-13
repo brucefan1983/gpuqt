@@ -18,7 +18,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## File organizations
 
-* After downloading and unpacking GPUQT, one can see two folders: `src` and `examples`. 
+* After downloading and unpacking this code, one can see two folders: `src` and `examples`. 
 
 * The folder `src` contains all the source files (with suffix `.h` or `.cu`) of the main code and two makefiles. The source files are:
     * `main.cu`                            - the main function
@@ -34,8 +34,8 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Prerequisites
 
-* The first version only supports GPU computing and it requires a computer/workstation/cluster equipped with one or more CUDA-enabled GPUs with compute capability of 2.0 or higher, a `g++` compiler and a `CUDA` toolkit. 
-* Now the code also supports pure CPU computing and in this case it only requires a `g++` compiler.
+* To use the CPU version, it only requires a `g++` compiler.
+* To use the GPU version, it also requires a CUDA-enabled GPU with compute capability of 2.0 or higher and a `CUDA` toolkit.
 * The code has only been tested in linux systems.
 
 ## Installing
