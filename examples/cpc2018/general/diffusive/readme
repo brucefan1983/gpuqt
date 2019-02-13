@@ -10,7 +10,7 @@ Before running the LSQT code, one has to first compile
 and run the C++ code here.
 
 To compile this C++ code, one can type
-`g++ -O3 -std=c++11 make_inputs.cpp`
+g++ -O3 -std=c++11 make_inputs.cpp
 
 To run it, type
-`./a.out`
+./a.out
