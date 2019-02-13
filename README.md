@@ -54,6 +54,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
     * `src/lsqt_gpu examples/input.txt` 
     
 or 
+
     * `src/lsqt_cpu examples/input.txt`
     
 to run the examples. The data will be written into the output files (with suffix `.out`) in the `examples/cpc2018/general/diffusive` and `examples/cpc2018/general/localized` folders. If you run a simulation multiple times, new data will be appended to the existing output files.
