@@ -1,3 +1,4 @@
 examples/cpc2018/lattice/diffusive
 examples/cpc2018/lattice/localized
-
+examples/rmp/square/ballistic
+examples/rmp/square/diffusive
