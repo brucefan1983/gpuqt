@@ -185,7 +185,7 @@ To be written.
 
 We use the random vector approximation method \cite{weisse2006rmp} to evaluate the trace in the above equations. In this method, the trace of a general operator $\hat{A}$ of size $N\times N$ is written as
 \begin{equation}
- \textmd{Tr}\left[ A \right] \approx N \langle \phi | \hat{A} |\phi \rangle,
+ \textmd{Tr}\left[ \hat{A} \right] \approx N \langle \phi | \hat{A} |\phi \rangle,
 \end{equation}
 where $|\phi\rangle$ is a random vector normalized to $1$, $\langle \phi | \phi \rangle = 1$. The error introduced by this approximation decreases with increasing $N$, scaling as $\sim 1/\sqrt{N}$ \cite{weisse2006rmp}. For a given $N$, the accuracy can also be increased by taking average over independent random vectors. Usually, it is enough to use a few random vectors.
 
@@ -228,7 +228,7 @@ J_m\left( \frac{\widetilde{\Delta t}}{\hbar} \right)
 where $J_m$ is the $m$th order Bessel function of the first kind and $T_m$ is the $m$th order Chebyshev polynomial of the first kind.
 Note that $T_m$ is defined in the interval $[-1,1]$ and the Hamiltonian and time step have to be scaled in the opposite way:
 \begin{equation}
-\widetilde{H}=\hat{U}/\Delta E;
+\widetilde{H}=\hat{H}/\Delta E;
 \end{equation}
 \begin{equation}
 \widetilde{\Delta t}= \Delta E \Delta t,
@@ -424,27 +424,27 @@ Essentially, to build the simulation model, we need information regarding the Ha
 
 In the tight-binding approximation, the Hamiltonian can be written as
 \begin{equation}
- H = \sum_m\sum_n H_{mn} |m\rangle \langle n| 
+ \hat{H} = \sum_m\sum_n H_{mn} |m\rangle \langle n| 
  + \sum_m U_m |m\rangle \langle m|,
 \end{equation}
 where $H_{mn}$ is the hopping integral between orbitals $m$ and $n$ and $U_m$ is the on-site potential of site $m$. Similarly, the position and velocity operators can be expressed as
 \begin{equation}
- X = \sum_{m} X_m |m\rangle \langle m|;
+ \hat{X} = \sum_{m} X_m |m\rangle \langle m|;
 \end{equation}
 \begin{equation}
- V = \frac{i}{\hbar} [H,X]
+ \hat{V} = \frac{i}{\hbar} [\hat{H},\hat{X}]
 = \frac{i}{\hbar} \sum_m\sum_n
  (X_n-X_m) H_{mn} |m\rangle \langle n|.
 \end{equation}
 When using the general model, one has to specify four sets of data: 1) the neighbor list structure that determines which hopping integrals are non-vanishing, 2) the non-vanishing hopping integrals, 3) the on-site potentials, and 4) the positions $X_m$ of the sites projected onto the transport direction.
 
 \begin{itemize}
-\item The \verb"neighbour.in" input file\\
-This file specifies the topology of the problem using a neighbour list. This will be used to build the sparse Hamiltonian. The first line should have two integer numbers. The first number is the total number of sites in the simulated system. The second number is the maximum possible number of nonzero hopping integrals originated from a given site. For example, in a square lattice with nearest-neighbour hopping only, this number can be set as 4. Using a larger number than needed will waste memory. Starting from the second line, the $n$th line contains the number of neighbours and the indices of the neighbouring sites of the $(n-1)$th site.
+\item The \verb"neighbor.in" input file\\
+This file specifies the topology of the problem using a neighbor list. This will be used to build the sparse Hamiltonian. The first line should have two integer numbers. The first number is the total number of sites in the simulated system. The second number is the maximum possible number of nonzero hopping integrals originated from a given site. For example, in a square lattice with nearest-neighbor hopping only, this number can be set as 4. Using a larger number than needed will just waste memory, while using a smaller number than needed will cause an error. Starting from the second line, the $n$th line contains the number of neighbors and the indices of the neighboring sites of the $(n-1)$th site.
 \item The \verb"hopping.in" input file\\
-This is an optional input file, which contains the hopping integrals (the off-diagonal terms in the Hamiltonian). If this file is not prepared, \verb"LSQT" assumes that all the hopping integrals between pairs of neighbouring sites (specified in the neighbour.in file) are $-1$. 
+This is an optional input file, which contains the hopping integrals (the off-diagonal terms in the Hamiltonian). If this file is not prepared, \verb"LSQT" assumes that all the hopping integrals between pairs of neighboring sites (specified in the neighbor.in file) are $-1$. 
 The first line should be either the word \verb"real" or \verb"complex".
-If the word is \verb"real", it means that all the hopping integrals are real numbers. Then, starting from the second line, the $n$th line contains the real hopping integrals between the $(n-1)$th site and its neighbouring sites, and the order should be consistent with that in the neighbour.in file. The file will look like this:
+If the word is \verb"real", it means that all the hopping integrals are real numbers. Then, starting from the second line, the $n$th line contains the real hopping integrals between the $(n-1)$th site and its neighboring sites, and the order should be consistent with that in the \verb"neighbor.in" file. The file will look like this:
 \begin{verbatim}
     real
     real_1 real_2 real_3 ...
@@ -479,7 +479,7 @@ The general model approach is flexible, but is not convenient for ``simple'' sys
     ...
 \end{verbatim}
 
-We are still working on optimize the lattice model. 
+We are still working on optimizing the lattice model. 
 
 \section{Output files of LSQT}
 
