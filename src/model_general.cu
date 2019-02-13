@@ -68,7 +68,7 @@ void Model::initialize_neighbor()
 
     input.close();
 
-    std::cout << "- Number of atoms is " << number_of_atoms << std::endl;
+    std::cout << "- Number of orbitals is " << number_of_atoms << std::endl;
     std::cout << "- Maximum neighbor number is " << max_neighbor << std::endl;
     print_finished_reading(filename);
 }
@@ -109,7 +109,7 @@ void Model::initialize_positions()
         input >> x[i];
     input.close();
   
-    std::cout << "- Box length along transport direction is "
+    std::cout << "- Box length along the transport direction is "
               << box << std::endl;
     std::cout << "- System volume is " << volume << std::endl;
 
@@ -139,9 +139,13 @@ void Model::initialize_potential()
     bool nonzero_potential = true;
     if (!input.is_open())
     {
-        std::cout <<"- Could not open " + filename << std::endl;
-        std::cout << "- Assuming zero onsite potential" << std::endl;
+        std::cout << "- Could not open " + filename << std::endl;
+        std::cout << "- Assuming zero on-site potential" << std::endl;
         nonzero_potential = false;
+    }
+    else
+    {
+        std::cout << "- On-site potential will be read in" << std::endl;
     }
 
     potential = new real[number_of_atoms];
