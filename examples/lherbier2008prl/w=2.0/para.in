@@ -1,0 +1,4 @@
+model              1
+number_of_moments  2000
+anderson_disorder  2.0
+energy_max         4.1
