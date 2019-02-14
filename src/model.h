@@ -18,14 +18,10 @@
 */
 
 
-
-
 #pragma once
 #include <random>
 typedef double real;
 class Vector;
-
-
 
 
 class Model
@@ -113,7 +109,5 @@ private:
 
     std::mt19937 generator;
 };
-
-
 
 

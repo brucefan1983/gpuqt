@@ -18,8 +18,6 @@
 */
 
 
-
-
 #include "model.h"
 #include "vector.h"
 #include <random>
@@ -29,8 +27,6 @@
 #include <chrono>
 
 #define PI 3.141592653589793
-
-
 
 
 Model::Model(std::string input_dir)
@@ -73,8 +69,6 @@ Model::Model(std::string input_dir)
 }
 
 
-
-
 Model::~Model()
 { 
     // other memory will be freed when constructing the Hamiltonian
@@ -82,8 +76,6 @@ Model::~Model()
     if (requires_time)
         delete[] time_step;
 }
-
-
 
 
 // This function is called by the lsqt function in the lsqt.cu file
@@ -129,8 +121,6 @@ void Model::initialize_state(Vector& random_state, int orbital)
 }
 
 
-
-
 void Model::print_started_reading(std::string filename)
 {
     std::cout << std::endl;
@@ -141,8 +131,6 @@ void Model::print_started_reading(std::string filename)
 }
 
 
-
-
 void Model::print_finished_reading(std::string filename)
 {
     std::cout << std::endl;
@@ -150,8 +138,6 @@ void Model::print_finished_reading(std::string filename)
     std::cout << "===========================================================";
     std::cout << std::endl << std::endl;
 }
-
-
 
 
 void Model::verify_parameters()
@@ -287,8 +273,6 @@ void Model::verify_parameters()
 }
 
 
-
-
 void Model::initialize_parameters()
 {
     std::string filename = input_dir + "/para.in";
@@ -381,8 +365,6 @@ void Model::initialize_parameters()
 }
 
 
-
-
 void Model::initialize_energy()
 {
     std::string filename = input_dir + "/energy.in";
@@ -410,8 +392,6 @@ void Model::initialize_energy()
 
     print_finished_reading(filename);
 }
-
-
 
 
 void Model::initialize_local_orbitals()
@@ -448,8 +428,6 @@ void Model::initialize_local_orbitals()
 }
 
 
-
-
 void Model::initialize_time()
 {
     std::string filename = input_dir + "/time_step.in";
@@ -476,7 +454,5 @@ void Model::initialize_time()
     input.close();
     print_finished_reading(filename);
 }
-
-
 
 

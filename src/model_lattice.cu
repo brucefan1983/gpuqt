@@ -18,15 +18,11 @@
 */
 
 
-
-
 #include "model.h"
 #include <random>
 #include <iostream>
 #include <fstream>
 #include <limits.h>
-
-
 
 
 void Model::add_anderson_disorder()
@@ -38,8 +34,6 @@ void Model::add_anderson_disorder()
         potential[n] = on_site_potential(generator);
     }
 }
-
-
 
 
 void Model::create_random_numbers
@@ -66,8 +60,6 @@ void Model::create_random_numbers
 }
 
 
-
-
 void Model::specify_vacancies
 (int *is_vacancy, int number_of_atoms_pristine)
 {
@@ -87,8 +79,6 @@ void Model::specify_vacancies
 }
 
 
-
-
 void Model::find_new_atom_index
 (int *is_vacancy, int *new_atom_index, int number_of_atoms_pristine)
 {
@@ -102,8 +92,6 @@ void Model::find_new_atom_index
         }
     }
 }
-
-
 
 
 void Model::add_vacancies()
@@ -191,8 +179,6 @@ void Model::add_vacancies()
 }
 
 
-
-
 void Model::add_charged_impurities()
 {
     real charged_impurity_range_square = charged_impurity_range
@@ -249,8 +235,6 @@ void Model::add_charged_impurities()
 }
 
 
-
-
 static int find_index
 (int nx, int ny, int nz, int Nx, int Ny, int Nz, int m, int N_orbital)
 {
@@ -262,8 +246,6 @@ static int find_index
     if (nz >= Nz) nz -= Nz;
     return ((nx * Ny + ny) * Nz + nz) * N_orbital + m;
 }
-
-
 
 
 void Model::initialize_lattice_model()
@@ -568,7 +550,5 @@ void Model::initialize_lattice_model()
 
     print_finished_reading(filename);
 }
-
-
 
 

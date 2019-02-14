@@ -18,8 +18,6 @@
 */
 
 
-
-
 #include "sigma.h"
 #include "vector.h"
 #include "hamiltonian.h"
@@ -29,8 +27,6 @@
 #define BLOCK_SIZE 512     // optimized
 #define PI 3.141592653589793
 typedef double real;
-
-
 
 
 // Find the Chebyshev moments defined in Eqs. (32-34) 
@@ -71,8 +67,6 @@ void find_moments_chebyshev
 }
 
 
-
-
 // Jackson damping in Eq. (35) of [Comput. Phys. Commun.185, 28 (2014)].
 void apply_damping
 (Model& model, real *inner_product_real, real *inner_product_imag)
@@ -86,8 +80,6 @@ void apply_damping
         inner_product_imag[k] *= damping;
     }
 }
-
-
 
 
 // Do the summation in Eqs. (29-31) in [Comput. Phys. Commun.185, 28 (2014)]
@@ -120,8 +112,6 @@ void perform_chebyshev_summation
         correlation_function[step1] = temp / model.energy_max;
     }
 }
-
-
 
 
 // Calculate:
@@ -163,8 +153,6 @@ void evolve
         state_1.swap(state_2);
     }
 }
-
-
 
 
 // Calculate:
@@ -219,8 +207,6 @@ void evolvex
 }
 
 
-
-
 // calculate the DOS as a function of Fermi energy
 // See Algorithm 1 in [Comput. Phys. Commun.185, 28 (2014)].
 void find_dos(Model& model, Hamiltonian& H, Vector& random_state, int flag)
@@ -264,8 +250,6 @@ void find_dos(Model& model, Hamiltonian& H, Vector& random_state, int flag)
     delete[] inner_product_imag;
     delete[] dos;
 }
-
-
 
 
 // calculate the VAC as a function of correlation time and Fermi energy
@@ -326,8 +310,6 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
     delete[] inner_product_imag;
     delete[] vac;
 }
-
-
 
 
 // calculate the MSD as a function of correlation time and Fermi energy
@@ -400,8 +382,6 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
 }
 
 
-
-
 // calculate the spin polarization as a function of correlation time and 
 // Fermi energy. See Eq. (6) in [Phys. Rev. B 95, 041401(R) (2017)].
 void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
@@ -456,7 +436,5 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
     delete[] inner_product_imag;
     delete[] S;
 }
-
-
 
 

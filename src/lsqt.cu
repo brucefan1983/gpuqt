@@ -18,8 +18,6 @@
 */
 
 
-
-
 #include "lsqt.h"
 #include "vector.h"
 #include "hamiltonian.h"
@@ -27,8 +25,6 @@
 #include "model.h"
 #include <iostream>
 typedef double real;
-
-
 
 
 static void print_started_random_vector(int i)
@@ -42,7 +38,6 @@ static void print_started_random_vector(int i)
 }
 
 
-
 static void print_finished_random_vector(int i)
 {
     std::cout << std::endl;
@@ -51,8 +46,6 @@ static void print_finished_random_vector(int i)
     std::cout << "===========================================================";
     std::cout << std::endl << std::endl;
 }
-
-
 
 
 static void print_started_ldos()
@@ -65,7 +58,6 @@ static void print_started_ldos()
 }
 
 
-
 static void print_finished_ldos()
 {
     std::cout << std::endl;
@@ -73,7 +65,6 @@ static void print_finished_ldos()
     std::cout << "===========================================================";
     std::cout << std::endl << std::endl;
 }
-
 
 
 void lsqt(std::string input_directory)
@@ -157,7 +148,5 @@ void lsqt(std::string input_directory)
         print_finished_ldos();
     }
 }
-
-
 
 

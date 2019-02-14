@@ -18,15 +18,11 @@
 */
 
 
-
-
 #include "hamiltonian.h"
 #include "model.h"
 #include "vector.h"
 #include <string.h>        // memcpy
 #define BLOCK_SIZE 512     // optimized
-
-
 
 
 #ifndef CPU_ONLY
@@ -139,8 +135,6 @@ void Hamiltonian::initialize_cpu(Model& model)
 #endif
 
 
-
-
 Hamiltonian::Hamiltonian(Model& model)
 {
 #ifndef CPU_ONLY
@@ -149,8 +143,6 @@ Hamiltonian::Hamiltonian(Model& model)
     initialize_cpu(model);
 #endif
 }
-
-
 
 
 Hamiltonian::~Hamiltonian()
@@ -171,8 +163,6 @@ Hamiltonian::~Hamiltonian()
     delete[] xx;
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -256,8 +246,6 @@ void cpu_apply_hamiltonian
 #endif
 
 
-
-
 // |output> = H |input>
 void Hamiltonian::apply(Vector& input, Vector& output)
 {
@@ -277,8 +265,6 @@ void Hamiltonian::apply(Vector& input, Vector& output)
     );
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -358,8 +344,6 @@ void cpu_apply_commutator
 #endif
 
 
-
-
 // |output> = [X, H] |input>
 void Hamiltonian::apply_commutator(Vector& input, Vector& output)
 {
@@ -379,8 +363,6 @@ void Hamiltonian::apply_commutator(Vector& input, Vector& output)
     );
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -456,8 +438,6 @@ void cpu_apply_current
 #endif
 
 
-
-
 // |output> = V |input>
 void Hamiltonian::apply_current(Vector& input, Vector& output)
 {
@@ -476,8 +456,6 @@ void Hamiltonian::apply_current(Vector& input, Vector& output)
     );
 #endif
 }
-
-
 
 
 // Kernel which calculates the two first terms of time evolution as described by
@@ -536,8 +514,6 @@ void cpu_chebyshev_01
 #endif
 
 
-
-
 //Wrapper for the kernel above
 void Hamiltonian::chebyshev_01
 (
@@ -561,8 +537,6 @@ void Hamiltonian::chebyshev_01
     );
 #endif
 }
-
-
 
 
 //Kernel for calculating further terms of Eq. (36)
@@ -720,8 +694,6 @@ void cpu_chebyshev_2
 #endif
 
 
-
-
 // Wrapper for the kernel above
 void Hamiltonian::chebyshev_2
 (
@@ -749,8 +721,6 @@ void Hamiltonian::chebyshev_2
     );
 #endif
 }
-
-
 
 
 // Kernel which calculates the two first terms of commutator [X, U(dt)]
@@ -795,8 +765,6 @@ void cpu_chebyshev_1x
 #endif
 
 
-
-
 // Wrapper for kernel above
 void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
 {
@@ -814,8 +782,6 @@ void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
     );
 #endif
 }
-
-
 
 
 // Kernel which calculates the further terms of [X, U(dt)]
@@ -1028,8 +994,6 @@ void cpu_chebyshev_2x
 #endif
 
 
-
-
 // Wrapper for the kernel above
 void Hamiltonian::chebyshev_2x
 (
@@ -1059,8 +1023,6 @@ void Hamiltonian::chebyshev_2x
     );
 #endif
 }
-
-
 
 
 // Kernel for doing the Chebyshev iteration phi_2 = 2 * H * phi_1 - phi_0.
@@ -1157,8 +1119,6 @@ void cpu_kernel_polynomial
 #endif
 
 
-
-
 // Wrapper for the Chebyshev iteration
 void Hamiltonian::kernel_polynomial
 (Vector& state_0, Vector& state_1, Vector& state_2)
@@ -1181,7 +1141,5 @@ void Hamiltonian::kernel_polynomial
     );
 #endif
 }
-
-
 
 

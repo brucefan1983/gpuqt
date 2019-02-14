@@ -18,13 +18,9 @@
 */
 
 
-
-
 #include "model.h"
 #include <iostream>
 #include <fstream>
-
-
 
 
 void Model::initialize_model_general()
@@ -34,8 +30,6 @@ void Model::initialize_model_general()
     initialize_potential();
     initialize_hopping();
 }
-
-
 
 
 void Model::initialize_neighbor()
@@ -74,8 +68,6 @@ void Model::initialize_neighbor()
 }
 
 
-
-
 real reduce_distance(real d, real box)
 {
     if (d > box/2.0)
@@ -85,8 +77,6 @@ real reduce_distance(real d, real box)
     else
         return d;
 }
-
-
 
 
 void Model::initialize_positions()
@@ -128,8 +118,6 @@ void Model::initialize_positions()
 }
 
 
-
-
 void Model::initialize_potential()
 {
     std::string filename = input_dir + "/potential.in";
@@ -164,19 +152,15 @@ void Model::initialize_potential()
 }
 
 
-
-
 void Model::initialize_hopping()
 {
     std::string filename = input_dir + "/hopping.in";
     print_started_reading(filename);
     std::ifstream input(filename);
 
-    /*
-     type == 1 : complex hoppings
-     type == 2 : real hoppings
-     type == 3 : uniform hoppings (hoppings.in is not read)
-    */
+    //type == 1 : complex hoppings
+    //type == 2 : real hoppings
+    //type == 3 : uniform hoppings (hoppings.in is not read)
     int type = 0;
 
     if (!input.is_open())
@@ -229,7 +213,5 @@ void Model::initialize_hopping()
 
     print_finished_reading(filename);
 }
-
-
 
 

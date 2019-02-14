@@ -18,14 +18,10 @@
 */
 
 
-
-
 #pragma once
 typedef double real;
 class Vector;
 class Model;
-
-
 
 
 class Hamiltonian
@@ -61,7 +57,5 @@ private:
     int max_neighbor;
     real energy_max;
 };
-
-
 
 

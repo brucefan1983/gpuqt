@@ -18,16 +18,10 @@
 */
 
 
-
-
 #pragma once
 #include <string>
 
 
-
-
 void lsqt(std::string input_directory);
-
-
 
 

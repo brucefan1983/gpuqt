@@ -18,14 +18,10 @@
 */
 
 
-
-
 #include "lsqt.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
-
-
 
 
 //----------------------------------------------------------------------------80
@@ -79,7 +75,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-
 
 

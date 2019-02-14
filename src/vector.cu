@@ -18,13 +18,9 @@
 */
 
 
-
-
 #include "vector.h"
 #include <string.h>        // memcpy
 #define BLOCK_SIZE 512     // optimized
-
-
 
 
 #ifndef CPU_ONLY 
@@ -51,8 +47,6 @@ void cpu_set_zero
 #endif
 
 
-
-
 #ifndef CPU_ONLY
 void Vector::initialize_gpu(int n)
 {
@@ -72,8 +66,6 @@ void Vector::initialize_cpu(int n)
 #endif
 
 
-
-
 Vector::Vector(int n)
 {
 #ifndef CPU_ONLY
@@ -85,8 +77,6 @@ Vector::Vector(int n)
     cpu_set_zero(n, real_part, imag_part);
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -113,8 +103,6 @@ void cpu_copy_state
 #endif
 
 
-
-
 Vector::Vector(Vector& original)
 {
     // Just teach myself: one can access private members of another instance
@@ -131,8 +119,6 @@ Vector::Vector(Vector& original)
 }
 
 
-
-
 Vector::~Vector()
 {
 #ifndef CPU_ONLY
@@ -143,8 +129,6 @@ Vector::~Vector()
     delete[] imag_part;
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -171,8 +155,6 @@ void cpu_add_state
 #endif
 
 
-
-
 void Vector::add(Vector& other)
 {
 #ifndef CPU_ONLY
@@ -182,8 +164,6 @@ void Vector::add(Vector& other)
     cpu_add_state(n, other.real_part, other.imag_part, real_part, imag_part);
 #endif
 }
-
-
 
 
 void Vector::copy(Vector& other)
@@ -196,8 +176,6 @@ void Vector::copy(Vector& other)
     (n, other.real_part, other.imag_part, real_part, imag_part);
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -240,8 +218,6 @@ void cpu_apply_sz
 #endif
 
 
-
-
 void Vector::apply_sz(Vector& other)
 {
 #ifndef CPU_ONLY
@@ -251,8 +227,6 @@ void Vector::apply_sz(Vector& other)
     cpu_apply_sz(n, other.real_part, other.imag_part, real_part, imag_part);
 #endif
 }
-
-
 
 
 void Vector::copy_from_host(real* other_real, real* other_imag)
@@ -267,8 +241,6 @@ void Vector::copy_from_host(real* other_real, real* other_imag)
 }
 
 
-
-
 void Vector::copy_to_host(real* target_real, real* target_imag)
 {
 #ifndef CPU_ONLY
@@ -279,8 +251,6 @@ void Vector::copy_to_host(real* target_real, real* target_imag)
     memcpy(target_imag, imag_part, array_size);
 #endif
 }
-
-
 
 
 void Vector::swap(Vector& other)
@@ -294,8 +264,6 @@ void Vector::swap(Vector& other)
 }
 
 
-
-
 #ifndef CPU_ONLY
 __device__ void warp_reduce(volatile real *s, int t)
 {
@@ -303,8 +271,6 @@ __device__ void warp_reduce(volatile real *s, int t)
     s[t] += s[t + 4];  s[t] += s[t + 2];  s[t] += s[t + 1];
 }
 #endif
-
-
 
 
 #ifndef CPU_ONLY
@@ -410,8 +376,6 @@ void cpu_find_inner_product_1
 #endif
 
 
-
-
 void Vector::inner_product_1
 (int number_of_atoms, Vector& other, Vector& target, int offset)
 {
@@ -432,8 +396,6 @@ void Vector::inner_product_1
     );
 #endif
 }
-
-
 
 
 #ifndef CPU_ONLY
@@ -529,8 +491,6 @@ void cpu_find_inner_product_2
 #endif
 
 
-
-
 void Vector::inner_product_2
 (int number_of_atoms, int number_of_moments, Vector& target)
 {
@@ -549,7 +509,5 @@ void Vector::inner_product_2
     );
 #endif
 }
-
-
 
 

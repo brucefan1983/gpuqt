@@ -18,12 +18,8 @@
 */
 
 
-
-
 #pragma once
 typedef double real;
-
-
 
 
 class Vector
@@ -53,7 +49,5 @@ private:
     int n;
     int array_size;
 };
-
-
 
 
