@@ -18,9 +18,9 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## File organizations
 
-* After downloading and unpacking this code, one can see two folders: `src` and `examples`. 
+* After downloading and unpacking this code, one can see three directories: `src`, `doc`, and `examples`. 
 
-* The folder `src` contains all the source files (with suffix `.h` or `.cu`) of the main code and two makefiles. The source files are:
+* The directory `src` contains all the source files (with suffix `.h` or `.cu`) of the main code and two makefiles. The source files are:
     * `main.cu` - the main function
     * `gpuqt.h` and `gpuqt.cu` - the "driver function"
     * `sigma.h` and `sigma.cu` - functions to obtain the transport properties
@@ -28,9 +28,11 @@ There is a comprehensive review article discussing the linear scaling quantum tr
     * `hamiltonian.h` and `hamiltonian.cu` - class to perform the matrix-related operations
     * `vector.h` and `vector.cu` - class to perform the vector-related operations
     
-* The folder `examples` contains two sub-folders with names `cpc2018` and `rmp`, containing examples in Refs. [3] and [4] mentioned above.
+* The directory `examples` contains some sub-directories and sub-sub-directories, corresponding to different examples.
 
-* There is also a file named `input.txt` in the `examples` folder, which is a "driver input file".
+* There is also a file named `input.txt` in the `examples` directory, which is a "driver input file" (see below).
+
+* The `doc` directory contains the `pdf` and source files for the manual of this code.
 
 ## Prerequisites
 
