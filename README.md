@@ -46,6 +46,8 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Running the examples
 
+* Edit the file `examples/input.txt` to include the paths (relative or absolute) of the working directories containing the examples you want to run.
+
 * Go to the main folder where you can see the `src` folder and type one of the following commands:
     * `src/lsqt_gpu examples/input.txt`
     * `src/lsqt_cpu examples/input.txt`
@@ -54,7 +56,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Analyzing the results
 
-Go to the folders `examples/cpc2018/general/diffusive` and `examples/cpc2018/general/localized` and run the `MATLAB` scripts. You should get similar figures as in Ref. [3].
+Go to the working directories and run the `MATLAB` scripts we have prepared. After getting familiar with the output files, one can analyze the results using her/his favorite computer language(s). 
 
 
 ## Authors
