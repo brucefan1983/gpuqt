@@ -31,6 +31,7 @@ public:
     ~Model();
     void initialize_state(Vector& random_state, int orbital);
 
+    bool calculate_vac0 = false;
     bool calculate_vac = false;
     bool calculate_msd = false;
     bool calculate_spin = false;

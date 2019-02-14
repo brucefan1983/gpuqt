@@ -220,6 +220,11 @@ void Model::verify_parameters()
 
     std::cout << "- DOS will be calculated" << std::endl;
 
+    if (calculate_vac0)
+        std::cout << "- VAC0 will be calculated" << std::endl;
+    else
+        std::cout << "- VAC0 will not be calculated" << std::endl;
+
     if (calculate_vac)
         std::cout << "- VAC will be calculated" << std::endl;
     else
@@ -234,6 +239,13 @@ void Model::verify_parameters()
         std::cout << "- spin polarization will be calculated" << std::endl;
     else
         std::cout << "- spin polarization will not be calculated" << std::endl;
+
+    if (calculate_spin && calculate_vac0)
+    {
+        std::cout << "Error: spin and VAC0 cannot be calculated together"
+                  << std::endl;
+        exit(1);
+    }
 
     if (calculate_spin && calculate_vac)
     {
@@ -312,6 +324,10 @@ void Model::initialize_parameters()
             has_vacancy_disorder = true;
             ss >> number_of_vacancies;
         }
+        else if (token == "calculate_vac0")
+        {
+            calculate_vac0 = true;
+        }
         else if (token == "calculate_vac")
         {
             calculate_vac = true;
@@ -350,6 +366,7 @@ void Model::initialize_parameters()
                       << "--anderson_disorder" << std::endl
                       << "--charged_impurity" << std::endl
                       << "--vacancy_disorder" << std::endl
+                      << "--calculate_vac0" << std::endl
                       << "--calculate_vac" << std::endl
                       << "--calculate_msd" << std::endl
                       << "--calculate_spin" << std::endl

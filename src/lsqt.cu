@@ -91,16 +91,16 @@ void lsqt(std::string input_directory)
         time_finish = clock();
         time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding DOS = " 
-                  << time_used << " s" << std::endl; 
+                  << time_used << " s" << std::endl;
 
-        // Calculate the MSD only if you want to
-        if (model.calculate_msd == 1)  
-        {    
+        // Calculate the VAC0 only if you want to
+        if (model.calculate_vac0 == 1)  
+        {
             time_begin = clock();
-            find_msd(model, H, random_state);
+            find_vac0(model, H, random_state);
             time_finish = clock();
             time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
-            std::cout << "- Time used for finding MSD = " 
+            std::cout << "- Time used for finding VAC0 = " 
                       << time_used << " s" << std::endl;
         }
 
@@ -112,6 +112,17 @@ void lsqt(std::string input_directory)
             time_finish = clock();
             time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
             std::cout << "- Time used for finding VAC = " 
+                      << time_used << " s" << std::endl;
+        }
+
+        // Calculate the MSD only if you want to
+        if (model.calculate_msd == 1)  
+        {    
+            time_begin = clock();
+            find_msd(model, H, random_state);
+            time_finish = clock();
+            time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+            std::cout << "- Time used for finding MSD = " 
                       << time_used << " s" << std::endl;
         }
 

@@ -252,6 +252,46 @@ void find_dos(Model& model, Hamiltonian& H, Vector& random_state, int flag)
 }
 
 
+// calculate the group velocity, which is sqrt{VAC(t=0)}
+// as a function of Fermi energy
+void find_vac0(Model& model, Hamiltonian& H, Vector& random_state)
+{
+    Vector inner_product_2(model.number_of_moments);
+    real *inner_product_real; 
+    real *inner_product_imag;
+    real *vac0;
+    inner_product_real = new real[model.number_of_moments];
+    inner_product_imag = new real[model.number_of_moments];
+    vac0 = new real[model.number_of_energy_points];
+
+    Vector state(model.number_of_atoms);
+    H.apply_current(random_state, state);
+    find_moments_chebyshev(model, H, state, state, inner_product_2);
+    inner_product_2.copy_to_host(inner_product_real, inner_product_imag);
+    apply_damping(model, inner_product_real, inner_product_imag);
+    perform_chebyshev_summation(model, inner_product_real,
+        inner_product_imag, vac0);
+
+    std::ofstream output(model.input_dir + "/vac0.out", std::ios::app);
+    if (!output.is_open())
+    {
+        std::cout <<"Error: cannot open " + model.input_dir + "/vac0.out"
+                  << std::endl;
+        exit(1);
+    }
+    for (int n = 0; n < model.number_of_energy_points; ++n)
+    {
+        output << vac0[n] << " ";
+    }
+    output << std::endl;
+    output.close();
+
+    delete[] inner_product_real;
+    delete[] inner_product_imag;
+    delete[] vac0;
+}
+
+
 // calculate the VAC as a function of correlation time and Fermi energy
 // See Algorithm 2 in [Comput. Phys. Commun.185, 28 (2014)].
 void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
