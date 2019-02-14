@@ -1,0 +1,9 @@
+This directory contains an example from the following paper:
+
+Zheyong Fan, Andreas Uppstu, and Ari Harju,
+Anderson localization in two-dimensional graphene with short-range disorder:
+One-parameter scaling and finite-size effects,
+Phys. Rev. B 89, 245422 (2014).
+https://doi.org/10.1103/PhysRevB.89.245422
+
+We aim to reproduce part of Figure 3 (the case of W = 2.0 t) in this paper.
