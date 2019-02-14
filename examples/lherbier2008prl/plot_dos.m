@@ -3,8 +3,6 @@ clear; close all; font_size=12;
 % load data
 data=cell(5,1);
 load w=0/dos.out;data{1}=dos;
-
-size(data{1})
 load w=1.0/dos.out;data{2}=dos;
 load w=1.5/dos.out;data{3}=dos;
 load w=2.0/dos.out;data{4}=dos;
