@@ -1,3 +1,8 @@
+lherbier2008prl/w=0
+lherbier2008prl/w=1.0
+lherbier2008prl/w=1.5
+lherbier2008prl/w=2.0
+lherbier2008prl/w=2.5
 examples/cpc2018/lattice/diffusive
 examples/cpc2018/lattice/localized
 examples/rmp/square/ballistic
