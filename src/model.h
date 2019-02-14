@@ -84,6 +84,7 @@ private:
     void initialize_lattice_model();
     void add_anderson_disorder();
     void add_vacancies();
+    void find_potentials(int*, real*);
     void add_charged_impurities();
     void create_random_numbers(int, int, int*);
     void specify_vacancies(int*, int);
