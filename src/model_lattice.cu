@@ -433,8 +433,10 @@ void Model::initialize_lattice_model()
     y_cell.resize(N_orbital);
     z_cell.resize(N_orbital);
     int number_of_hoppings_per_cell = N_orbital * max_neighbor;
-    std::vector<std::vector<int>> hopping_data;
-    hopping_data.assign(6, std::vector<int>(number_of_hoppings_per_cell, 0));
+    std::vector<std::vector<int>> hopping_index;
+    hopping_index.assign(4, std::vector<int>(number_of_hoppings_per_cell, 0));
+    std::vector<std::vector<real>> hopping_data;
+    hopping_data.assign(2, std::vector<real>(number_of_hoppings_per_cell, 0));
 
     std::cout << std::endl << "\torbital\tx\ty\tz" << std::endl;
     for (int n = 0; n < N_orbital; ++n)
@@ -461,12 +463,12 @@ void Model::initialize_lattice_model()
             input >> nx >> ny >> nz >> m_neighbor >> hopping_real
                   >> hopping_imag;
 
-            hopping_data[0][m*max_neighbor+n] = nx;
-            hopping_data[1][m*max_neighbor+n] = ny;
-            hopping_data[2][m*max_neighbor+n] = nz;
-            hopping_data[3][m*max_neighbor+n] = m_neighbor;
-            hopping_data[4][m*max_neighbor+n] = hopping_real;
-            hopping_data[5][m*max_neighbor+n] = hopping_imag;
+            hopping_index[0][m*max_neighbor+n] = nx;
+            hopping_index[1][m*max_neighbor+n] = ny;
+            hopping_index[2][m*max_neighbor+n] = nz;
+            hopping_index[3][m*max_neighbor+n] = m_neighbor;
+            hopping_data[0][m*max_neighbor+n] = hopping_real;
+            hopping_data[1][m*max_neighbor+n] = hopping_imag;
 
             std::cout << "\tH(0,0,0," << m << "; " 
                  << nx << "," << ny << "," << nz << "," << m_neighbor << ") = "
@@ -502,9 +504,9 @@ void Model::initialize_lattice_model()
                         int neighbor_index = n1 * max_neighbor + count;
                         int k = m*max_neighbor+i;
 
-                        int nx2 = hopping_data[0][k] + nx1;
-                        int ny2 = hopping_data[1][k] + ny1;
-                        int nz2 = hopping_data[2][k] + nz1;
+                        int nx2 = hopping_index[0][k] + nx1;
+                        int ny2 = hopping_index[1][k] + ny1;
+                        int nz2 = hopping_index[2][k] + nz1;
                         bool skip_x = !pbc[0] && (nx2 < 0 || nx2 >= N_cell[0]);
                         bool skip_y = !pbc[1] && (ny2 < 0 || ny2 >= N_cell[1]);
                         bool skip_z = !pbc[2] && (nz2 < 0 || nz2 >= N_cell[2]);
@@ -513,16 +515,16 @@ void Model::initialize_lattice_model()
                         neighbor_list[neighbor_index] = find_index
                         (
                             nx2, ny2, nz2, N_cell[0], N_cell[1], N_cell[2], 
-                            hopping_data[3][k], N_orbital
+                            hopping_index[3][k], N_orbital
                         );
 
                         real x12 = lattice_constant[transport_direction]
-                                 * hopping_data[transport_direction][k];
-                        x12 += x_cell[hopping_data[3][k]] - x_cell[m];
+                                 * hopping_index[transport_direction][k];
+                        x12 += x_cell[hopping_index[3][k]] - x_cell[m];
                         xx[neighbor_index] = x12;
 
-                        hopping_real[neighbor_index] = hopping_data[4][k];
-                        hopping_imag[neighbor_index] = hopping_data[5][k];
+                        hopping_real[neighbor_index] = hopping_data[0][k];
+                        hopping_imag[neighbor_index] = hopping_data[1][k];
 
                         ++count;
                     }
