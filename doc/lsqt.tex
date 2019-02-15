@@ -465,21 +465,70 @@ This file specifies the coordinates of the sites in the simulated system. This w
 
 \subsection{Other input files when using the lattice model}
 
-The general model approach is flexible, but is not convenient for ``simple'' systems. We therefore provide an alternative method to constructing the simulation model. In the method, one needs to prepare a file called \verb"lattice.in" of the following form:
+The general model approach is flexible, but is not convenient for ``simple'' systems. We therefore provide an alternative method for constructing the simulation model. In this ``lattice model'' method, one needs to prepare a file called \verb"lattice.in" of the following form:
 \begin{verbatim}
-    Nx Ny Nz
-    pbc_x pbc_y pbc_z transport direction
-    ax ay az
-    N_cell  M
-    x0 y0 y0 # coordinates of orbital 0
-    # coordinates of orbital 1
-    ...
-    M0
-    nx ny nz Hr Hi
-    ...
+2500 2000 1          # Nx Ny Nz
+1 1 0 0              # pbc_x pbc_y pbc_z transport_direction
+1.7321 3 1           # ax ay az
+4 3                  # N_orbotal  N_hopping
+0.866 0    0         # coordinates of orbital 0
+0     0.5  0         # coordinates of orbital 1
+0     1.5  0         # coordinates of orbital 2
+0.866 2    0         # coordinates of orbital 3
+3                    # there are 3 hoppings from orbital 0
+1  0 0 1 -2.7 0      # hop to the orbital 1 in the positive x cell
+0  0 0 1 -2.7 0      # hop to the orbital 1 in the current cell
+0 -1 0 3 -2.7 0      # hop to the orbital 3 in the negative y cell
+3                    # there are 3 hoppings from orbital 1
+0  0 0 0 -2.7 0      # hop to the orbital 0 in the current cell
+-1 0 0 0 -2.7 0      # hop to the orbital 0 in the negative x cell
+0  0 0 2 -2.7 0      # hop to the orbital 2 in the current cell
+3                    # there are 3 hoppings from orbital 2
+0  0 0 3 -2.7 0      # hop to the orbital 3 in the current cell
+-1 0 0 3 -2.7 0      # hop to the orbital 3 in the negative x cell
+0  0 0 1 -2.7 0      # hop to the orbital 1 in the current cell
+3                    # there are 3 hoppings from orbital 3
+1 0 0 2 -2.7 0       # hop to the orbital 2 in the positive x cell
+0 0 0 2 -2.7 0       # hop to the orbital 2 in the current cell
+0 1 0 0 -2.7 0       # hop to the orbital 0 in the positive y cell
 \end{verbatim}
+Here are some explanations:
+\begin{itemize}
+\item Line 1. \verb"Nx" is the number of unit cells in the $x$ direction.
+\item Line 1. \verb"Ny" is the number of unit cells in the $y$ direction.
+\item Line 1. \verb"Nz" is the number of unit cells in the $z$ direction. 
+\item When simulating two-dimensional materials, one can set \verb"Nz" to 1.
+\item Line 2. \verb"pbc_x" specifies the boundary conditions in the $x$ direction. It can be either 1 or 0, corresponding to periodic and open boundary conditions, respectively.
+\item Line 2. \verb"pbc_y" is similar to \verb"pbc_x", but for the $y$ direction.
+\item Line 2. \verb"pbc_z" is similar to \verb"pbc_x", but for the $z$ direction. \item When all three directions have periodic boundary conditions, the system is considered as a bulk material. When one direction is open, the system is considered as a film or a 2D material. When two directions are open, the system is considered as a wire or a ribbon. When all the directions are open, the system is considered as a dot, or a particle/cluster. 
+\item Line 2. \verb"transport_direction" specifies the transport direction in dissipative transport. It can be 0, 1, or 2, which corresponds to the $x$, $y$, and $z$ directions, respectively. The transport direction must have periodic boundary conditions.
+\item Line 3. \verb"ax" is the lattice constant in the $x$ direction, which is the length of the unit cell in this direction. The units of the length are chosen by the user. The user need to make sure that all the length parameters are of the same units for a given simulation.
+\item Line 3. \verb"ay" is the lattice constant in the $y$ direction.
+\item Line 3. \verb"az" is the lattice constant in the $z$ direction.
+\item Line 4. \verb"N_orbital" is the number of orbitals in the unit cell. The unit cell must be rectangular. 
 
-We are still working on optimizing the lattice model. 
+\begin{itemize}
+\item Example 1. In the single-orbital square lattice model, the smallest unit cell only contains one site, and \verb"N_orbital" is 1. 
+\item  Example 2. Consider graphene. The smallest rectangular unit cell contains 4 carbon atoms. When considering the $p_z$-orbital tight-binding model, each atom contributes one orbital. In this case, \verb"N_orbital" is 4.
+\end{itemize}
+
+\item Line 4. \verb"N_hopping" is the maximum number of hoppings between one orbital and others. 
+
+\begin{itemize}
+\item Example 1. In the nearest-neighbor single-orbital square lattice model,  \verb"N_hopping" is 4. 
+\item  Example 2. In the nearest-neigthbor $p_z$-orbital tight-binding model for graphene, \verb"N_hopping" is 3.
+\end{itemize}
+
+\item The next \verb"N_orbital" lines gives the coordinates of the \verb"N_orbital" orbitals in the unit cell. The first, second, and third columns correspond to the $x$, $y$, and $z$ coordinates, respectively. Note the different orbitals can have the same coordinates. That is, one atom/site can have multiple orbitals.
+
+\item Starting from the next line, there are \verb"N_orbital" blocks of data. Each block of data correspond to an orbital. For each block, there are one plus \verb"N_hopping" lines, where the first line gives the number of hopping integrals $M$ for the current orbital, and the remaining $M$ lines give the details of the hopping integrals. To specify a hopping integral from the current orbital in the unit cell, we have to specify the (three-dimensional) cell index and orbital index of the neighboring orbital. The data format is as follows:
+\begin{verbatim}
+nx ny nz n_orbital h_real h_imag
+\end{verbatim}
+This means that there is a hopping integtal with real part \verb"h_real" and imaginary part \verb"h_imag", hopping to an orbital with index \verb"n_orbital" in a unit cell that are offset by \verb"nx", \verb"ny", and \verb"nz" compared to the current unit cell in the $x$, $y$, and $z$ directions. 
+
+\end{itemize}
+
 
 \section{Output files of LSQT}
 
