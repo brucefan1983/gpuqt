@@ -24,7 +24,6 @@
 #include "sigma.h"
 #include "model.h"
 #include <iostream>
-typedef double real;
 
 
 static void print_started_random_vector(int i)
@@ -75,7 +74,7 @@ void lsqt(std::string input_directory)
     Vector random_state(model.number_of_atoms);
 
     clock_t time_begin, time_finish;
-    real time_used;
+    double time_used;
 
     // Loop over different random vectors
     for (int i = 0; i < model.number_of_random_vectors; ++i)
@@ -89,7 +88,7 @@ void lsqt(std::string input_directory)
         time_begin = clock(); 
         find_dos(model, H, random_state, 0);
         time_finish = clock();
-        time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+        time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding DOS = " 
                   << time_used << " s" << std::endl;
 
@@ -99,7 +98,7 @@ void lsqt(std::string input_directory)
             time_begin = clock();
             find_vac0(model, H, random_state);
             time_finish = clock();
-            time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
             std::cout << "- Time used for finding VAC0 = " 
                       << time_used << " s" << std::endl;
         }
@@ -110,7 +109,7 @@ void lsqt(std::string input_directory)
             time_begin = clock();
             find_vac(model, H, random_state);
             time_finish = clock();
-            time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
             std::cout << "- Time used for finding VAC = " 
                       << time_used << " s" << std::endl;
         }
@@ -121,7 +120,7 @@ void lsqt(std::string input_directory)
             time_begin = clock();
             find_msd(model, H, random_state);
             time_finish = clock();
-            time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
             std::cout << "- Time used for finding MSD = " 
                       << time_used << " s" << std::endl;
         }
@@ -132,7 +131,7 @@ void lsqt(std::string input_directory)
             time_begin = clock();
             find_spin_polarization(model, H, random_state);
             time_finish = clock();
-            time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
             std::cout << "- Time used for finding spin polarization = " 
                       << time_used << " s" << std::endl;
         }
@@ -153,7 +152,7 @@ void lsqt(std::string input_directory)
             find_dos(model, H, random_state, 1);
         }
         time_finish = clock();
-        time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
+        time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding LDOS = "
                   << time_used << " s" << std::endl;
         print_finished_ldos();
