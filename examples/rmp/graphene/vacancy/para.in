@@ -1,0 +1,5 @@
+model              1
+number_of_moments  3000
+vacancy_disorder   200000
+energy_max         8.5
+calculate_msd
