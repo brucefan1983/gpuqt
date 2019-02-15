@@ -31,45 +31,31 @@ using namespace std;
 
 static void print_welcome();
 static void check_argc(int);
+static void print_start(std::string);
+static void print_finish(std::string, double);
 
 
 int main(int argc, char *argv[])
 {
     print_welcome();
     check_argc(argc);
-
     ifstream input(argv[1]); // input = the driver input file
     if (!input.is_open())
     {
         cout << "Failed to open " << argv[1] << endl;
         exit(1);
     }
-
     string directory;
     while (getline(input, directory))
     {
-        if (directory == "")
-             continue;
-        cout << endl;
-        cout << "===========================================================\n";
-        cout << "Run LSQT simulation for " << directory << std::endl; 
-        cout << "===========================================================\n";
-
+        if (directory == "") { continue; }
+        print_start(directory);
         clock_t time_begin = clock();
-
-        // call the driver function
         lsqt(directory);
-
         clock_t time_finish = clock();
         double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-
-        cout << endl;
-        cout << "===========================================================\n";
-        cout << "Total time used for " << directory << " = " 
-             << time_used <<" s" << endl; 
-        cout << "===========================================================\n";
+        print_finish(directory, time_used);
     }
-
     return 0;
 }
 
@@ -93,6 +79,24 @@ static void check_argc(int argc)
         cout << "Usage: src/gpuqt input.txt" << std::endl;
         exit(1);
     }
+}
+
+
+static void print_start(std::string directory)
+{
+    cout << endl;
+    cout << "===============================================================\n";
+    cout << "Run LSQT simulation for " << directory << std::endl; 
+    cout << "===============================================================\n";
+}
+
+
+static void print_finish(std::string directory, double time)
+{
+    cout << endl;
+    cout << "===============================================================\n";
+    cout << "Total time used for " << directory << " = " << time <<" s" << endl;
+    cout << "===============================================================\n";
 }
 
 
