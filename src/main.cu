@@ -18,35 +18,32 @@
 */
 
 
+/*----------------------------------------------------------------------------80
+    The main function of the LSQT code
+------------------------------------------------------------------------------*/
+
+
 #include "lsqt.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
 
 
-//----------------------------------------------------------------------------80
+static void print_welcome();
+static void check_argc(int);
+
+
 int main(int argc, char *argv[])
 {
-    cout << endl;
-    cout << "***************************************************************\n";
-    cout << "*                  Welcome to use LSQT                        *\n";
-    cout << "*          (Linear Scaling Quantum Transport)                 *\n";
-    cout << "*        (Author:  Zheyong Fan <brucenju@gmail.com>)          *\n";
-    cout << "***************************************************************\n";
-    cout << endl;
-	
-    if (argc != 2)
-    {
-        cout << "Usage: src/gpuqt input.txt" << std::endl;
-        exit(1);
-    }
-	
+    print_welcome();
+    check_argc(argc);
+
     ifstream input(argv[1]); // input = the driver input file
     if (!input.is_open())
     {
         cout << "Failed to open " << argv[1] << endl;
         exit(1);
-    }		
+    }
 
     string directory;
     while (getline(input, directory))
@@ -59,7 +56,7 @@ int main(int argc, char *argv[])
         cout << "===========================================================\n";
 
         clock_t time_begin = clock();
-         
+
         // call the driver function
         lsqt(directory);
 
@@ -74,6 +71,28 @@ int main(int argc, char *argv[])
     }
 
     return 0;
+}
+
+
+static void print_welcome()
+{
+    cout << endl;
+    cout << "***************************************************************\n";
+    cout << "*                  Welcome to use LSQT                        *\n";
+    cout << "*          (Linear Scaling Quantum Transport)                 *\n";
+    cout << "*        (Author:  Zheyong Fan <brucenju@gmail.com>)          *\n";
+    cout << "***************************************************************\n";
+    cout << endl;
+}
+
+
+static void check_argc(int argc)
+{
+    if (argc != 2)
+    {
+        cout << "Usage: src/gpuqt input.txt" << std::endl;
+        exit(1);
+    }
 }
 
 
