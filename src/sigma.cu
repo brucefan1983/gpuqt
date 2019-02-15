@@ -321,6 +321,7 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
 
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
+        std::cout << "- calculating VAC step " << m << std::endl;
         H.apply_current(state_left, state_left_copy);
         find_moments_chebyshev
         (model, H, state_right, state_left_copy, inner_product_2);
@@ -383,6 +384,8 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
 
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
+        std::cout << "- calculating MSD step " << m << std::endl;
+
         find_moments_chebyshev(model, H, state_x, state_x, inner_product_2);
         inner_product_2.copy_to_host(inner_product_real, inner_product_imag);
 
@@ -448,6 +451,8 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
 
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
+        std::cout << "- calculating spin step " << m << std::endl;
+
         state_sz.apply_sz(state);
 
         find_moments_chebyshev(model, H, state, state_sz, inner_product_2);
