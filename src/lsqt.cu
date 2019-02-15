@@ -66,97 +66,112 @@ static void print_finished_ldos()
 }
 
 
-void lsqt(std::string input_directory)
+static void run_dos(Model& model, Hamiltonian& H, Vector& random_state)
 {
-    // Initialize model on the CPU
-    Model model(input_directory);
-    Hamiltonian H(model);
-    Vector random_state(model.number_of_atoms);
+    clock_t time_begin = clock(); 
+    find_dos(model, H, random_state, 0);
+    clock_t time_finish = clock();
+    double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+    std::cout << "- Time used for finding DOS = " 
+              << time_used << " s" << std::endl;
+}
 
-    clock_t time_begin, time_finish;
-    double time_used;
 
-    // Loop over different random vectors
-    for (int i = 0; i < model.number_of_random_vectors; ++i)
+static void run_vac0(Model& model, Hamiltonian& H, Vector& random_state)
+{
+    if (model.calculate_vac0 == 1)
     {
-        print_started_random_vector(i);
-
-        int orbital = -1; // using random vectors rather than a local orbital
-        model.initialize_state(random_state, orbital);
-
-        // Always calculate the DOS, since it is very cheap
-        time_begin = clock(); 
-        find_dos(model, H, random_state, 0);
-        time_finish = clock();
-        time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-        std::cout << "- Time used for finding DOS = " 
+        clock_t time_begin = clock();
+        find_vac0(model, H, random_state);
+        clock_t time_finish = clock();
+        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        std::cout << "- Time used for finding VAC0 = " 
                   << time_used << " s" << std::endl;
-
-        // Calculate the VAC0 only if you want to
-        if (model.calculate_vac0 == 1)  
-        {
-            time_begin = clock();
-            find_vac0(model, H, random_state);
-            time_finish = clock();
-            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-            std::cout << "- Time used for finding VAC0 = " 
-                      << time_used << " s" << std::endl;
-        }
-
-        // Calculate the VAC only if you want to
-        if (model.calculate_vac == 1)  
-        {
-            time_begin = clock();
-            find_vac(model, H, random_state);
-            time_finish = clock();
-            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-            std::cout << "- Time used for finding VAC = " 
-                      << time_used << " s" << std::endl;
-        }
-
-        // Calculate the MSD only if you want to
-        if (model.calculate_msd == 1)  
-        {    
-            time_begin = clock();
-            find_msd(model, H, random_state);
-            time_finish = clock();
-            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-            std::cout << "- Time used for finding MSD = " 
-                      << time_used << " s" << std::endl;
-        }
-
-        // Calculate the spin polarization only if you want to
-        if (model.calculate_spin == 1)  
-        {
-            time_begin = clock();
-            find_spin_polarization(model, H, random_state);
-            time_finish = clock();
-            time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-            std::cout << "- Time used for finding spin polarization = " 
-                      << time_used << " s" << std::endl;
-        }
-
-        print_finished_random_vector(i);
     }
+}
 
-    // Calculate the LDOS only if you want to
+
+static void run_vac(Model& model, Hamiltonian& H, Vector& random_state)
+{
+    if (model.calculate_vac == 1)
+    {
+        clock_t time_begin = clock();
+        find_vac(model, H, random_state);
+        clock_t time_finish = clock();
+        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        std::cout << "- Time used for finding VAC = " 
+                  << time_used << " s" << std::endl;
+    }
+}
+
+
+static void run_msd(Model& model, Hamiltonian& H, Vector& random_state)
+{
+    if (model.calculate_msd == 1)
+    {
+        clock_t time_begin = clock();
+        find_msd(model, H, random_state);
+        clock_t time_finish = clock();
+        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        std::cout << "- Time used for finding MSD = " 
+                  << time_used << " s" << std::endl;
+    }
+}
+
+
+static void run_spin(Model& model, Hamiltonian& H, Vector& random_state)
+{
+    if (model.calculate_spin == 1)  
+    {
+        clock_t time_begin = clock();
+        find_spin_polarization(model, H, random_state);
+        clock_t time_finish = clock();
+        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        std::cout << "- Time used for finding spin polarization = " 
+                  << time_used << " s" << std::endl;
+    }
+}
+
+
+static void run_ldos(Model& model, Hamiltonian& H, Vector& random_state)
+{
     if (model.calculate_ldos)
     {
         print_started_ldos();
-        time_begin = clock();
-        // loop over the local orbitals
+        clock_t time_begin = clock();
         for (int i = 0; i < model.number_of_local_orbitals; ++i)
         {
             int orbital = model.local_orbitals[i];
             model.initialize_state(random_state, orbital);
             find_dos(model, H, random_state, 1);
         }
-        time_finish = clock();
-        time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        clock_t time_finish = clock();
+        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding LDOS = "
                   << time_used << " s" << std::endl;
         print_finished_ldos();
     }
+}
+
+
+void lsqt(std::string input_directory)
+{
+    Model model(input_directory);
+    Hamiltonian H(model);
+    Vector random_state(model.number_of_atoms);
+    for (int i = 0; i < model.number_of_random_vectors; ++i)
+    {
+        print_started_random_vector(i);
+        int orbital = -1; // using random vectors rather than a local orbital
+        model.initialize_state(random_state, orbital);
+        run_dos(model, H, random_state);
+        run_vac0(model, H, random_state);
+        run_vac(model, H, random_state);
+        run_msd(model, H, random_state);
+        run_spin(model, H, random_state);
+        print_finished_random_vector(i);
+    }
+    run_ldos(model, H, random_state);
 }
 
 
