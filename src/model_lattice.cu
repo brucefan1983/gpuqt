@@ -25,17 +25,6 @@
 #include <limits.h>
 
 
-void Model::add_anderson_disorder()
-{
-    double W2 = anderson_disorder_strength * 0.5;
-    std::uniform_real_distribution<double> on_site_potential(-W2, W2);
-    for (int n = 0; n < number_of_atoms; ++n)
-    {
-        potential[n] = on_site_potential(generator);
-    }
-}
-
-
 void Model::create_random_numbers
 (int max_value, int total_number, int* random_numbers)
 {
@@ -539,9 +528,9 @@ void Model::initialize_lattice_model()
         add_vacancies();
     }
 
-    if (has_anderson_disorder)
+    if (anderson.has_disorder)
     {
-        add_anderson_disorder();
+        anderson.add_disorder(number_of_atoms, generator, potential);
     }
 
     if (has_charged_impurities)

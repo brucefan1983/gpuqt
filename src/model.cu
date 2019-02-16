@@ -157,10 +157,10 @@ void Model::verify_parameters()
             exit(1);
         }
 
-        if (has_anderson_disorder)
+        if (anderson.has_disorder)
         {
             std::cout << "- Add Anderson disorder with strength W = "
-                      << anderson_disorder_strength << std::endl;
+                      << anderson.disorder_strength << std::endl;
         }
         else
         {
@@ -198,7 +198,7 @@ void Model::verify_parameters()
     else
     {
         std::cout << "- Use general model" << std::endl;
-        if (has_anderson_disorder)
+        if (anderson.has_disorder)
         {
             std::cout << "Error: General model does not allowed to add "
                       << "Anderson disorder" << std::endl;
@@ -309,8 +309,8 @@ void Model::initialize_parameters()
         }
         else if (token == "anderson_disorder")
         {
-            has_anderson_disorder = true;
-            ss >> anderson_disorder_strength;
+            anderson.has_disorder = true;
+            ss >> anderson.disorder_strength;
         }
         else if (token == "charged_impurity")
         {

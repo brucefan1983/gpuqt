@@ -19,6 +19,7 @@
 
 
 #pragma once
+#include "anderson.h"
 #include <random>
 class Vector;
 
@@ -81,7 +82,6 @@ private:
 
     // only for lattice model
     void initialize_lattice_model();
-    void add_anderson_disorder();
     void add_vacancies();
     void find_potentials(int*, double*);
     void add_charged_impurities();
@@ -93,8 +93,7 @@ private:
     bool use_lattice_model = false;
 
     // disorder
-    bool has_anderson_disorder = false;
-    double anderson_disorder_strength;
+    Anderson anderson;
 
     bool has_vacancy_disorder = false;
     int number_of_vacancies;
