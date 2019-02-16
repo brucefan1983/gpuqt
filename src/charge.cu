@@ -1,0 +1,113 @@
+/*
+    Copyright 2017 Zheyong Fan, Ville Vierimaa, and Ari Harju
+
+    This file is part of GPUQT.
+
+    GPUQT is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    GPUQT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+#include "charge.h"
+#include <iostream>
+#include <fstream>
+#include <limits.h>
+
+
+void Charge::create_random_numbers
+(std::mt19937& generator, int max_value, int total_number, int* random_numbers)
+{
+    int *permuted_numbers = new int[max_value];
+    for(int i = 0; i < max_value; ++i)
+    {
+        permuted_numbers[i] = i;
+    }
+    std::uniform_int_distribution<int> rand_int(0, INT_MAX);
+    for(int i = 0; i < max_value; ++i)
+    {
+        int j = rand_int(generator) % (max_value - i) + i;
+        int temp = permuted_numbers[i];
+        permuted_numbers[i] = permuted_numbers[j];
+        permuted_numbers[j] = temp;
+    }
+    for (int i = 0; i < total_number; ++i)
+    {
+        random_numbers[i] = permuted_numbers[i];
+    }
+    delete[] permuted_numbers;
+}
+
+
+void Charge::find_potentials
+(
+    int number_of_atoms, double box_length[3], int pbc[3],
+    double* x, double* y, double* z, double* potential
+)
+{
+    double charged_impurity_range_square = charged_impurity_range
+                                       * charged_impurity_range;
+    double box_length_half[3];
+    for (int d = 0; d < 3; ++d) 
+        box_length_half[d] = box_length[d] * 0.5;
+    for (int n1 = 0; n1 < number_of_atoms; ++n1)
+    {
+        potential[n1] = 0.0;
+        double x1 = x[n1];
+        double y1 = y[n1];
+        double z1 = z[n1];
+        for (int i = 0; i < number_of_charged_impurities; ++i)
+        {
+            int n2 = impurity_indices[i];
+            double r12[3];
+            r12[0] = x[n2] - x1;
+            r12[1] = y[n2] - y1;
+            r12[2] = z[n2] - z1;
+            double d12_square = 0.0;
+            for (int d = 0; d < 3; ++d)
+            {
+                r12[d] = fabs(r12[d]);
+                if (pbc[d] == 1 && r12[d] > box_length_half[d])
+                {
+                    r12[d] = box_length[d] - r12[d];
+                }
+                d12_square += r12[d] * r12[d];
+            }
+            d12_square /= charged_impurity_range_square;
+            potential[n1] += impurity_strength[i]*exp(-d12_square*0.5);
+        }
+    }
+}
+
+
+void Charge::add_charged_impurities
+(
+    std::mt19937& generator, int number_of_atoms, double box_length[3],
+    int pbc[3], double* x, double* y, double* z, double* potential
+)
+{
+    impurity_indices = new int[number_of_charged_impurities];
+    impurity_strength = new double[number_of_charged_impurities];
+    create_random_numbers(generator, number_of_atoms, 
+        number_of_charged_impurities, impurity_indices);
+    double W2 = charged_impurity_strength * 0.5;
+    std::uniform_real_distribution<double> strength(-W2, W2);
+    for (int i = 0; i < number_of_charged_impurities; ++i)
+    {
+        impurity_strength[i] = strength(generator);
+    }
+    find_potentials(number_of_atoms, box_length, pbc, x, y, z, potential);
+    delete[] impurity_indices;
+    delete[] impurity_strength;
+}
+
+
