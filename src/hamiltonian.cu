@@ -35,15 +35,15 @@ void Hamiltonian::initialize_gpu(Model& model)
 
     cudaMalloc((void**)&neighbor_number, sizeof(int)  * n);
     cudaMalloc((void**)&neighbor_list,   sizeof(int)  * model.number_of_pairs);
-    cudaMalloc((void**)&potential,       sizeof(real) * n);
-    cudaMalloc((void**)&hopping_real,    sizeof(real) * model.number_of_pairs);
-    cudaMalloc((void**)&hopping_imag,    sizeof(real) * model.number_of_pairs);
-    cudaMalloc((void**)&xx,              sizeof(real) * model.number_of_pairs);
+    cudaMalloc((void**)&potential,       sizeof(double) * n);
+    cudaMalloc((void**)&hopping_real,    sizeof(double) * model.number_of_pairs);
+    cudaMalloc((void**)&hopping_imag,    sizeof(double) * model.number_of_pairs);
+    cudaMalloc((void**)&xx,              sizeof(double) * model.number_of_pairs);
 
     cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int) * n,
         cudaMemcpyHostToDevice);
     delete[] model.neighbor_number;
-    cudaMemcpy(potential, model.potential, sizeof(real) * n,
+    cudaMemcpy(potential, model.potential, sizeof(double) * n,
         cudaMemcpyHostToDevice);
     delete[] model.potential;
 
@@ -61,7 +61,7 @@ void Hamiltonian::initialize_gpu(Model& model)
     delete[] neighbor_list_new;
 
 
-    real *hopping_real_new = new real[model.number_of_pairs];
+    double *hopping_real_new = new double[model.number_of_pairs];
     for (int m = 0; m < max_neighbor; ++m)
     {
         for (int i = 0; i < n; ++i)
@@ -71,10 +71,10 @@ void Hamiltonian::initialize_gpu(Model& model)
     }
     delete[] model.hopping_real;
     cudaMemcpy(hopping_real, hopping_real_new,
-        sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
+        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] hopping_real_new;
 
-    real *hopping_imag_new = new real[model.number_of_pairs];
+    double *hopping_imag_new = new double[model.number_of_pairs];
     for (int m = 0; m < max_neighbor; ++m)
     {
         for (int i = 0; i < n; ++i)
@@ -84,10 +84,10 @@ void Hamiltonian::initialize_gpu(Model& model)
     }
     delete[] model.hopping_imag;
     cudaMemcpy(hopping_imag, hopping_imag_new,
-        sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
+        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] hopping_imag_new;
 
-    real *xx_new = new real[model.number_of_pairs];
+    double *xx_new = new double[model.number_of_pairs];
     for (int m = 0; m < max_neighbor; ++m)
     {
         for (int i = 0; i < n; ++i)
@@ -97,7 +97,7 @@ void Hamiltonian::initialize_gpu(Model& model)
     }
     delete[] model.xx;
     cudaMemcpy(xx, xx_new, 
-        sizeof(real) * model.number_of_pairs, cudaMemcpyHostToDevice);
+        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice);
     delete[] xx_new;
 }
 #else
@@ -116,20 +116,20 @@ void Hamiltonian::initialize_cpu(Model& model)
     memcpy(neighbor_list, model.neighbor_list, sizeof(int) * number_of_pairs);
     delete[] model.neighbor_list;
 
-    potential = new real[n];
-    memcpy(potential, model.potential, sizeof(real) * n);
+    potential = new double[n];
+    memcpy(potential, model.potential, sizeof(double) * n);
     delete[] model.potential;
 
-    hopping_real = new real[number_of_pairs];
-    memcpy(hopping_real, model.hopping_real, sizeof(real) * number_of_pairs);
+    hopping_real = new double[number_of_pairs];
+    memcpy(hopping_real, model.hopping_real, sizeof(double) * number_of_pairs);
     delete[] model.hopping_real;
 
-    hopping_imag = new real[number_of_pairs];
-    memcpy(hopping_imag, model.hopping_imag, sizeof(real) * number_of_pairs);
+    hopping_imag = new double[number_of_pairs];
+    memcpy(hopping_imag, model.hopping_imag, sizeof(double) * number_of_pairs);
     delete[] model.hopping_imag;
 
-    xx = new real[number_of_pairs];
-    memcpy(xx, model.xx, sizeof(real) * number_of_pairs);
+    xx = new double[number_of_pairs];
+    memcpy(xx, model.xx, sizeof(double) * number_of_pairs);
     delete[] model.xx;
 }
 #endif
@@ -169,32 +169,32 @@ Hamiltonian::~Hamiltonian()
 __global__ void gpu_apply_hamiltonian
 (
     int number_of_atoms,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_state_in_real,
-    real *g_state_in_imag,
-    real *g_state_out_real,
-    real *g_state_out_imag
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_state_in_real,
+    double *g_state_in_imag,
+    double *g_state_out_real,
+    double *g_state_out_imag
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     { 
-        real temp_real = g_potential[n] * g_state_in_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_in_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_in_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_in_imag[n]; // on-site
 
         for (int m = 0; m < g_neighbor_number[n]; ++m) 
         {
             int index_1 = m * number_of_atoms + n;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_in_real[index_2];
-            real d = g_state_in_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_in_real[index_2];
+            double d = g_state_in_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
         }
@@ -209,31 +209,31 @@ void cpu_apply_hamiltonian
 (
     int number_of_atoms,
     int max_neighbor,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_state_in_real,
-    real *g_state_in_imag,
-    real *g_state_out_real,
-    real *g_state_out_imag
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_state_in_real,
+    double *g_state_in_imag,
+    double *g_state_out_real,
+    double *g_state_out_imag
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     { 
-        real temp_real = g_potential[n] * g_state_in_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_in_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_in_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_in_imag[n]; // on-site
 
         for (int m = 0; m < g_neighbor_number[n]; ++m) 
         {
             int index_1 = n * max_neighbor + m;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_in_real[index_2];
-            real d = g_state_in_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_in_real[index_2];
+            double d = g_state_in_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
         }
@@ -271,32 +271,32 @@ void Hamiltonian::apply(Vector& input, Vector& output)
 __global__ void gpu_apply_commutator
 (
     int number_of_atoms,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_xx,
-    real *g_state_in_real,
-    real *g_state_in_imag,
-    real *g_state_out_real,
-    real *g_state_out_imag
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_xx,
+    double *g_state_in_real,
+    double *g_state_in_imag,
+    double *g_state_out_real,
+    double *g_state_out_imag
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {
-        real temp_real = 0.0;
-        real temp_imag = 0.0;
+        double temp_real = 0.0;
+        double temp_imag = 0.0;
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = m * number_of_atoms + n;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_in_real[index_2];
-            real d = g_state_in_imag[index_2];
-            real xx = g_xx[index_1]; 
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_in_real[index_2];
+            double d = g_state_in_imag[index_2];
+            double xx = g_xx[index_1]; 
             temp_real -= (a * c - b * d) * xx;
             temp_imag -= (a * d + b * c) * xx;
         }
@@ -309,31 +309,31 @@ void cpu_apply_commutator
 (
     int number_of_atoms,
     int max_neighbor,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_xx,
-    real *g_state_in_real,
-    real *g_state_in_imag,
-    real *g_state_out_real,
-    real *g_state_out_imag
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_xx,
+    double *g_state_in_real,
+    double *g_state_in_imag,
+    double *g_state_out_real,
+    double *g_state_out_imag
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {  
-        real temp_real = 0.0;
-        real temp_imag = 0.0; 
+        double temp_real = 0.0;
+        double temp_imag = 0.0; 
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = n * max_neighbor + m;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_in_real[index_2];
-            real d = g_state_in_imag[index_2];
-            real xx = g_xx[index_1]; 
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_in_real[index_2];
+            double d = g_state_in_imag[index_2];
+            double xx = g_xx[index_1]; 
             temp_real -= (a * c - b * d) * xx;
             temp_imag -= (a * d + b * c) * xx;
         }
@@ -371,28 +371,28 @@ __global__ void gpu_apply_current
     int number_of_atoms,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_xx,
-    real *g_state_in_real,
-    real *g_state_in_imag,
-    real *g_state_out_real,
-    real *g_state_out_imag
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_xx,
+    double *g_state_in_real,
+    double *g_state_in_imag,
+    double *g_state_out_real,
+    double *g_state_out_imag
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {
-        real temp_real = 0.0;
-        real temp_imag = 0.0;
+        double temp_real = 0.0;
+        double temp_imag = 0.0;
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = m * number_of_atoms + n;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_in_real[index_2];
-            real d = g_state_in_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_in_real[index_2];
+            double d = g_state_in_imag[index_2];
             temp_real += (a * c - b * d) * g_xx[index_1];
             temp_imag += (a * d + b * c) * g_xx[index_1];
         }
@@ -407,27 +407,27 @@ void cpu_apply_current
     int max_neighbor,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_xx,
-    real *g_state_in_real,
-    real *g_state_in_imag,
-    real *g_state_out_real,
-    real *g_state_out_imag
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_xx,
+    double *g_state_in_real,
+    double *g_state_in_imag,
+    double *g_state_out_real,
+    double *g_state_out_imag
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        real temp_real = 0.0;
-        real temp_imag = 0.0;
+        double temp_real = 0.0;
+        double temp_imag = 0.0;
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = n * max_neighbor + m;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_in_real[index_2];
-            real d = g_state_in_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_in_real[index_2];
+            double d = g_state_in_imag[index_2];
             temp_real += (a * c - b * d) * g_xx[index_1];
             temp_imag += (a * d + b * c) * g_xx[index_1];
         }
@@ -464,22 +464,22 @@ void Hamiltonian::apply_current(Vector& input, Vector& output)
 __global__ void gpu_chebyshev_01
 (
     int number_of_atoms,
-    real *g_state_0_real,
-    real *g_state_0_imag,
-    real *g_state_1_real,
-    real *g_state_1_imag,
-    real *g_state_real,
-    real *g_state_imag,
-    real b0,
-    real b1,
+    double *g_state_0_real,
+    double *g_state_0_imag,
+    double *g_state_1_real,
+    double *g_state_1_imag,
+    double *g_state_real,
+    double *g_state_imag,
+    double b0,
+    double b1,
     int  direction
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {
-        real bessel_0 = b0;
-        real bessel_1 = b1 * direction;
+        double bessel_0 = b0;
+        double bessel_1 = b1 * direction;
         g_state_real[n] = bessel_0 * g_state_0_real[n]
                         + bessel_1 * g_state_1_imag[n];
         g_state_imag[n] = bessel_0 * g_state_0_imag[n]
@@ -490,21 +490,21 @@ __global__ void gpu_chebyshev_01
 void cpu_chebyshev_01
 (
     int number_of_atoms,
-    real *g_state_0_real,
-    real *g_state_0_imag,
-    real *g_state_1_real,
-    real *g_state_1_imag,
-    real *g_state_real,
-    real *g_state_imag,
-    real b0,
-    real b1,
+    double *g_state_0_real,
+    double *g_state_0_imag,
+    double *g_state_1_real,
+    double *g_state_1_imag,
+    double *g_state_real,
+    double *g_state_imag,
+    double b0,
+    double b1,
     int  direction
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        real bessel_0 = b0;
-        real bessel_1 = b1 * direction;
+        double bessel_0 = b0;
+        double bessel_1 = b1 * direction;
         g_state_real[n] = bessel_0 * g_state_0_real[n]
                         + bessel_1 * g_state_1_imag[n];
         g_state_imag[n] = bessel_0 * g_state_0_imag[n]
@@ -518,7 +518,7 @@ void cpu_chebyshev_01
 void Hamiltonian::chebyshev_01
 (
     Vector& state_0, Vector& state_1, Vector& state,
-    real bessel_0, real bessel_1, int direction
+    double bessel_0, double bessel_1, int direction
 )
 {
 #ifndef CPU_ONLY
@@ -545,38 +545,38 @@ void Hamiltonian::chebyshev_01
 __global__ void gpu_chebyshev_2
 (
     int number_of_atoms,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_state_0_real,
-    real *g_state_0_imag,
-    real *g_state_1_real,
-    real *g_state_1_imag,
-    real *g_state_2_real,
-    real *g_state_2_imag,
-    real *g_state_real,
-    real *g_state_imag,
-    real bessel_m,
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_state_0_real,
+    double *g_state_0_imag,
+    double *g_state_1_real,
+    double *g_state_1_imag,
+    double *g_state_2_real,
+    double *g_state_2_imag,
+    double *g_state_real,
+    double *g_state_imag,
+    double bessel_m,
     int  label
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {
-        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
 
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = m * number_of_atoms + n;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_1_real[index_2];
-            real d = g_state_1_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_1_real[index_2];
+            double d = g_state_1_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
         }
@@ -621,37 +621,37 @@ void cpu_chebyshev_2
 (
     int number_of_atoms,
     int max_neighbor,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_state_0_real,
-    real *g_state_0_imag,
-    real *g_state_1_real,
-    real *g_state_1_imag,
-    real *g_state_2_real,
-    real *g_state_2_imag,
-    real *g_state_real,
-    real *g_state_imag,
-    real bessel_m,
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_state_0_real,
+    double *g_state_0_imag,
+    double *g_state_1_real,
+    double *g_state_1_imag,
+    double *g_state_2_real,
+    double *g_state_2_imag,
+    double *g_state_real,
+    double *g_state_imag,
+    double bessel_m,
     int  label
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
 
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = n * max_neighbor + m;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_1_real[index_2];
-            real d = g_state_1_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_1_real[index_2];
+            double d = g_state_1_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
         }
@@ -698,7 +698,7 @@ void cpu_chebyshev_2
 void Hamiltonian::chebyshev_2
 (
     Vector& state_0, Vector& state_1, Vector& state_2, Vector& state, 
-    real bessel_m, int label
+    double bessel_m, int label
 )
 {
 #ifndef CPU_ONLY
@@ -729,17 +729,17 @@ void Hamiltonian::chebyshev_2
 __global__ void gpu_chebyshev_1x
 (
     int number_of_atoms,
-    real *g_state_1x_real,
-    real *g_state_1x_imag,
-    real *g_state_real,
-    real *g_state_imag,
-    real  g_bessel_1
+    double *g_state_1x_real,
+    double *g_state_1x_imag,
+    double *g_state_real,
+    double *g_state_imag,
+    double  g_bessel_1
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {
-        real b1 = g_bessel_1;
+        double b1 = g_bessel_1;
         g_state_real[n] = + b1 * g_state_1x_imag[n];
         g_state_imag[n] = - b1 * g_state_1x_real[n];
     }
@@ -748,16 +748,16 @@ __global__ void gpu_chebyshev_1x
 void cpu_chebyshev_1x
 (
     int number_of_atoms,
-    real *g_state_1x_real,
-    real *g_state_1x_imag,
-    real *g_state_real,
-    real *g_state_imag,
-    real  g_bessel_1
+    double *g_state_1x_real,
+    double *g_state_1x_imag,
+    double *g_state_real,
+    double *g_state_imag,
+    double  g_bessel_1
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        real b1 = g_bessel_1;
+        double b1 = g_bessel_1;
         g_state_real[n] = + b1 * g_state_1x_imag[n];
         g_state_imag[n] = - b1 * g_state_1x_real[n];
     }
@@ -766,7 +766,7 @@ void cpu_chebyshev_1x
 
 
 // Wrapper for kernel above
-void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
+void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, double bessel_1)
 {
 #ifndef CPU_ONLY
     gpu_chebyshev_1x<<<grid_size, BLOCK_SIZE>>>
@@ -789,57 +789,57 @@ void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, real bessel_1)
 __global__ void gpu_chebyshev_2x
 (
     int number_of_atoms,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_xx,
-    real *g_state_0_real, 
-    real *g_state_0_imag, 
-    real *g_state_0x_real, 
-    real *g_state_0x_imag, 
-    real *g_state_1_real, 
-    real *g_state_1_imag,
-    real *g_state_1x_real, 
-    real *g_state_1x_imag, 
-    real *g_state_2_real, 
-    real *g_state_2_imag,
-    real *g_state_2x_real, 
-    real *g_state_2x_imag, 
-    real *g_state_real, 
-    real *g_state_imag, 
-    real  g_bessel_m,
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_xx,
+    double *g_state_0_real, 
+    double *g_state_0_imag, 
+    double *g_state_0x_real, 
+    double *g_state_0x_imag, 
+    double *g_state_1_real, 
+    double *g_state_1_imag,
+    double *g_state_1x_real, 
+    double *g_state_1x_imag, 
+    double *g_state_2_real, 
+    double *g_state_2_imag,
+    double *g_state_2x_real, 
+    double *g_state_2x_imag, 
+    double *g_state_real, 
+    double *g_state_imag, 
+    double  g_bessel_m,
     int   g_label
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {   
-        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
-        real temp_x_real = g_potential[n] * g_state_1x_real[n]; // on-site
-        real temp_x_imag = g_potential[n] * g_state_1x_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        double temp_x_real = g_potential[n] * g_state_1x_real[n]; // on-site
+        double temp_x_imag = g_potential[n] * g_state_1x_imag[n]; // on-site
 
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = m * number_of_atoms + n;
             int index_2 = g_neighbor_list[index_1];
 
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_1_real[index_2];
-            real d = g_state_1_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_1_real[index_2];
+            double d = g_state_1_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
 
-            real cx = g_state_1x_real[index_2];
-            real dx = g_state_1x_imag[index_2];
+            double cx = g_state_1x_real[index_2];
+            double dx = g_state_1x_imag[index_2];
             temp_x_real += a * cx - b * dx; // hopping
             temp_x_imag += a * dx + b * cx; // hopping
 
-            real xx = g_xx[index_1];
+            double xx = g_xx[index_1];
             temp_x_real -= (a * c - b * d) * xx; // hopping
             temp_x_imag -= (a * d + b * c) * xx; // hopping
         }
@@ -858,7 +858,7 @@ __global__ void gpu_chebyshev_2x
         g_state_2x_real[n] = temp_x_real;
         g_state_2x_imag[n] = temp_x_imag;
 
-        real bessel_m = g_bessel_m;
+        double bessel_m = g_bessel_m;
         switch (g_label)
         {
             case 1:
@@ -893,56 +893,56 @@ void cpu_chebyshev_2x
 (
     int number_of_atoms,
     int max_neighbor,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_xx,
-    real *g_state_0_real, 
-    real *g_state_0_imag, 
-    real *g_state_0x_real, 
-    real *g_state_0x_imag, 
-    real *g_state_1_real, 
-    real *g_state_1_imag,
-    real *g_state_1x_real, 
-    real *g_state_1x_imag, 
-    real *g_state_2_real, 
-    real *g_state_2_imag,
-    real *g_state_2x_real, 
-    real *g_state_2x_imag, 
-    real *g_state_real, 
-    real *g_state_imag, 
-    real  g_bessel_m,
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_xx,
+    double *g_state_0_real, 
+    double *g_state_0_imag, 
+    double *g_state_0x_real, 
+    double *g_state_0x_imag, 
+    double *g_state_1_real, 
+    double *g_state_1_imag,
+    double *g_state_1x_real, 
+    double *g_state_1x_imag, 
+    double *g_state_2_real, 
+    double *g_state_2_imag,
+    double *g_state_2x_real, 
+    double *g_state_2x_imag, 
+    double *g_state_real, 
+    double *g_state_imag, 
+    double  g_bessel_m,
     int   g_label
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {   
-        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
-        real temp_x_real = g_potential[n] * g_state_1x_real[n]; // on-site
-        real temp_x_imag = g_potential[n] * g_state_1x_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        double temp_x_real = g_potential[n] * g_state_1x_real[n]; // on-site
+        double temp_x_imag = g_potential[n] * g_state_1x_imag[n]; // on-site
 
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = n * max_neighbor + m;
             int index_2 = g_neighbor_list[index_1];
 
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_1_real[index_2];
-            real d = g_state_1_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_1_real[index_2];
+            double d = g_state_1_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
 
-            real cx = g_state_1x_real[index_2];
-            real dx = g_state_1x_imag[index_2];
+            double cx = g_state_1x_real[index_2];
+            double dx = g_state_1x_imag[index_2];
             temp_x_real += a * cx - b * dx; // hopping
             temp_x_imag += a * dx + b * cx; // hopping
 
-            real xx = g_xx[index_1];
+            double xx = g_xx[index_1];
             temp_x_real -= (a * c - b * d) * xx; // hopping
             temp_x_imag -= (a * d + b * c) * xx; // hopping
         }
@@ -961,7 +961,7 @@ void cpu_chebyshev_2x
         g_state_2x_real[n] = temp_x_real;
         g_state_2x_imag[n] = temp_x_imag;
 
-        real bessel_m = g_bessel_m;
+        double bessel_m = g_bessel_m;
         switch (g_label)
         {
             case 1:
@@ -998,7 +998,7 @@ void cpu_chebyshev_2x
 void Hamiltonian::chebyshev_2x
 (
     Vector& state_0, Vector& state_0x, Vector& state_1, Vector& state_1x,
-    Vector& state_2, Vector& state_2x, Vector& state, real bessel_m, int label
+    Vector& state_2, Vector& state_2x, Vector& state, double bessel_m, int label
 )
 {
 #ifndef CPU_ONLY
@@ -1030,34 +1030,34 @@ void Hamiltonian::chebyshev_2x
 __global__ void gpu_kernel_polynomial
 (
     int number_of_atoms,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_state_0_real,
-    real *g_state_0_imag,
-    real *g_state_1_real,
-    real *g_state_1_imag,
-    real *g_state_2_real,
-    real *g_state_2_imag
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_state_0_real,
+    double *g_state_0_imag,
+    double *g_state_1_real,
+    double *g_state_1_imag,
+    double *g_state_2_real,
+    double *g_state_2_imag
 )
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_atoms)
     {
-        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
         
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = m * number_of_atoms + n;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_1_real[index_2];
-            real d = g_state_1_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_1_real[index_2];
+            double d = g_state_1_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
         }
@@ -1076,33 +1076,33 @@ void cpu_kernel_polynomial
 (
     int number_of_atoms,
     int max_neighbor,
-    real energy_max,
+    double energy_max,
     int *g_neighbor_number,
     int *g_neighbor_list,
-    real *g_potential,
-    real *g_hopping_real,
-    real *g_hopping_imag,
-    real *g_state_0_real,
-    real *g_state_0_imag,
-    real *g_state_1_real,
-    real *g_state_1_imag,
-    real *g_state_2_real,
-    real *g_state_2_imag
+    double *g_potential,
+    double *g_hopping_real,
+    double *g_hopping_imag,
+    double *g_state_0_real,
+    double *g_state_0_imag,
+    double *g_state_1_real,
+    double *g_state_1_imag,
+    double *g_state_2_real,
+    double *g_state_2_imag
 )
 {
     for (int n = 0; n < number_of_atoms; ++n)
     {
-        real temp_real = g_potential[n] * g_state_1_real[n]; // on-site
-        real temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
+        double temp_real = g_potential[n] * g_state_1_real[n]; // on-site
+        double temp_imag = g_potential[n] * g_state_1_imag[n]; // on-site
         
         for (int m = 0; m < g_neighbor_number[n]; ++m)
         {
             int index_1 = n * max_neighbor + m;
             int index_2 = g_neighbor_list[index_1];
-            real a = g_hopping_real[index_1];
-            real b = g_hopping_imag[index_1];
-            real c = g_state_1_real[index_2];
-            real d = g_state_1_imag[index_2];
+            double a = g_hopping_real[index_1];
+            double b = g_hopping_imag[index_1];
+            double c = g_state_1_real[index_2];
+            double d = g_state_1_imag[index_2];
             temp_real += a * c - b * d; // hopping
             temp_imag += a * d + b * c; // hopping
         }

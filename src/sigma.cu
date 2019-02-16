@@ -26,7 +26,6 @@
 #include <fstream>
 #define BLOCK_SIZE 512     // optimized
 #define PI 3.141592653589793
-typedef double real;
 
 
 // Find the Chebyshev moments defined in Eqs. (32-34) 
@@ -69,12 +68,12 @@ void find_moments_chebyshev
 
 // Jackson damping in Eq. (35) of [Comput. Phys. Commun.185, 28 (2014)].
 void apply_damping
-(Model& model, real *inner_product_real, real *inner_product_imag)
+(Model& model, double *inner_product_real, double *inner_product_imag)
 {
     for (int k = 0; k < model.number_of_moments; ++k)
     {
-        real factor = 1.0 / (model.number_of_moments + 1);
-        real damping = (1 - k * factor) * cos(k * PI * factor)
+        double factor = 1.0 / (model.number_of_moments + 1);
+        double damping = (1 - k * factor) * cos(k * PI * factor)
                      + sin(k * PI * factor) * factor / tan(PI * factor);
         inner_product_real[k] *= damping;
         inner_product_imag[k] *= damping;
@@ -86,18 +85,18 @@ void apply_damping
 void perform_chebyshev_summation
 (
     Model& model,
-    real *inner_product_real,
-    real *inner_product_imag,
-    real *correlation_function
+    double *inner_product_real,
+    double *inner_product_imag,
+    double *correlation_function
 )
 {
     for (int step1 = 0; step1 < model.number_of_energy_points; ++step1)
     {
-        real energy_scaled = model.energy[step1] / model.energy_max;
-        real chebyshev_0 = 1.0;
-        real chebyshev_1 = energy_scaled;
-        real chebyshev_2;
-        real temp = inner_product_real[1] * chebyshev_1;
+        double energy_scaled = model.energy[step1] / model.energy_max;
+        double chebyshev_0 = 1.0;
+        double chebyshev_1 = energy_scaled;
+        double chebyshev_2;
+        double temp = inner_product_real[1] * chebyshev_1;
         for (int step2 = 2; step2 < model.number_of_moments; ++step2)
         {
             chebyshev_2 = 2.0 * energy_scaled * chebyshev_1 - chebyshev_0;
@@ -120,7 +119,7 @@ void perform_chebyshev_summation
 // See Eq. (36) and Algorithm 6 in [Comput. Phys. Commun.185, 28 (2014)].
 void evolve
 (
-    Model& model, int direction, real time_step_scaled,
+    Model& model, int direction, double time_step_scaled,
     Hamiltonian& H, Vector& state_in
 )
 {
@@ -131,13 +130,13 @@ void evolve
     H.apply(state_in, state_1);
 
     // |final_state> = c_0 * T_0(H) |psi> + c_1 * T_1(H) |psi>
-    real bessel_0 = j0(time_step_scaled);
-    real bessel_1 = 2.0 * j1(time_step_scaled);
+    double bessel_0 = j0(time_step_scaled);
+    double bessel_1 = 2.0 * j1(time_step_scaled);
     H.chebyshev_01(state_0, state_1, state_in, bessel_0, bessel_1, direction);
 
     for (int m = 2; m < 1000000; ++m)
     {
-        real bessel_m = jn(m, time_step_scaled);
+        double bessel_m = jn(m, time_step_scaled);
         if (bessel_m < 1.0e-15 && bessel_m > -1.0e-15) { break; }
         bessel_m *= 2.0;
         int label;
@@ -161,7 +160,7 @@ void evolve
 // See Eq. (37) and Algorithm 7 in [Comput. Phys. Commun.185, 28 (2014)].
 void evolvex
 (
-    Model& model, int direction, real time_step_scaled,
+    Model& model, int direction, double time_step_scaled,
     Hamiltonian& H, Vector& state_in
 )
 {
@@ -177,12 +176,12 @@ void evolvex
     H.apply_commutator(state_in, state_1x);
 
     // |final_state> = c_1 * [X, T_1(H)] |psi>
-    real bessel_1 = 2.0 * j1(time_step_scaled);
+    double bessel_1 = 2.0 * j1(time_step_scaled);
     H.chebyshev_1x(state_1x, state_in, bessel_1);
 
     for (int m = 2; m <= 1000000; ++m)
     {
-        real bessel_m = jn(m, time_step_scaled);
+        double bessel_m = jn(m, time_step_scaled);
         if (bessel_m < 1.0e-15 && bessel_m > -1.0e-15) { break; }
         bessel_m *= 2.0;
         int label;
@@ -213,13 +212,13 @@ void find_dos(Model& model, Hamiltonian& H, Vector& random_state, int flag)
 {
     Vector inner_product_2(model.number_of_moments);
 
-    real *dos;
-    real *inner_product_real;
-    real *inner_product_imag;
+    double *dos;
+    double *inner_product_real;
+    double *inner_product_imag;
 
-    dos = new real[model.number_of_energy_points];
-    inner_product_real = new real[model.number_of_moments];
-    inner_product_imag = new real[model.number_of_moments];
+    dos = new double[model.number_of_energy_points];
+    inner_product_real = new double[model.number_of_moments];
+    inner_product_imag = new double[model.number_of_moments];
 
     find_moments_chebyshev
     (model, H, random_state, random_state, inner_product_2);
@@ -257,12 +256,12 @@ void find_dos(Model& model, Hamiltonian& H, Vector& random_state, int flag)
 void find_vac0(Model& model, Hamiltonian& H, Vector& random_state)
 {
     Vector inner_product_2(model.number_of_moments);
-    real *inner_product_real; 
-    real *inner_product_imag;
-    real *vac0;
-    inner_product_real = new real[model.number_of_moments];
-    inner_product_imag = new real[model.number_of_moments];
-    vac0 = new real[model.number_of_energy_points];
+    double *inner_product_real; 
+    double *inner_product_imag;
+    double *vac0;
+    inner_product_real = new double[model.number_of_moments];
+    inner_product_imag = new double[model.number_of_moments];
+    vac0 = new double[model.number_of_energy_points];
 
     Vector state(model.number_of_atoms);
     H.apply_current(random_state, state);
@@ -301,13 +300,13 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
     Vector state_right(random_state);
     Vector inner_product_2(model.number_of_moments);
 
-    real *inner_product_real; 
-    real *inner_product_imag;
-    real *vac;
+    double *inner_product_real; 
+    double *inner_product_imag;
+    double *vac;
 
-    vac = new real[model.number_of_energy_points];
-    inner_product_real = new real[model.number_of_moments];
-    inner_product_imag = new real[model.number_of_moments];
+    vac = new double[model.number_of_energy_points];
+    inner_product_real = new double[model.number_of_moments];
+    inner_product_imag = new double[model.number_of_moments];
 
     H.apply_current(state_left, state_right);
 
@@ -339,7 +338,7 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
 
         if (m < model.number_of_steps_correlation - 1)
         {
-            real time_step_scaled = model.time_step[m] * model.energy_max;
+            double time_step_scaled = model.time_step[m] * model.energy_max;
             evolve(model, -1, time_step_scaled, H, state_left);
             evolve(model, -1, time_step_scaled, H, state_right);
         }
@@ -362,15 +361,15 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
     Vector state_copy(model.number_of_atoms);
     Vector inner_product_2(model.number_of_moments);
 
-    real *inner_product_real;
-    real *inner_product_imag;
-    real *msd;
+    double *inner_product_real;
+    double *inner_product_imag;
+    double *msd;
 
-    msd = new real[model.number_of_energy_points];
-    inner_product_real = new real[model.number_of_moments];
-    inner_product_imag = new real[model.number_of_moments];
+    msd = new double[model.number_of_energy_points];
+    inner_product_real = new double[model.number_of_moments];
+    inner_product_imag = new double[model.number_of_moments];
 
-    real time_step_scaled = model.time_step[0] * model.energy_max;
+    double time_step_scaled = model.time_step[0] * model.energy_max;
     evolve(model, 1, time_step_scaled, H, state);
     evolvex(model, 1, time_step_scaled, H, state_x);
 
@@ -433,13 +432,13 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
     Vector state_sz(model.number_of_atoms);
     Vector inner_product_2(model.number_of_moments);
 
-    real *inner_product_real;
-    real *inner_product_imag;
-    real *S;
+    double *inner_product_real;
+    double *inner_product_imag;
+    double *S;
 
-    S = new real[model.number_of_energy_points];
-    inner_product_real = new real[model.number_of_moments];
-    inner_product_imag = new real[model.number_of_moments];
+    S = new double[model.number_of_energy_points];
+    inner_product_real = new double[model.number_of_moments];
+    inner_product_imag = new double[model.number_of_moments];
 
     std::ofstream output(model.input_dir + "/S.out", std::ios::app);
     if (!output.is_open())
@@ -470,7 +469,7 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
         if (m < model.number_of_steps_correlation - 1)
         {
             // update U^m |phi> to U^(m+1) |phi>
-            real time_step_scaled = model.time_step[m] * model.energy_max;
+            double time_step_scaled = model.time_step[m] * model.energy_max;
             evolve(model, 1, time_step_scaled, H, state);
         }
     }

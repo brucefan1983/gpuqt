@@ -68,7 +68,7 @@ void Model::initialize_neighbor()
 }
 
 
-real reduce_distance(real d, real box)
+double reduce_distance(double d, double box)
 {
     if (d > box/2.0)
         return d-box;
@@ -91,9 +91,9 @@ void Model::initialize_positions()
     }
     print_started_reading(filename);
 
-    real box;
+    double box;
     input >> box >> volume;
-    real *x = new real[number_of_atoms];
+    double *x = new double[number_of_atoms];
 
     for (int i=0; i<number_of_atoms; ++i)
         input >> x[i];
@@ -103,7 +103,7 @@ void Model::initialize_positions()
               << box << std::endl;
     std::cout << "- System volume is " << volume << std::endl;
 
-    xx = new real[number_of_pairs];
+    xx = new double[number_of_pairs];
     for (int n = 0; n < number_of_atoms; ++n)
     {
         for (int m = 0; m < neighbor_number[n]; ++m)
@@ -136,7 +136,7 @@ void Model::initialize_potential()
         std::cout << "- On-site potential will be read in" << std::endl;
     }
 
-    potential = new real[number_of_atoms];
+    potential = new double[number_of_atoms];
 
     for (int n = 0; n < number_of_atoms; ++n)
     {
@@ -192,8 +192,8 @@ void Model::initialize_hopping()
         }
     }
 
-    hopping_real = new real[number_of_pairs];
-    hopping_imag = new real[number_of_pairs];
+    hopping_real = new double[number_of_pairs];
+    hopping_imag = new double[number_of_pairs];
     for (int n = 0; n < number_of_atoms; ++n)
     {
         for (int m = 0; m < neighbor_number[n]; ++m)

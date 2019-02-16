@@ -20,7 +20,6 @@
 
 #pragma once
 #include <random>
-typedef double real;
 class Vector;
 
 
@@ -46,20 +45,20 @@ public:
     int number_of_steps_correlation = 0;
     int number_of_local_orbitals = 0;
     std::string input_dir;
-    real energy_max = 10;
+    double energy_max = 10;
 
-    real *energy;
-    real *time_step;
+    double *energy;
+    double *time_step;
     std::vector<int> local_orbitals;
     
     int *neighbor_number;
     int *neighbor_list;  
-    real *xx;
-    real *potential;
-    real *hopping_real;
-    real *hopping_imag;
+    double *xx;
+    double *potential;
+    double *hopping_real;
+    double *hopping_imag;
 
-    real volume;
+    double volume;
     
 private:
 
@@ -84,7 +83,7 @@ private:
     void initialize_lattice_model();
     void add_anderson_disorder();
     void add_vacancies();
-    void find_potentials(int*, real*);
+    void find_potentials(int*, double*);
     void add_charged_impurities();
     void create_random_numbers(int, int, int*);
     void specify_vacancies(int*, int);
@@ -95,19 +94,19 @@ private:
 
     // disorder
     bool has_anderson_disorder = false;
-    real anderson_disorder_strength;
+    double anderson_disorder_strength;
 
     bool has_vacancy_disorder = false;
     int number_of_vacancies;
 
     bool has_charged_impurities = false;
-    real charged_impurity_strength;
-    real charged_impurity_range;
+    double charged_impurity_strength;
+    double charged_impurity_range;
     int number_of_charged_impurities;
 
     int pbc[3];
-    real box_length[3];
-    std::vector<real> x, y, z;
+    double box_length[3];
+    std::vector<double> x, y, z;
 
     std::mt19937 generator;
 };

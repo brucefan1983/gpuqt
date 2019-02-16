@@ -19,7 +19,6 @@
 
 
 #pragma once
-typedef double real;
 
 
 class Vector
@@ -33,14 +32,14 @@ public:
     void add(Vector& other);
     void copy(Vector& other);
     void apply_sz(Vector& other);
-    void copy_from_host(real* other_real, real* other_imag);
-    void copy_to_host(real* target_real, real* target_imag);
+    void copy_from_host(double* other_real, double* other_imag);
+    void copy_to_host(double* target_real, double* target_imag);
     void swap(Vector& other);
     void inner_product_1(int, Vector& other, Vector& target, int offset);
     void inner_product_2(int, int, Vector& target);
     
-    real* real_part;
-    real* imag_part;
+    double* real_part;
+    double* imag_part;
     
 private:
 

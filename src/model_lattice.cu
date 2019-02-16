@@ -27,8 +27,8 @@
 
 void Model::add_anderson_disorder()
 {
-    real W2 = anderson_disorder_strength * 0.5;
-    std::uniform_real_distribution<real> on_site_potential(-W2, W2);
+    double W2 = anderson_disorder_strength * 0.5;
+    std::uniform_real_distribution<double> on_site_potential(-W2, W2);
     for (int n = 0; n < number_of_atoms; ++n)
     {
         potential[n] = on_site_potential(generator);
@@ -99,9 +99,9 @@ void Model::add_vacancies()
     // copy some data
     int *neighbor_number_pristine = new int[number_of_atoms];
     int *neighbor_list_pristine = new int[number_of_pairs];
-    real *hopping_real_pristine = new real[number_of_pairs];
-    real *hopping_imag_pristine = new real[number_of_pairs];
-    real *xx_pristine = new real[number_of_pairs];
+    double *hopping_real_pristine = new double[number_of_pairs];
+    double *hopping_imag_pristine = new double[number_of_pairs];
+    double *xx_pristine = new double[number_of_pairs];
 
     for (int n = 0; n < number_of_atoms; ++n)
     {
@@ -130,9 +130,9 @@ void Model::add_vacancies()
     // allocate new memory
     neighbor_number = new int[number_of_atoms];
     neighbor_list = new int[number_of_pairs];
-    hopping_real = new real[number_of_pairs];
-    hopping_imag = new real[number_of_pairs];
-    xx = new real[number_of_pairs];
+    hopping_real = new double[number_of_pairs];
+    hopping_imag = new double[number_of_pairs];
+    xx = new double[number_of_pairs];
 
     // specify the distribution of the vacancies
     int *is_vacancy = new int[number_of_atoms_pristine];
@@ -179,27 +179,27 @@ void Model::add_vacancies()
 }
 
 
-void Model::find_potentials(int* impurity_indices, real* impurity_strength)
+void Model::find_potentials(int* impurity_indices, double* impurity_strength)
 {
-    real charged_impurity_range_square = charged_impurity_range
+    double charged_impurity_range_square = charged_impurity_range
                                        * charged_impurity_range;
-    real box_length_half[3];
+    double box_length_half[3];
     for (int d = 0; d < 3; ++d) 
         box_length_half[d] = box_length[d] * 0.5;
     for (int n1 = 0; n1 < number_of_atoms; ++n1)
     {
         potential[n1] = 0.0;
-        real x1 = x[n1];
-        real y1 = y[n1];
-        real z1 = z[n1];
+        double x1 = x[n1];
+        double y1 = y[n1];
+        double z1 = z[n1];
         for (int i = 0; i < number_of_charged_impurities; ++i)
         {
             int n2 = impurity_indices[i];
-            real r12[3];
+            double r12[3];
             r12[0] = x[n2] - x1;
             r12[1] = y[n2] - y1;
             r12[2] = z[n2] - z1;
-            real d12_square = 0.0;
+            double d12_square = 0.0;
             for (int d = 0; d < 3; ++d)
             {
                 r12[d] = fabs(r12[d]);
@@ -219,11 +219,11 @@ void Model::find_potentials(int* impurity_indices, real* impurity_strength)
 void Model::add_charged_impurities()
 {
     int *impurity_indices = new int[number_of_charged_impurities];
-    real *impurity_strength = new real[number_of_charged_impurities];
+    double *impurity_strength = new double[number_of_charged_impurities];
     create_random_numbers
     (number_of_atoms, number_of_charged_impurities, impurity_indices);
-    real W2 = charged_impurity_strength * 0.5;
-    std::uniform_real_distribution<real> strength(-W2, W2);
+    double W2 = charged_impurity_strength * 0.5;
+    std::uniform_real_distribution<double> strength(-W2, W2);
     for (int i = 0; i < number_of_charged_impurities; ++i)
     {
         impurity_strength[i] = strength(generator);
@@ -262,7 +262,7 @@ void Model::initialize_lattice_model()
     int N_orbital;
     int transport_direction;
     int N_cell[3];
-    real lattice_constant[3];
+    double lattice_constant[3];
 
     input >> N_cell[0] >> N_cell[1] >> N_cell[2];
     std::cout << "- Number of cells in the x direction = "
@@ -411,10 +411,10 @@ void Model::initialize_lattice_model()
     number_of_pairs = number_of_atoms * max_neighbor;
     neighbor_number = new int[number_of_atoms];
     neighbor_list = new int [number_of_pairs];
-    hopping_real = new real[number_of_pairs];
-    hopping_imag = new real[number_of_pairs];
-    xx = new real[number_of_pairs];
-    potential = new real[number_of_atoms];
+    hopping_real = new double[number_of_pairs];
+    hopping_imag = new double[number_of_pairs];
+    xx = new double[number_of_pairs];
+    potential = new double[number_of_atoms];
     for (int n = 0; n < number_of_atoms; ++n)
     {
         potential[n] = 0.0;
@@ -428,15 +428,15 @@ void Model::initialize_lattice_model()
         z.resize(number_of_atoms);
     }
 
-    std::vector<real> x_cell, y_cell, z_cell;
+    std::vector<double> x_cell, y_cell, z_cell;
     x_cell.resize(N_orbital);
     y_cell.resize(N_orbital);
     z_cell.resize(N_orbital);
     int number_of_hoppings_per_cell = N_orbital * max_neighbor;
     std::vector<std::vector<int>> hopping_index;
     hopping_index.assign(4, std::vector<int>(number_of_hoppings_per_cell, 0));
-    std::vector<std::vector<real>> hopping_data;
-    hopping_data.assign(2, std::vector<real>(number_of_hoppings_per_cell, 0));
+    std::vector<std::vector<double>> hopping_data;
+    hopping_data.assign(2, std::vector<double>(number_of_hoppings_per_cell, 0));
 
     std::cout << std::endl << "\torbital\tx\ty\tz" << std::endl;
     for (int n = 0; n < N_orbital; ++n)
@@ -459,7 +459,7 @@ void Model::initialize_lattice_model()
         for (int n = 0; n < number_of_hoppings[m]; ++n)
         {
             int nx, ny, nz, m_neighbor;
-            real hopping_real, hopping_imag;
+            double hopping_real, hopping_imag;
             input >> nx >> ny >> nz >> m_neighbor >> hopping_real
                   >> hopping_imag;
 
@@ -518,7 +518,7 @@ void Model::initialize_lattice_model()
                             hopping_index[3][k], N_orbital
                         );
 
-                        real x12 = lattice_constant[transport_direction]
+                        double x12 = lattice_constant[transport_direction]
                                  * hopping_index[transport_direction][k];
                         x12 += x_cell[hopping_index[3][k]] - x_cell[m];
                         xx[neighbor_index] = x12;

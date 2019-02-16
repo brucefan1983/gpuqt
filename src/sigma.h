@@ -24,10 +24,10 @@ class Hamiltonian;
 class Vector;
 
 
-void find_dos(Model &para, Hamiltonian& H, Vector& random_state, int flag);
-void find_vac0(Model &para, Hamiltonian& H, Vector& random_state);
-void find_vac(Model& model, Hamiltonian& H, Vector& random_state);
-void find_msd(Model &para, Hamiltonian& H, Vector& random_state);
-void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state);
+void find_dos(Model&, Hamiltonian&, Vector&, int);
+void find_vac0(Model&, Hamiltonian&, Vector&);
+void find_vac(Model&, Hamiltonian&, Vector&);
+void find_msd(Model&, Hamiltonian&, Vector&);
+void find_spin_polarization(Model&, Hamiltonian&, Vector&);
 
 

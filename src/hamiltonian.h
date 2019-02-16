@@ -19,7 +19,6 @@
 
 
 #pragma once
-typedef double real;
 class Vector;
 class Model;
 
@@ -35,11 +34,11 @@ public:
     void apply_commutator(Vector&, Vector&);
     void apply_current(Vector&, Vector&);
     void kernel_polynomial(Vector&, Vector&, Vector&);
-    void chebyshev_01(Vector&, Vector&, Vector&, real, real, int);
-    void chebyshev_2(Vector&, Vector&, Vector&, Vector&, real, int);
-    void chebyshev_1x(Vector&, Vector&, real);
+    void chebyshev_01(Vector&, Vector&, Vector&, double, double, int);
+    void chebyshev_2(Vector&, Vector&, Vector&, Vector&, double, int);
+    void chebyshev_1x(Vector&, Vector&, double);
     void chebyshev_2x
-    (Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, real, int);
+    (Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, double, int);
 
 private:
 
@@ -48,14 +47,14 @@ private:
 
     int* neighbor_number;
     int* neighbor_list;
-    real* potential;
-    real* hopping_real;
-    real* hopping_imag;
-    real* xx;
+    double* potential;
+    double* hopping_real;
+    double* hopping_imag;
+    double* xx;
     int grid_size;
     int n;
     int max_neighbor;
-    real energy_max;
+    double energy_max;
 };
 
 

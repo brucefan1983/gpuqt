@@ -25,7 +25,7 @@
 
 #ifndef CPU_ONLY 
 __global__ void gpu_set_zero
-(int number_of_elements, real *g_state_real, real *g_state_imag)
+(int number_of_elements, double *g_state_real, double *g_state_imag)
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < number_of_elements)
@@ -36,7 +36,7 @@ __global__ void gpu_set_zero
 }
 #else
 void cpu_set_zero
-(int number_of_elements, real *g_state_real, real *g_state_imag)
+(int number_of_elements, double *g_state_real, double *g_state_imag)
 {
     for (int n = 0; n < number_of_elements; ++n)
     {
@@ -51,7 +51,7 @@ void cpu_set_zero
 void Vector::initialize_gpu(int n)
 {
     this->n = n;
-    array_size = n * sizeof(real);
+    array_size = n * sizeof(double);
     cudaMalloc((void**)&real_part, array_size);
     cudaMalloc((void**)&imag_part, array_size);
 }
@@ -59,9 +59,9 @@ void Vector::initialize_gpu(int n)
 void Vector::initialize_cpu(int n)
 {
     this->n = n;
-    array_size = n * sizeof(real);
-    real_part = new real[n];
-    imag_part = new real[n];
+    array_size = n * sizeof(double);
+    real_part = new double[n];
+    imag_part = new double[n];
 }
 #endif
 
@@ -81,7 +81,7 @@ Vector::Vector(int n)
 
 #ifndef CPU_ONLY
 __global__ void gpu_copy_state
-(int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
+(int N, double *in_real, double *in_imag, double *out_real, double *out_imag)
 {
     int n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n < N)
@@ -92,7 +92,7 @@ __global__ void gpu_copy_state
 }
 #else
 void cpu_copy_state
-(int N, real *in_real, real *in_imag, real *out_real, real *out_imag)
+(int N, double *in_real, double *in_imag, double *out_real, double *out_imag)
 {
     for (int n = 0; n < N; ++n)
     {
@@ -133,7 +133,7 @@ Vector::~Vector()
 
 #ifndef CPU_ONLY
 __global__ void gpu_add_state
-(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+(int n, double *in_real, double *in_imag, double *out_real, double *out_imag)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
@@ -144,7 +144,7 @@ __global__ void gpu_add_state
 }
 #else
 void cpu_add_state
-(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+(int n, double *in_real, double *in_imag, double *out_real, double *out_imag)
 {
     for (int i = 0; i < n; ++i)
     {
@@ -180,7 +180,7 @@ void Vector::copy(Vector& other)
 
 #ifndef CPU_ONLY
 __global__ void gpu_apply_sz
-(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+(int n, double *in_real, double *in_imag, double *out_real, double *out_imag)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
@@ -199,7 +199,7 @@ __global__ void gpu_apply_sz
 }
 #else
 void cpu_apply_sz
-(int n, real *in_real, real *in_imag, real *out_real, real *out_imag)
+(int n, double *in_real, double *in_imag, double *out_real, double *out_imag)
 {
     for (int i = 0; i < n; ++i)
     {
@@ -229,7 +229,7 @@ void Vector::apply_sz(Vector& other)
 }
 
 
-void Vector::copy_from_host(real* other_real, real* other_imag)
+void Vector::copy_from_host(double* other_real, double* other_imag)
 {
 #ifndef CPU_ONLY 
     cudaMemcpy(real_part, other_real, array_size, cudaMemcpyHostToDevice);
@@ -241,7 +241,7 @@ void Vector::copy_from_host(real* other_real, real* other_imag)
 }
 
 
-void Vector::copy_to_host(real* target_real, real* target_imag)
+void Vector::copy_to_host(double* target_real, double* target_imag)
 {
 #ifndef CPU_ONLY
     cudaMemcpy(target_real, real_part, array_size, cudaMemcpyDeviceToHost);
@@ -255,8 +255,8 @@ void Vector::copy_to_host(real* target_real, real* target_imag)
 
 void Vector::swap(Vector& other)
 {
-    real* tmp_real = real_part;
-    real* tmp_imag = imag_part;
+    double* tmp_real = real_part;
+    double* tmp_imag = imag_part;
     real_part = other.real_part,
     imag_part = other.imag_part;
     other.real_part = tmp_real;
@@ -265,7 +265,7 @@ void Vector::swap(Vector& other)
 
 
 #ifndef CPU_ONLY
-__device__ void warp_reduce(volatile real *s, int t)
+__device__ void warp_reduce(volatile double *s, int t)
 {
     s[t] += s[t + 32]; s[t] += s[t + 16]; s[t] += s[t + 8];
     s[t] += s[t + 4];  s[t] += s[t + 2];  s[t] += s[t + 1];
@@ -277,21 +277,21 @@ __device__ void warp_reduce(volatile real *s, int t)
 __global__ void gpu_find_inner_product_1
 (
     int number_of_atoms,
-    real *g_final_state_real,
-    real *g_final_state_imag,
-    real *g_random_state_real,
-    real *g_random_state_imag,
-    real *g_inner_product_real,
-    real *g_inner_product_imag,
+    double *g_final_state_real,
+    double *g_final_state_imag,
+    double *g_random_state_real,
+    double *g_random_state_imag,
+    double *g_inner_product_real,
+    double *g_inner_product_imag,
     int   g_offset
 )
 {
     int tid = threadIdx.x;
     int n = blockIdx.x * blockDim.x + tid;
     int m;
-    real a, b, c, d;
-    __shared__ real s_data_real[BLOCK_SIZE];
-    __shared__ real s_data_imag[BLOCK_SIZE];
+    double a, b, c, d;
+    __shared__ double s_data_real[BLOCK_SIZE];
+    __shared__ double s_data_imag[BLOCK_SIZE];
     s_data_real[tid] = 0.0;
     s_data_imag[tid] = 0.0;
     
@@ -343,28 +343,28 @@ void cpu_find_inner_product_1
 (
     int grid_size,
     int number_of_atoms,
-    real *g_final_state_real,
-    real *g_final_state_imag,
-    real *g_random_state_real,
-    real *g_random_state_imag,
-    real *g_inner_product_real,
-    real *g_inner_product_imag,
+    double *g_final_state_real,
+    double *g_final_state_imag,
+    double *g_random_state_real,
+    double *g_random_state_imag,
+    double *g_inner_product_real,
+    double *g_inner_product_imag,
     int   g_offset
 )
 {
     for (int m = 0; m < grid_size; ++m)
     {
-        real s_data_real = 0.0;
-        real s_data_imag = 0.0;
+        double s_data_real = 0.0;
+        double s_data_imag = 0.0;
         for (int k = 0; k < BLOCK_SIZE; ++k)
         {
             int n = m * BLOCK_SIZE + k;
             if (n < number_of_atoms)
             {
-                real a = g_final_state_real[n];
-                real b = g_final_state_imag[n];
-                real c = g_random_state_real[n];
-                real d = g_random_state_imag[n];
+                double a = g_final_state_real[n];
+                double b = g_final_state_imag[n];
+                double c = g_random_state_real[n];
+                double d = g_random_state_imag[n];
                 s_data_real += (a * c + b * d);
                 s_data_imag += (b * c - a * d);
             }
@@ -402,18 +402,18 @@ void Vector::inner_product_1
 __global__ void gpu_find_inner_product_2
 (
     int number_of_atoms,
-    real *g_inner_product_1_real,
-    real *g_inner_product_1_imag,
-    real *g_inner_product_2_real,
-    real *g_inner_product_2_imag
+    double *g_inner_product_1_real,
+    double *g_inner_product_1_imag,
+    double *g_inner_product_2_real,
+    double *g_inner_product_2_imag
 )
 {
     //<<<para.number_of_energy_points, BLOCK_SIZE)>>>
     int tid = threadIdx.x;
     int patch, n, m;
 
-    __shared__ real s_data_real[BLOCK_SIZE];
-    __shared__ real s_data_imag[BLOCK_SIZE];
+    __shared__ double s_data_real[BLOCK_SIZE];
+    __shared__ double s_data_imag[BLOCK_SIZE];
     s_data_real[tid] = 0.0;
     s_data_imag[tid] = 0.0;
     int number_of_blocks  = (number_of_atoms - 1) / BLOCK_SIZE + 1;
@@ -468,16 +468,16 @@ void cpu_find_inner_product_2
 (
     int number_of_moments,
     int grid_size,
-    real *g_inner_product_1_real,
-    real *g_inner_product_1_imag,
-    real *g_inner_product_2_real,
-    real *g_inner_product_2_imag
+    double *g_inner_product_1_real,
+    double *g_inner_product_1_imag,
+    double *g_inner_product_2_real,
+    double *g_inner_product_2_imag
 )
 {
     for (int m = 0; m < number_of_moments; ++m)
     {
-        real s_data_real = 0.0;
-        real s_data_imag = 0.0;
+        double s_data_real = 0.0;
+        double s_data_imag = 0.0;
         for (int k = 0; k < grid_size; ++k)
         {
             int n = m * grid_size + k;
