@@ -25,18 +25,24 @@
 class Charge
 {
 public:
+    void add_impurities
+    (
+        std::mt19937&, int, double*, int*,  std::vector<double>&,
+        std::vector<double>&,  std::vector<double>&, double*
+    );
+    bool has = false;
+    int Ni;
+    double W;
+    double xi;
+private:
     int *impurity_indices;
     double *impurity_strength;
     void create_random_numbers(std::mt19937&, int, int, int*);
     void find_potentials
-    (int, double*, int*, double*, double*, double*, double*);
-    void add_charged_impurities();
-    void add_charged_impurities
-    (std::mt19937&, int, double*, int*, double*, double*, double*, double*);
-    bool has_charged_impurities = false;
-    double charged_impurity_strength;
-    double charged_impurity_range;
-    int number_of_charged_impurities;
+    (
+        int, double*, int*,  std::vector<double>&,  std::vector<double>&,
+        std::vector<double>&, double*
+    );
 };
 
 

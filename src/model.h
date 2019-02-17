@@ -20,6 +20,7 @@
 
 #pragma once
 #include "anderson.h"
+#include "charge.h"
 #include <random>
 class Vector;
 
@@ -83,8 +84,6 @@ private:
     // only for lattice model
     void initialize_lattice_model();
     void add_vacancies();
-    void find_potentials(int*, double*);
-    void add_charged_impurities();
     void create_random_numbers(int, int, int*);
     void specify_vacancies(int*, int);
     void find_new_atom_index(int*, int*, int);
@@ -94,14 +93,10 @@ private:
 
     // disorder
     Anderson anderson;
+    Charge charge;
 
     bool has_vacancy_disorder = false;
     int number_of_vacancies;
-
-    bool has_charged_impurities = false;
-    double charged_impurity_strength;
-    double charged_impurity_range;
-    int number_of_charged_impurities;
 
     int pbc[3];
     double box_length[3];

@@ -168,61 +168,6 @@ void Model::add_vacancies()
 }
 
 
-void Model::find_potentials(int* impurity_indices, double* impurity_strength)
-{
-    double charged_impurity_range_square = charged_impurity_range
-                                       * charged_impurity_range;
-    double box_length_half[3];
-    for (int d = 0; d < 3; ++d) 
-        box_length_half[d] = box_length[d] * 0.5;
-    for (int n1 = 0; n1 < number_of_atoms; ++n1)
-    {
-        potential[n1] = 0.0;
-        double x1 = x[n1];
-        double y1 = y[n1];
-        double z1 = z[n1];
-        for (int i = 0; i < number_of_charged_impurities; ++i)
-        {
-            int n2 = impurity_indices[i];
-            double r12[3];
-            r12[0] = x[n2] - x1;
-            r12[1] = y[n2] - y1;
-            r12[2] = z[n2] - z1;
-            double d12_square = 0.0;
-            for (int d = 0; d < 3; ++d)
-            {
-                r12[d] = fabs(r12[d]);
-                if (pbc[d] == 1 && r12[d] > box_length_half[d])
-                {
-                    r12[d] = box_length[d] - r12[d];
-                }
-                d12_square += r12[d] * r12[d];
-            }
-            d12_square /= charged_impurity_range_square;
-            potential[n1] += impurity_strength[i]*exp(-d12_square*0.5);
-        }
-    }
-}
-
-
-void Model::add_charged_impurities()
-{
-    int *impurity_indices = new int[number_of_charged_impurities];
-    double *impurity_strength = new double[number_of_charged_impurities];
-    create_random_numbers
-    (number_of_atoms, number_of_charged_impurities, impurity_indices);
-    double W2 = charged_impurity_strength * 0.5;
-    std::uniform_real_distribution<double> strength(-W2, W2);
-    for (int i = 0; i < number_of_charged_impurities; ++i)
-    {
-        impurity_strength[i] = strength(generator);
-    }
-    find_potentials(impurity_indices, impurity_strength);
-    delete[] impurity_indices;
-    delete[] impurity_strength;
-}
-
-
 static int find_index
 (int nx, int ny, int nz, int Nx, int Ny, int Nz, int m, int N_orbital)
 {
@@ -410,7 +355,7 @@ void Model::initialize_lattice_model()
     }
 
     // currently, I only need the positions in this case
-    if (has_charged_impurities)
+    if (charge.has)
     {
         x.resize(number_of_atoms);
         y.resize(number_of_atoms);
@@ -480,7 +425,7 @@ void Model::initialize_lattice_model()
                     );
 
                     // currently, I only need the positions in this case
-                    if (has_charged_impurities)
+                    if (charge.has)
                     {
                         x[n1] = x_cell[m] + lattice_constant[0] * nx1;
                         y[n1] = y_cell[m] + lattice_constant[1] * ny1;
@@ -533,9 +478,10 @@ void Model::initialize_lattice_model()
         anderson.add_disorder(number_of_atoms, generator, potential);
     }
 
-    if (has_charged_impurities)
+    if (charge.has)
     {
-        add_charged_impurities();
+        charge.add_impurities(generator, number_of_atoms, box_length,
+            pbc, x, y, z, potential);
     }
 
     print_finished_reading(filename);

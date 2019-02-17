@@ -51,11 +51,11 @@ void Charge::create_random_numbers
 void Charge::find_potentials
 (
     int number_of_atoms, double box_length[3], int pbc[3],
-    double* x, double* y, double* z, double* potential
+    std::vector<double>& x,  std::vector<double>& y,  std::vector<double>& z, 
+    double* potential
 )
 {
-    double charged_impurity_range_square = charged_impurity_range
-                                       * charged_impurity_range;
+    double charged_impurity_range_square = xi * xi;
     double box_length_half[3];
     for (int d = 0; d < 3; ++d) 
         box_length_half[d] = box_length[d] * 0.5;
@@ -65,7 +65,7 @@ void Charge::find_potentials
         double x1 = x[n1];
         double y1 = y[n1];
         double z1 = z[n1];
-        for (int i = 0; i < number_of_charged_impurities; ++i)
+        for (int i = 0; i < Ni; ++i)
         {
             int n2 = impurity_indices[i];
             double r12[3];
@@ -89,19 +89,19 @@ void Charge::find_potentials
 }
 
 
-void Charge::add_charged_impurities
+void Charge::add_impurities
 (
     std::mt19937& generator, int number_of_atoms, double box_length[3],
-    int pbc[3], double* x, double* y, double* z, double* potential
+    int pbc[3],  std::vector<double>& x,  std::vector<double>& y, 
+     std::vector<double>& z, double* potential
 )
 {
-    impurity_indices = new int[number_of_charged_impurities];
-    impurity_strength = new double[number_of_charged_impurities];
-    create_random_numbers(generator, number_of_atoms, 
-        number_of_charged_impurities, impurity_indices);
-    double W2 = charged_impurity_strength * 0.5;
+    impurity_indices = new int[Ni];
+    impurity_strength = new double[Ni];
+    create_random_numbers(generator, number_of_atoms, Ni, impurity_indices);
+    double W2 = xi * 0.5;
     std::uniform_real_distribution<double> strength(-W2, W2);
-    for (int i = 0; i < number_of_charged_impurities; ++i)
+    for (int i = 0; i < Ni; ++i)
     {
         impurity_strength[i] = strength(generator);
     }

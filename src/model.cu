@@ -167,12 +167,12 @@ void Model::verify_parameters()
             std::cout << "- No Anderson disorder" << std::endl;
         }
 
-        if (has_charged_impurities)
+        if (charge.has)
         {
             std::cout << "- Add charged impurities with " << std::endl
-                      << "  N = " << number_of_charged_impurities << std::endl
-                      << "  W = " << charged_impurity_strength << std::endl
-                      << "  xi = " << charged_impurity_range << std::endl;
+                      << "  N = " << charge.Ni << std::endl
+                      << "  W = " << charge.W << std::endl
+                      << "  xi = " << charge.xi << std::endl;
         }
         else
         {
@@ -210,7 +210,7 @@ void Model::verify_parameters()
                       << "vacancy disorder" << std::endl;
             exit(1);
         }
-        if (has_charged_impurities)
+        if (charge.has)
         {
             std::cout << "Error: General model does not allowed to add "
                       << "charged impurities" << std::endl;
@@ -314,10 +314,10 @@ void Model::initialize_parameters()
         }
         else if (token == "charged_impurity")
         {
-            has_charged_impurities = true;
-            ss >> number_of_charged_impurities;
-            ss >> charged_impurity_strength;
-            ss >> charged_impurity_range;
+            charge.has = true;
+            ss >> charge.Ni;
+            ss >> charge.W;
+            ss >> charge.xi;
         }
         else if (token == "vacancy_disorder")
         {
