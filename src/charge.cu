@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits.h>
+const double cutoff = 5.0;
 
 
 void Charge::create_random_numbers
@@ -55,19 +56,19 @@ void Charge::find_potentials
     double* potential
 )
 {
-    double charged_impurity_range_square = xi * xi;
+    double cutoff_square = cutoff * cutoff * xi * xi;
+    double xi_factor = -0.5 / (xi * xi);
     double box_length_half[3];
-    for (int d = 0; d < 3; ++d) 
-        box_length_half[d] = box_length[d] * 0.5;
-    for (int n1 = 0; n1 < number_of_atoms; ++n1)
+    for (int d = 0; d < 3; ++d) box_length_half[d] = box_length[d] * 0.5;
+    for (int n = 0; n < number_of_atoms; ++n) potential[n] = 0.0;
+    for (int i = 0; i < Ni; ++i)
     {
-        potential[n1] = 0.0;
+        int n1 = impurity_indices[i];
         double x1 = x[n1];
         double y1 = y[n1];
         double z1 = z[n1];
-        for (int i = 0; i < Ni; ++i)
+        for (int n2 = 0; n2 < number_of_atoms; ++n2)
         {
-            int n2 = impurity_indices[i];
             double r12[3];
             r12[0] = x[n2] - x1;
             r12[1] = y[n2] - y1;
