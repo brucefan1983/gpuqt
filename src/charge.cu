@@ -83,8 +83,8 @@ void Charge::find_potentials
                 }
                 d12_square += r12[d] * r12[d];
             }
-            d12_square /= charged_impurity_range_square;
-            potential[n1] += impurity_strength[i]*exp(-d12_square*0.5);
+            if (d12_square > cutoff_square) continue;
+            potential[n2] += impurity_strength[i] * exp(d12_square * xi_factor);
         }
     }
 }
