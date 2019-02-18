@@ -31,18 +31,34 @@ public:
         std::vector<double>&,  std::vector<double>&, double*
     );
     bool has = false;
-    int Ni;
-    double W;
-    double xi;
+    int Ni;       // impurity concentration
+    double W;     // impurity strength
+    double xi;    // impurity range
 private:
-    int *impurity_indices;
-    double *impurity_strength;
-    void create_random_numbers(std::mt19937&, int, int, int*);
+    int Nx, Ny, Nz, Nxyz; // number of cells
+    double rc;            // cutoff distance for impurity potential
+    double rc2;           // cutoff square
+    std::vector<int> cell_count;
+    std::vector<int> cell_count_sum;
+    std::vector<int> cell_contents;
+    std::vector<int> impurity_indices;
+    std::vector<double> impurity_strength;
+    void find_impurity_indices(std::mt19937&, int);
+    void find_impurity_strength(std::mt19937&);
     void find_potentials
     (
-        int, double*, int*,  std::vector<double>&,  std::vector<double>&,
+        int, double*, int*, std::vector<double>&, std::vector<double>&,
         std::vector<double>&, double*
     );
+    int find_cell_id(double, double, double, double);
+    void find_cell_id(double, double, double, double, int&, int&, int&, int&);
+    void find_cell_size(int*, double*);
+    void find_cell_contents
+    (
+        int, int*, double*, std::vector<double>&, 
+        std::vector<double>&, std::vector<double>&
+    );
+    int find_neighbor_cell(int, int, int, int, int, int, int);
 };
 
 
