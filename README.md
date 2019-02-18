@@ -25,6 +25,8 @@ There is a comprehensive review article discussing the linear scaling quantum tr
     * `gpuqt.h` and `gpuqt.cu` - the "driver function"
     * `sigma.h` and `sigma.cu` - functions to obtain the transport properties
     * `model.h`, `model.cu`, `model_general.cu`, and `model_lattice.cu` - class to define the simulation model
+    * `anderson.h` and `anderson.cu` - class to add Anderson disorder
+    * `charge.h` and `charge.cu` - class to add charged impurities
     * `hamiltonian.h` and `hamiltonian.cu` - class to perform the matrix-related operations
     * `vector.h` and `vector.cu` - class to perform the vector-related operations
     
