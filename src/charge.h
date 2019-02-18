@@ -52,7 +52,7 @@ private:
     );
     int find_cell_id(double, double, double, double);
     void find_cell_id(double, double, double, double, int&, int&, int&, int&);
-    void find_cell_size(int*, double*);
+    void find_cell_numbers(int*, double*);
     void find_cell_contents
     (
         int, int*, double*, std::vector<double>&, 

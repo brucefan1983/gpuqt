@@ -37,7 +37,7 @@ void Charge::add_impurities
     impurity_strength.resize(Ni);
     find_impurity_indices(generator, number_of_atoms);
     find_impurity_strength(generator);
-    find_cell_size(pbc, box_length);
+    find_cell_numbers(pbc, box_length);
     find_cell_contents(number_of_atoms, pbc, box_length, x, y, z);
     find_potentials(number_of_atoms, box_length, pbc, x, y, z, potential);
 }
@@ -77,7 +77,7 @@ void Charge::find_impurity_strength(std::mt19937& generator)
 }
 
 
-void Charge::find_cell_size(int pbc[3], double box_length[3])
+void Charge::find_cell_numbers(int pbc[3], double box_length[3])
 {
     if (pbc[0]) Nx = floor(box_length[0] / rc);
     else Nx = 1;
