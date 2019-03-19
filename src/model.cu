@@ -370,6 +370,7 @@ void Model::initialize_parameters()
                       << "--calculate_vac" << std::endl
                       << "--calculate_msd" << std::endl
                       << "--calculate_spin" << std::endl
+                      << "--calculate_ldos" << std::endl
                       << "--number_of_random_vectors" << std::endl
                       << "--number_of_moments" << std::endl
                       << "--energy_max" << std::endl;
