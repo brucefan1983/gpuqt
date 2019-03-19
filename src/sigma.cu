@@ -26,6 +26,7 @@
 #include <fstream>
 #define BLOCK_SIZE 512     // optimized
 #define PI 3.141592653589793
+//#define LORENTZ // Lorentz damping is not as good as Jackson damping
 
 
 // Find the Chebyshev moments defined in Eqs. (32-34) 
@@ -67,6 +68,20 @@ void find_moments_chebyshev
 
 
 // Jackson damping in Eq. (35) of [Comput. Phys. Commun.185, 28 (2014)].
+#ifdef LORENTZ
+void apply_damping
+(Model& model, double *inner_product_real, double *inner_product_imag)
+{
+    double lambda = 4.0;
+    double f1 = sinh(lambda);
+    for (int k = 0; k < model.number_of_moments; ++k)
+    {
+        double f2 = sinh(lambda * (1.0 - k / model.number_of_moments)) / f1;
+        inner_product_real[k] *= f2;
+        inner_product_imag[k] *= f2;
+    }
+}
+#else
 void apply_damping
 (Model& model, double *inner_product_real, double *inner_product_imag)
 {
@@ -79,6 +94,7 @@ void apply_damping
         inner_product_imag[k] *= damping;
     }
 }
+#endif
 
 
 // Do the summation in Eqs. (29-31) in [Comput. Phys. Commun.185, 28 (2014)]
