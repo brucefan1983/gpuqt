@@ -498,3 +498,98 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
 }
 
 
+// find the moments in Eq. (106) of the review paper
+static void find_moments
+(
+    Model& model, Hamiltonian& H, Vector& random_state, 
+    double* moments_real, double* moments_imag
+)
+{
+    int N = model.number_of_atoms;
+    int grid_size = (N - 1) / BLOCK_SIZE + 1;
+    int M = model.number_of_moments;
+    Vector state_right_0(N), state_right_1(N), state_left_0(N), state_left_1(N);
+    Vector state_tmp(N), inner_product_1(grid_size * M), inner_product_2(M);
+    for (int m = 0; m < M; m++) 
+    {  
+        if (m == 0) // <phi| T_0
+        {
+            state_left_0.copy(random_state);
+            state_left_1.copy(state_left_0);
+        }
+        else if (m == 1) // <phi| T_1
+        {
+            H.apply(state_left_0, state_left_1);
+        }
+        else // <phi| T_m 
+        {       
+            H.kernel_polynomial(state_left_0, state_left_1, state_tmp);
+            state_left_0.swap(state_left_1); 
+            state_left_1.swap(state_tmp);
+        } 
+        for (int n = 0; n < M; n++)
+        {
+            if (n == 0) // T_0 V|phi>
+            {
+                H.apply_current(random_state, state_right_0);
+                state_right_1.copy(state_right_0);
+            }
+            else if (n == 1) // T_1 V |phi>
+            {
+                H.apply(state_right_0, state_right_1); 
+            }
+            else // T_n V |phi>
+            {
+                H.kernel_polynomial(state_right_0, state_right_1, state_tmp);
+                state_right_0.swap(state_right_1);
+                state_right_1.swap(state_tmp);
+            }
+            H.apply_current(state_right_1, state_tmp); // V T_n V |phi>
+            int offset = n * grid_size; // <phi| T_m V T_n V |phi>
+            state_tmp.inner_product_1(N, state_left_1, inner_product_1, offset);
+        }
+        inner_product_1.inner_product_2(N, M, inner_product_2);
+        inner_product_2.copy_to_host(moments_real + m*M, moments_imag + m*M);
+    }
+}
+
+
+// currently only for JHG
+void find_moments_kg(Model& model, Hamiltonian& H)
+{
+    int N = model.number_of_atoms;
+    int M = model.number_of_moments;
+    int Nr = model.number_of_random_vectors;
+    Vector random_state(N);
+    double* moments_real = new double[M * M];
+    double* moments_imag = new double[M * M];
+    double* moments_ave = new double[M * M];
+    for (int i = 0; i < Nr; ++i)
+    {
+        model.initialize_state(random_state, -1);
+        find_moments(model, H, random_state, moments_real, moments_imag);
+        for (int m = 0; m < M; ++m)
+            for (int n = 0; n < M; ++n)
+                moments_ave[m * M + n] = 0.0;
+        for (int m = 0; m < M; ++m)
+            for (int n = 0; n < M; ++n)
+                moments_ave[m * M + n] += moments_real[m * M + n];
+    }
+    std::ofstream output(model.input_dir + "/moments_kg.out", std::ios::app);
+    if (!output.is_open())
+    {
+        std::cout << "Error: connot open " + model.input_dir + "/moments_kg.out"
+                  << std::endl;
+        exit(1);
+    }
+    for (int m = 0; m < M; ++m)
+        for (int n = 0; n < M; ++n)
+            output << m << " " << n << " " << moments_ave[m * M + n] / Nr 
+                   << " 0 " << std::endl;
+    output.close();
+    delete[] moments_real;
+    delete[] moments_imag;
+    delete[] moments_ave;
+}
+
+
