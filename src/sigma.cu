@@ -334,6 +334,15 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
         exit(1);
     }
 
+    std::ofstream output_moments
+    (model.input_dir + "/moments_vac.out", std::ios::app);
+    if (!output_moments.is_open())
+    {
+        std::cout <<"Error: cannot open " + model.input_dir + "/moments_vac.out"
+                  << std::endl;
+        exit(1);
+    }
+
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
         std::cout << "- calculating VAC step " << m << std::endl;
@@ -341,6 +350,12 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
         find_moments_chebyshev
         (model, H, state_right, state_left_copy, inner_product_2);
         inner_product_2.copy_to_host(inner_product_real, inner_product_imag);
+
+        for (int n = 0; n < model.number_of_moments; ++n)
+        {
+            output_moments << m << " " << n << " " << inner_product_real[n]
+                           << " 0" << std::endl;
+        }
 
         apply_damping(model, inner_product_real, inner_product_imag);
         perform_chebyshev_summation
@@ -361,6 +376,7 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
     }
 
     output.close();
+    output_moments.close();
 
     delete[] inner_product_real;
     delete[] inner_product_imag;
@@ -397,12 +413,27 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
         exit(1);
     }
 
+    std::ofstream output_moments
+    (model.input_dir + "/moments_msd.out", std::ios::app);
+    if (!output_moments.is_open())
+    {
+        std::cout <<"Error: cannot open " + model.input_dir + "/moments_msd.out"
+                  << std::endl;
+        exit(1);
+    }
+
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
         std::cout << "- calculating MSD step " << m << std::endl;
 
         find_moments_chebyshev(model, H, state_x, state_x, inner_product_2);
         inner_product_2.copy_to_host(inner_product_real, inner_product_imag);
+
+        for (int n = 0; n < model.number_of_moments; ++n)
+        {
+            output_moments << m << " " << n << " " << inner_product_real[n]
+                           << " 0" << std::endl;
+        }
 
         apply_damping(model, inner_product_real, inner_product_imag);
         perform_chebyshev_summation
@@ -433,6 +464,7 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
     }
 
     output.close();
+    output_moments.close();
 
     delete[] inner_product_real;
     delete[] inner_product_imag;
@@ -585,7 +617,7 @@ void find_moments_kg(Model& model, Hamiltonian& H)
     for (int m = 0; m < M; ++m)
         for (int n = 0; n < M; ++n)
             output << m << " " << n << " " << moments_ave[m * M + n] / Nr 
-                   << " 0 " << std::endl;
+                   << " 0" << std::endl;
     output.close();
     delete[] moments_real;
     delete[] moments_imag;
