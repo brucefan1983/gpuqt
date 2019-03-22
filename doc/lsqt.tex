@@ -27,8 +27,8 @@ urlcolor=Blue           % color of external links
   \huge
   {
    \vspace*{1.0cm}
-   LSQT: \\
-   Linear Scaling Quantum Transport \\
+   GPUQT: \\
+   Graphics Processing Units Quantum Transport \\
    \vspace*{1.0cm}
    Reference Manual\\
    \vspace*{1.0cm}
@@ -44,9 +44,6 @@ urlcolor=Blue           % color of external links
   Zheyong Fan (Aalto University)\\
   Ville Vierimaa (Aalto University)\\
   Ari Harju (Aalto University)\\
-  Jose Hugo Garcia (ICN2)\\
-  Aron W. Cummings (ICN2)\\
-  Stephan Roche (ICN2)\\
   }
   \vspace*{1.0cm}
 \end{center}
@@ -55,9 +52,9 @@ urlcolor=Blue           % color of external links
 
 \chapter{Introduction\label{chapter:introduction}}
 
-\section{What is LSQT?}
+\section{What is GPUQT?}
 
-\verb"LSQT" is an efficient and flexible implementation of the linear scaling quantum transport (LSQT) methods reviewed in \citet{fan2018arxiv}. It is an extension of the \verb"GPUQT" code \citet{fan2018cpc}. The \verb"LSQT" code is not fully finished yet, and we aim to complete version 1.0 within a few months.
+\verb"GPUQT" is an efficient and flexible implementation of the linear scaling quantum transport (LSQT) methods reviewed in \citet{fan2018arxiv}.  The \verb"GPUQT" code is not fully finished yet, and we aim to complete version 1.0 within a few months.
 
 Here are the major available features in the current code:
 \begin{itemize}
@@ -85,10 +82,10 @@ TODO list for future versions:
 
 \section{Citations}
 \begin{itemize}
-\item If you use \verb"LSQT" in your published work, we kindly ask you to cite the review paper \cite{fan2018arxiv} which describes the various algorithms used in \verb"LSQT".
+\item If you use \verb"GPUQT" in your published work, we kindly ask you to cite the review paper \cite{fan2018arxiv} which describes the various algorithms used in \verb"GPUQT".
 \item The most important original paper is \cite{roche1997prl} which introduced the concept of MSD. 
-\item When you use \verb"LSQT" to do calculations related to Hall transport, you can cite \citet{ortmann2015prb} and \citet{garcia2015prl}.
-\item When you use \verb"LSQT" to do calculations related to spin transport, you can cite one or more of these papers: \citet{vantuan2014np}, \citet{vierimaa2017prb}, and \cite{Cummings2017prl}.
+\item When you use \verb"GPUQT" to do calculations related to Hall transport (not implemented yet), you can cite \citet{ortmann2015prb} and \citet{garcia2015prl}.
+\item When you use \verb"GPUQT" to do calculations related to spin transport, you can cite one or more of these papers: \citet{vantuan2014np}, \citet{vierimaa2017prb}, and \cite{Cummings2017prl}.
 \item When you use the GPU version, you can cite \cite{fan2018cpc} and/or \cite{fan2014cpc}.
 \end{itemize}
 
@@ -310,7 +307,7 @@ The code has only been tested in linux operating systems and we assume that the 
 
 \subsection{Compiling}
 
-After downloading and unpacking \verb"LSQT", one can see three folders:  \verb"src",  \verb"doc", and \verb"examples". The folder \verb"src" contains all the source files. The folder \verb"examples" contains all the examples. The folder \verb"doc" contains the pdf file you are reading and the source files generating it.
+After downloading and unpacking \verb"GPUQT", one can see three folders:  \verb"src",  \verb"doc", and \verb"examples". The folder \verb"src" contains all the source files. The folder \verb"examples" contains all the examples. The folder \verb"doc" contains the pdf file you are reading and the source files generating it.
 
 To compile the code, first go to the \verb"src" folder. Then one can build either a CPU version or a GPU version or both. 
 \begin{itemize}
@@ -354,9 +351,9 @@ or
     src/lsqt_cpu examples/input.txt
 \end{verbatim}
 
-We now turn to describe the actual input files needed for \verb"LSQT".
+We now turn to describe the actual input files needed for \verb"GPUQT".
 
-\section{Input files for LSQT}
+\section{Input files for GPUQT}
 
 The input files are used to specify the Hamiltonian and related quantities of a simulated system and some controlling parameters. All the input files for a simulation should be in a single folder. We currently provide two ways to specify the Hamiltonian and related quantities. One way is to use \textbf{the general model} and the other is to use \textbf{the lattice model}. In both cases, one needs to prepare a file called \verb"para.in" which contains the controlling parameters, a file called \verb"energy.in" which contains the Fermi energies, and possibly a file called \verb"time_step.in" which contains the time steps.
 
@@ -414,7 +411,7 @@ This file contains the time steps in the VAC, MSD, and spin polarization calcula
     19
     20
 \end{verbatim}
-This file tells that there would be 20 (non-uniform) time steps, from $t_0$ to 20 $t_0$, with a spacing of $t_0$. One should note that the data here are the time steps, not the cumulative times. The cumulative times for this example should be $t_0$, $3t_0$, $6t_0$, $10t_0$, $\cdots$. The unit of time, $t_0$ is fixed by the energy unit, as we set the reduced Planck constant to 1 in \verb"LSQT". Suppose the unit of energy is $\gamma$, the unit of time is then $t_0=\hbar/\gamma$.
+This file tells that there would be 20 (non-uniform) time steps, from $t_0$ to 20 $t_0$, with a spacing of $t_0$. One should note that the data here are the time steps, not the cumulative times. The cumulative times for this example should be $t_0$, $3t_0$, $6t_0$, $10t_0$, $\cdots$. The unit of time, $t_0$ is fixed by the energy unit, as we set the reduced Planck constant to 1. Suppose the unit of energy is $\gamma$, the unit of time is then $t_0=\hbar/\gamma$.
 
 \subsection{Other input files when using the general model}
 
@@ -440,7 +437,7 @@ When using the general model, one has to specify four sets of data: 1) the neigh
 \item The \verb"neighbor.in" input file\\
 This file specifies the topology of the problem using a neighbor list. This will be used to build the sparse Hamiltonian. The first line should have two integer numbers. The first number is the total number of sites in the simulated system. The second number is the maximum possible number of nonzero hopping integrals originated from a given site. For example, in a square lattice with nearest-neighbor hopping only, this number can be set as 4. Using a larger number than needed will just waste memory, while using a smaller number than needed will cause an error. Starting from the second line, the $n$th line contains the number of neighbors and the indices of the neighboring sites of the $(n-1)$th site.
 \item The \verb"hopping.in" input file\\
-This is an optional input file, which contains the hopping integrals (the off-diagonal terms in the Hamiltonian). If this file is not prepared, \verb"LSQT" assumes that all the hopping integrals between pairs of neighboring sites (specified in the \verb"neighbor.in" file) are $-1$. 
+This is an optional input file, which contains the hopping integrals (the off-diagonal terms in the Hamiltonian). If this file is not prepared, it is assumed that all the hopping integrals between pairs of neighboring sites (specified in the \verb"neighbor.in" file) are $-1$. 
 The first line should be either the word \verb"real" or \verb"complex".
 If the word is \verb"real", it means that all the hopping integrals are real numbers. Then, starting from the second line, the $n$th line contains the real hopping integrals between the $(n-1)$th site and its neighboring sites, and the order should be consistent with that in the \verb"neighbor.in" file. The file will look like this:
 \begin{verbatim}
@@ -456,7 +453,7 @@ If the word is \verb"complex", it means that not all the hopping integrals are r
 \end{verbatim}
 The unit of energy is determined by the user. One should consistently use the same unit in other input files such as \verb"potential.in", \verb"energy.in" and \verb"para.in".
 \item The \verb"potential.in" input file\\
-This is an optional input file, which contains the on-site potentials (the diagonal terms in the Hamiltonian). If this file is not prepared, \verb"LSQT" assumes that all the on-site potentials are zero. The $n$th line is the on-site potential of the $n$th site.
+This is an optional input file, which contains the on-site potentials (the diagonal terms in the Hamiltonian). If this file is not prepared, it is assumed that all the on-site potentials are zero. The $n$th line is the on-site potential of the $n$th site.
 \item The \verb"position.in"  input file\\
 This file specifies the coordinates of the sites in the simulated system. This will be used to build the velocity (current) operator. The first line should have two numbers, which are the length of the simulated system in the transport direction and the volume of the system. Be careful with periodic boundary conditions. For example, consider a $1~000 \times 1~000$ regular square lattice with a lattice constant of $a=1$, the length in the $x$ direction should be 1 000, even though the distance between a leftmost site and a rightmost site is only 999. Starting from the second line, the $n$th line is the position component of the $(n-1)$th site in the transport direction. The unit of length is determined by the user. One can either set the lattice constant to 1 or some values in unit of nm or \AA. What is important is to be consistent when reporting the results.
 \end{itemize}
@@ -530,7 +527,7 @@ This means that there is a hopping integtal with real part \verb"h_real" and ima
 
 \section{Output files of LSQT}
 
-We now describe the data format of the output files produced by running \verb"LSQT". We note that for all the output files, results from a new simulation will append to, rather than overwrite existing data.
+We now describe the data format of the output files produced by running the code. We note that for all the output files, results from a new simulation will append to, rather than overwrite existing data.
 
 \subsection{The dos.out file}
 
