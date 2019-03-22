@@ -26,7 +26,7 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 * The directory `src` contains all the source files (with suffix `.h` or `.cu`) of the main code and two makefiles. The source files are:
     * `main.cu` - the main function
-    * `gpuqt.h` and `gpuqt.cu` - the "driver function"
+    * `lsqt.h` and `lsqt.cu` - the "driver function"
     * `sigma.h` and `sigma.cu` - functions to obtain the transport properties
     * `model.h`, `model.cu`, `model_general.cu`, and `model_lattice.cu` - class to define the simulation model
     * `anderson.h` and `anderson.cu` - class to add Anderson disorder
