@@ -79,8 +79,6 @@ TODO list for future versions:
 \begin{itemize}
 \item Optical conductivity
 \item Lattice thermal transport
-\item Python wrapper
-\item Interface with other tight-binding related codes
 \item OpenMP acceleration for the CPU version
 \item MPI acceleration for both the CPU and the GPU versions
 \end{itemize}
@@ -542,6 +540,9 @@ The $n$th column of this file corresponds to the value of $\rho(E_n)$ at the $n$
 \subsection{The vac.out file}
 
 The $n$th column of this file corresponds to the value of $\rho(E_n)C_{vv}(E_n,t)$ at the $n$th energy point $E_n$ specified in the \verb"energy.in" file. If the number of time steps specified in the \verb"time_step.in" file is $N_t$, the first $N_t$ rows correspond to the results obtained by using one random vector. Integrating this quantity with respect to time gives the running electrical conductivity. In 2D, the unit of conductivity is $e^2/\hbar$. In 3D, the unit is $e^2/\hbar/a$, where $a$ is the unit of length. As expected, the unit in 3D can be converted to S/cm.
+
+\subsection{The vac0.out file}
+Similar to the\verb"vac.out"  file, but only for $\rho(E_n)C_{vv}(E_n,t=0)$.
 
 \subsection{The msd.out file}
 
