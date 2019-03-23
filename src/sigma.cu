@@ -353,8 +353,7 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
 
         for (int n = 0; n < model.number_of_moments; ++n)
         {
-            output_moments << m << " " << n << " " << inner_product_real[n]
-                           << " 0" << std::endl;
+            output_moments << inner_product_real[n] << std::endl;
         }
 
         apply_damping(model, inner_product_real, inner_product_imag);
@@ -431,8 +430,7 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
 
         for (int n = 0; n < model.number_of_moments; ++n)
         {
-            output_moments << m << " " << n << " " << inner_product_real[n]
-                           << " 0" << std::endl;
+            output_moments << inner_product_real[n] << std::endl;
         }
 
         apply_damping(model, inner_product_real, inner_product_imag);
