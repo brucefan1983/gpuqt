@@ -70,7 +70,7 @@ plot(x,kpm_jackson,'s','linewidth',1); hold on;
 plot(x,kpm_lorentz,'o','linewidth',1);
 plot(x,kpm_cpgf,'x','linewidth',1);
 
-legend('FTM-Hann','KPM-Jackson','KPM-Lorentz','KPM-CPGF','KPM-NONE','FTM-NONE');
+legend('FTM-Hann','KPM-Jackson','KPM-Lorentz','KPM-CPGF');
 ylabel('\delta(x)','fontsize',12);
 xlabel('x','fontsize',12);
 set(gca,'fontsize',12)
