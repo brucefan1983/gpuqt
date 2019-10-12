@@ -1,5 +1,4 @@
 * This directory contains examples presented in the review paper:
-
 ** Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, 
 Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, 
 Linear Scaling Quantum Transport Methodologies, 
