@@ -35,7 +35,7 @@ urlcolor=Blue           % color of external links
    Version 0.9 \\
    (change to 1.0 upon official release)\\
    \vspace*{1.0cm}
-   (Dec 21, 2018)\\
+   (Oct 13, 2019)\\
   \vspace*{2.0cm}
   }
   \large
@@ -54,7 +54,7 @@ urlcolor=Blue           % color of external links
 
 \section{What is GPUQT?}
 
-\verb"GPUQT" is an efficient and flexible implementation of the linear scaling quantum transport (LSQT) methods reviewed in \citet{fan2018arxiv}.  The \verb"GPUQT" code is not fully finished yet, and we aim to complete version 1.0 within a few months.
+\verb"GPUQT" is an efficient and flexible implementation of some of the linear scaling quantum transport (LSQT) methods reviewed in \citet{fan2018arxiv}.  The \verb"GPUQT" code is not fully finished yet, and we aim to complete version 1.0 within a few months.
 
 Here are the major available features in the current code:
 \begin{itemize}
@@ -65,35 +65,18 @@ Here are the major available features in the current code:
 \item It can be used to calculate the spin polarization, from which one can deduce the spin relaxation time.
 \end{itemize}
 
-TODO list up to version 1.0:
-\begin{itemize}
-\item Improve the features related to model building
-\item Kubo-Bastin formula for Hall transport
-\end{itemize}
-
-
-TODO list for future versions:
-\begin{itemize}
-\item Optical conductivity
-\item Lattice thermal transport
-\item OpenMP acceleration for the CPU version
-\item MPI acceleration for both the CPU and the GPU versions
-\end{itemize}
-
 \section{Citations}
 \begin{itemize}
 \item If you use \verb"GPUQT" in your published work, we kindly ask you to cite the review paper \cite{fan2018arxiv} which describes the various algorithms used in \verb"GPUQT".
 \item The most important original paper is \cite{roche1997prl} which introduced the concept of MSD. 
-\item When you use \verb"GPUQT" to do calculations related to Hall transport (not implemented yet), you can cite \citet{ortmann2015prb} and \citet{garcia2015prl}.
 \item When you use \verb"GPUQT" to do calculations related to spin transport, you can cite one or more of these papers: \citet{vantuan2014np}, \citet{vierimaa2017prb}, and \cite{Cummings2017prl}.
 \item When you use the GPU version, you can cite \cite{fan2018cpc} and/or \cite{fan2014cpc}.
 \end{itemize}
 
 \section{Feedbacks}
 
-You can email the first author if you find errors in the manual or bugs in the source code, or have any suggestions/questions about the manual and code. The following email addresses can be used:
+You can email the first author if you find errors in the manual or bugs in the source code, or have any suggestions/questions about the manual and code. The following email address can be used:
 \begin{itemize}
-\item zheyong.fan(at)aalto.fi (valid at least up to the end of 2019)
 \item brucenju(at)gmail.com
 \end{itemize}
 
@@ -161,18 +144,6 @@ S(E, t) =
 {\textmd{Tr}\left[ \delta(E - \hat{H}_{2N}) \right]},
 \end{equation}
 where $\hat{I}_N \otimes \hat{s}_z(t) = U^{\dagger}(t) (\hat{I}_N \otimes \hat{s}_z) U(t)$, $\hat{I}_N$ is an identity matrix of size $N\times N$ ($N$ is the number of orbitals for one spin), and $\hat{s}_z(t)=\begin{bmatrix} 1 & 0 \\0  &-1\\ \end{bmatrix}$  is the Pauli $z$-matrix. Here we assume that the initial spin polarization is along the $z$ direction. Note that the Hamiltonian $\hat{H}_{2N}$ is defined in the compound Hilbert space formed by the tensor product of the $N$-dimensional orbital space and the $2$-dimensional spin space. 
-
-\subsection{Kubo-Bastin conductivity}
-
-To be written.
-
-\subsection{Optical conductivity}
-
-To be written.
-
-\subsection{Lattice thermal conductivity}
-
-To be written.
 
 \section{Linear-scaling techniques\label{section:numerical}}
 
@@ -324,7 +295,7 @@ The flag \verb"-DDEBUG" means that a fixed seed for the random number generator 
 \begin{verbatim}
     make -f makefile.gpu
 \end{verbatim}
-in the command line. This will produce an executable called \verb"lsqt_gpu" in the \verb"src" folder. To build the GPU version, you need to have a CUDA toolkit and a CUDA-enabled GPU with compute capability of 2.0 or higher. The second line of \verb"makefile.gpu" reads
+in the command line. This will produce an executable called \verb"lsqt_gpu" in the \verb"src" folder. To build the GPU version, you need to have a CUDA toolkit and a CUDA-enabled GPU with compute capability of 3.5 or higher. The second line of \verb"makefile.gpu" reads
 \begin{verbatim}
     CFLAGS = -O3 -std=c++11 -arch=sm_35 -use_fast_math -DDEBUG
 \end{verbatim}
