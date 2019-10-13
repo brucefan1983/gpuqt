@@ -1,0 +1,7 @@
+model                    1
+anderson_disorder        2
+energy_max               7.1
+number_of_moments        2000
+number_of_random_vectors 10
+calculate_msd
+
