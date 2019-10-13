@@ -15,5 +15,6 @@ https://arxiv.org/abs/1811.07387
 |----------------------|---------------|
 | square/ballistic     | figures 5 and 6 in the review paper |
 | square/diffusive     | figures 7 in the review paper |
+| square/cubic         | figures 9 in the review paper |
 | graphene/vacancy     | figures 13 in the review paper |
 
