@@ -1,11 +1,23 @@
 CC = nvcc
+
+ifdef OS # for Windows
+CFLAGS = -O3 -arch=sm_35 -DDEBUG -Xcompiler "/wd 4819"
+else # for Linux
 CFLAGS = -O3 -std=c++11 -arch=sm_35 -DDEBUG
+endif
 
 
 SOURCES = main.cu lsqt.cu sigma.cu vector.cu hamiltonian.cu model.\
 	cu model_general.cu model_lattice.cu anderson.cu charge.cu
+	
+ifdef OS # for Windows
+_OBJ = main.obj lsqt.obj sigma.obj vector.obj hamiltonian.obj model.obj model_general.obj \
+	model_lattice.obj anderson.obj charge.obj
+else # for Linux
 _OBJ = main.o lsqt.o sigma.o vector.o hamiltonian.o model.o model_general.o \
 	model_lattice.o anderson.o charge.o
+endif
+
 HEADERS = sigma.h vector.h lsqt.h hamiltonian.h model.h anderson.h charge.h
 
 
@@ -14,11 +26,20 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: lsqt_gpu
 
-$(ODIR)/%.o: %.cu $(HEADERS)
+ifdef OS # for Windows
+$(ODIR)/%.obj: %.cu $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
+else # for Linux
+$(ODIR)/%.o: %.cu $(HEADERS)
+    $(CC) $(CFLAGS) -c $< -o $@
+endif
 
 lsqt_gpu: $(OBJ)
 	$(CC) $^ -o $@
 
 clean:
-	rm $(ODIR)/*o lsqt_gpu
+ifdef OS # for Windows
+	del $(ODIR)\*.obj lsqt_gpu.*
+else # for Linux
+    rm $(ODIR)/*.o lsqt_gpu
+endif 
