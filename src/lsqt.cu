@@ -159,20 +159,6 @@ static void run_ldos(Model& model, Hamiltonian& H, Vector& random_state)
 }
 
 
-static void run_moments_kg(Model& model, Hamiltonian& H)
-{
-    if (model.calculate_moments_kg)
-    {
-        clock_t time_begin = clock();
-        find_moments_kg(model, H);
-        clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
-        std::cout << "- Time used for finding KG moments = "
-                  << time_used << " s" << std::endl;
-    }
-}
-
-
 void lsqt(std::string input_directory)
 {
     Model model(input_directory);
@@ -191,7 +177,6 @@ void lsqt(std::string input_directory)
         print_finished_random_vector(i);
     }
     run_ldos(model, H, random_state);
-    run_moments_kg(model, H);
 }
 
 

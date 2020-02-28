@@ -334,15 +334,6 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
         exit(1);
     }
 
-    std::ofstream output_moments
-    (model.input_dir + "/moments_vac.out", std::ios::app);
-    if (!output_moments.is_open())
-    {
-        std::cout <<"Error: cannot open " + model.input_dir + "/moments_vac.out"
-                  << std::endl;
-        exit(1);
-    }
-
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
         std::cout << "- calculating VAC step " << m << std::endl;
@@ -350,11 +341,6 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
         find_moments_chebyshev
         (model, H, state_right, state_left_copy, inner_product_2);
         inner_product_2.copy_to_host(inner_product_real, inner_product_imag);
-
-        for (int n = 0; n < model.number_of_moments; ++n)
-        {
-            output_moments << inner_product_real[n] << std::endl;
-        }
 
         apply_damping(model, inner_product_real, inner_product_imag);
         perform_chebyshev_summation
@@ -375,7 +361,6 @@ void find_vac(Model& model, Hamiltonian& H, Vector& random_state)
     }
 
     output.close();
-    output_moments.close();
 
     delete[] inner_product_real;
     delete[] inner_product_imag;
@@ -412,26 +397,12 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
         exit(1);
     }
 
-    std::ofstream output_moments
-    (model.input_dir + "/moments_msd.out", std::ios::app);
-    if (!output_moments.is_open())
-    {
-        std::cout <<"Error: cannot open " + model.input_dir + "/moments_msd.out"
-                  << std::endl;
-        exit(1);
-    }
-
     for (int m = 0; m < model.number_of_steps_correlation; ++m)
     {
         std::cout << "- calculating MSD step " << m << std::endl;
 
         find_moments_chebyshev(model, H, state_x, state_x, inner_product_2);
         inner_product_2.copy_to_host(inner_product_real, inner_product_imag);
-
-        for (int n = 0; n < model.number_of_moments; ++n)
-        {
-            output_moments << inner_product_real[n] << std::endl;
-        }
 
         apply_damping(model, inner_product_real, inner_product_imag);
         perform_chebyshev_summation
@@ -462,7 +433,6 @@ void find_msd(Model& model, Hamiltonian& H, Vector& random_state)
     }
 
     output.close();
-    output_moments.close();
 
     delete[] inner_product_real;
     delete[] inner_product_imag;
@@ -526,100 +496,4 @@ void find_spin_polarization(Model& model, Hamiltonian& H, Vector& random_state)
     delete[] inner_product_imag;
     delete[] S;
 }
-
-
-// find the moments in Eq. (106) of the review paper
-static void find_moments
-(
-    Model& model, Hamiltonian& H, Vector& random_state, 
-    double* moments_real, double* moments_imag
-)
-{
-    int N = model.number_of_atoms;
-    int grid_size = (N - 1) / BLOCK_SIZE + 1;
-    int M = model.number_of_moments;
-    Vector state_right_0(N), state_right_1(N), state_left_0(N), state_left_1(N);
-    Vector state_tmp(N), inner_product_1(grid_size * M), inner_product_2(M);
-    for (int m = 0; m < M; m++) 
-    {  
-        if (m == 0) // <phi| T_0
-        {
-            state_left_0.copy(random_state);
-            state_left_1.copy(state_left_0);
-        }
-        else if (m == 1) // <phi| T_1
-        {
-            H.apply(state_left_0, state_left_1);
-        }
-        else // <phi| T_m 
-        {       
-            H.kernel_polynomial(state_left_0, state_left_1, state_tmp);
-            state_left_0.swap(state_left_1); 
-            state_left_1.swap(state_tmp);
-        } 
-        for (int n = 0; n < M; n++)
-        {
-            if (n == 0) // T_0 V|phi>
-            {
-                H.apply_current(random_state, state_right_0);
-                state_right_1.copy(state_right_0);
-            }
-            else if (n == 1) // T_1 V |phi>
-            {
-                H.apply(state_right_0, state_right_1); 
-            }
-            else // T_n V |phi>
-            {
-                H.kernel_polynomial(state_right_0, state_right_1, state_tmp);
-                state_right_0.swap(state_right_1);
-                state_right_1.swap(state_tmp);
-            }
-            H.apply_current(state_right_1, state_tmp); // V T_n V |phi>
-            int offset = n * grid_size; // <phi| T_m V T_n V |phi>
-            state_tmp.inner_product_1(N, state_left_1, inner_product_1, offset);
-        }
-        inner_product_1.inner_product_2(N, M, inner_product_2);
-        inner_product_2.copy_to_host(moments_real + m*M, moments_imag + m*M);
-    }
-}
-
-
-// currently only for JHG
-void find_moments_kg(Model& model, Hamiltonian& H)
-{
-    int N = model.number_of_atoms;
-    int M = model.number_of_moments;
-    int Nr = model.number_of_random_vectors;
-    Vector random_state(N);
-    double* moments_real = new double[M * M];
-    double* moments_imag = new double[M * M];
-    double* moments_ave = new double[M * M];
-    for (int i = 0; i < Nr; ++i)
-    {
-        model.initialize_state(random_state, -1);
-        find_moments(model, H, random_state, moments_real, moments_imag);
-        for (int m = 0; m < M; ++m)
-            for (int n = 0; n < M; ++n)
-                moments_ave[m * M + n] = 0.0;
-        for (int m = 0; m < M; ++m)
-            for (int n = 0; n < M; ++n)
-                moments_ave[m * M + n] += moments_real[m * M + n];
-    }
-    std::ofstream output(model.input_dir + "/moments_kg.out", std::ios::app);
-    if (!output.is_open())
-    {
-        std::cout << "Error: connot open " + model.input_dir + "/moments_kg.out"
-                  << std::endl;
-        exit(1);
-    }
-    for (int m = 0; m < M; ++m)
-        for (int n = 0; n < M; ++n)
-            output << m << " " << n << " " << moments_ave[m * M + n] / Nr 
-                   << " 0" << std::endl;
-    output.close();
-    delete[] moments_real;
-    delete[] moments_imag;
-    delete[] moments_ave;
-}
-
 

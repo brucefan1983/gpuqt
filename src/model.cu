@@ -240,11 +240,6 @@ void Model::verify_parameters()
     else
         std::cout << "- spin polarization will not be calculated" << std::endl;
 
-    if (calculate_moments_kg)
-        std::cout << "- KG moments will be calculated" << std::endl;
-    else
-        std::cout << "- KG moments will not be calculated" << std::endl;
-
     if (calculate_spin && calculate_vac0)
     {
         std::cout << "Error: spin and VAC0 cannot be calculated together"
@@ -349,10 +344,6 @@ void Model::initialize_parameters()
         {
             calculate_ldos = true;
         }
-        else if (token == "calculate_moments_kg")
-        {
-            calculate_moments_kg = true;
-        }
         else if (token == "number_of_random_vectors")
         {
             ss >> number_of_random_vectors;
@@ -380,7 +371,6 @@ void Model::initialize_parameters()
                       << "--calculate_msd" << std::endl
                       << "--calculate_spin" << std::endl
                       << "--calculate_ldos" << std::endl
-                      << "--calculate_moments_kg" << std::endl
                       << "--number_of_random_vectors" << std::endl
                       << "--number_of_moments" << std::endl
                       << "--energy_max" << std::endl;
