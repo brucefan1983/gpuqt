@@ -31,7 +31,7 @@ $(ODIR)/%.obj: %.cu $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 else # for Linux
 $(ODIR)/%.o: %.cu $(HEADERS)
-    $(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 endif
 
 lsqt_gpu: $(OBJ)
@@ -41,5 +41,5 @@ clean:
 ifdef OS # for Windows
 	del $(ODIR)\*.obj lsqt_gpu.*
 else # for Linux
-    rm $(ODIR)/*.o lsqt_gpu
+	rm $(ODIR)/*.o lsqt_gpu
 endif 
