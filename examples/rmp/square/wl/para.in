@@ -1,0 +1,6 @@
+model                    1
+anderson_disorder        2.0
+energy_max               6.0
+number_of_moments        3000
+calculate_msd
+
