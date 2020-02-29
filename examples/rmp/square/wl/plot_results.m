@@ -62,15 +62,15 @@ ylabel('$\sigma_{max}$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
 figure;
-plot(len(:,1001),sigma_from_msd(:,1001),'d','linewidth',2);
+semilogx(len(:,1001),sigma_from_msd(:,1001),'rs','linewidth',2);
 hold on;
-plot(len(:,751),(sigma_from_msd(:,751)+sigma_from_msd(:,1251))/2,'o','linewidth',2);
+plot(len(:,751),(sigma_from_msd(:,751)+sigma_from_msd(:,1251))/2,'bo','linewidth',2);
 x=1:200;
-plot(x,sigma_sc(1001)-2/pi*log(x/len(index(1001),1001)));
-plot(x,sigma_sc(751)-2/pi*log(x/len(index(751),751)));
-ylim([0,20]);
-legend('E=0','E=1');
-xlabel('L (a)', 'fontsize',font_size,'interpreter','latex');
+plot(x,sigma_sc(1001)-2/pi*log(x/len(index(1001),1001)),'r-');
+plot(x,sigma_sc(751)-2/pi*log(x/len(index(751),751)),'b--');
+ylim([0.1,20]);
+legend('E = 0 (numerical)','E = \gamma (numerical)','E = 0 (theory)','E = \gamma (theory)');
+xlabel('$L$ (a)', 'fontsize',font_size,'interpreter','latex');
 ylabel('$\sigma$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
