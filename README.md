@@ -42,9 +42,8 @@ There is a comprehensive review article discussing the linear scaling quantum tr
 
 ## Prerequisites
 
-* To use the CPU version, it only requires a `g++` compiler.
-* To use the GPU version, it also requires a CUDA-enabled GPU with compute capability of 3.5 or higher and a `CUDA` toolkit.
-* Support both Windows and linux systems.
+* To use the CPU version, it only requires a `g++` compiler and the `make` program.
+* To use the GPU version, it also requires a CUDA-enabled GPU with compute capability of 3.5 or higher and a `CUDA` toolkit. I have tested the GPU version on both Windows (requres the `cl` compiler from MSVC and the `make` program) and Linux systems. 
 
 ## Installing
 
