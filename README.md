@@ -76,5 +76,5 @@ Go to the working directories and run the `MATLAB` scripts we have prepared. Aft
 
 ## Contact
 
-* Zheyong Fan: brucenju(at)gmail.com; zheyong.fan(at)aalto.fi;
+* Zheyong Fan: brucenju(at)gmail.com
 
