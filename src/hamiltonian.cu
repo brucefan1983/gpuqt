@@ -20,6 +20,7 @@
 
 #include "hamiltonian.h"
 #include "model.h"
+#include "error.h"
 #include "vector.h"
 #include <string.h>        // memcpy
 #define BLOCK_SIZE 512     // optimized
@@ -33,18 +34,18 @@ void Hamiltonian::initialize_gpu(Model& model)
     energy_max = model.energy_max;
     grid_size = (model.number_of_atoms - 1) / BLOCK_SIZE + 1;
 
-    cudaMalloc((void**)&neighbor_number, sizeof(int)  * n);
-    cudaMalloc((void**)&neighbor_list,   sizeof(int)  * model.number_of_pairs);
-    cudaMalloc((void**)&potential,       sizeof(double) * n);
-    cudaMalloc((void**)&hopping_real,    sizeof(double) * model.number_of_pairs);
-    cudaMalloc((void**)&hopping_imag,    sizeof(double) * model.number_of_pairs);
-    cudaMalloc((void**)&xx,              sizeof(double) * model.number_of_pairs);
+    CHECK(cudaMalloc((void**)&neighbor_number, sizeof(int)  * n));
+    CHECK(cudaMalloc((void**)&neighbor_list,   sizeof(int)  * model.number_of_pairs));
+    CHECK(cudaMalloc((void**)&potential,       sizeof(double) * n));
+    CHECK(cudaMalloc((void**)&hopping_real,    sizeof(double) * model.number_of_pairs));
+    CHECK(cudaMalloc((void**)&hopping_imag,    sizeof(double) * model.number_of_pairs));
+    CHECK(cudaMalloc((void**)&xx,              sizeof(double) * model.number_of_pairs));
 
-    cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int) * n,
-        cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(neighbor_number, model.neighbor_number, sizeof(int) * n,
+        cudaMemcpyHostToDevice));
     delete[] model.neighbor_number;
-    cudaMemcpy(potential, model.potential, sizeof(double) * n,
-        cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(potential, model.potential, sizeof(double) * n,
+        cudaMemcpyHostToDevice));
     delete[] model.potential;
 
     int *neighbor_list_new = new int[model.number_of_pairs];
@@ -56,8 +57,8 @@ void Hamiltonian::initialize_gpu(Model& model)
         }
     }
     delete[] model.neighbor_list;
-    cudaMemcpy(neighbor_list, neighbor_list_new,
-        sizeof(int) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(neighbor_list, neighbor_list_new,
+        sizeof(int) * model.number_of_pairs, cudaMemcpyHostToDevice));
     delete[] neighbor_list_new;
 
 
@@ -70,8 +71,8 @@ void Hamiltonian::initialize_gpu(Model& model)
         }
     }
     delete[] model.hopping_real;
-    cudaMemcpy(hopping_real, hopping_real_new,
-        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(hopping_real, hopping_real_new,
+        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice));
     delete[] hopping_real_new;
 
     double *hopping_imag_new = new double[model.number_of_pairs];
@@ -83,8 +84,8 @@ void Hamiltonian::initialize_gpu(Model& model)
         }
     }
     delete[] model.hopping_imag;
-    cudaMemcpy(hopping_imag, hopping_imag_new,
-        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(hopping_imag, hopping_imag_new,
+        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice));
     delete[] hopping_imag_new;
 
     double *xx_new = new double[model.number_of_pairs];
@@ -96,8 +97,8 @@ void Hamiltonian::initialize_gpu(Model& model)
         }
     }
     delete[] model.xx;
-    cudaMemcpy(xx, xx_new, 
-        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(xx, xx_new, 
+        sizeof(double) * model.number_of_pairs, cudaMemcpyHostToDevice));
     delete[] xx_new;
 }
 #else
@@ -148,12 +149,12 @@ Hamiltonian::Hamiltonian(Model& model)
 Hamiltonian::~Hamiltonian()
 {
 #ifndef CPU_ONLY
-    cudaFree(neighbor_number);
-    cudaFree(neighbor_list);
-    cudaFree(potential);
-    cudaFree(hopping_real);
-    cudaFree(hopping_imag);
-    cudaFree(xx);
+    CHECK(cudaFree(neighbor_number));
+    CHECK(cudaFree(neighbor_list));
+    CHECK(cudaFree(potential));
+    CHECK(cudaFree(hopping_real));
+    CHECK(cudaFree(hopping_imag));
+    CHECK(cudaFree(xx));
 #else
     delete[] neighbor_number;
     delete[] neighbor_list;
@@ -256,6 +257,7 @@ void Hamiltonian::apply(Vector& input, Vector& output)
         hopping_real, hopping_imag, input.real_part, input.imag_part,
         output.real_part, output.imag_part
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_apply_hamiltonian
     (
@@ -354,6 +356,7 @@ void Hamiltonian::apply_commutator(Vector& input, Vector& output)
         hopping_real, hopping_imag, xx, input.real_part, input.imag_part,
         output.real_part, output.imag_part
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_apply_commutator
     (
@@ -447,6 +450,7 @@ void Hamiltonian::apply_current(Vector& input, Vector& output)
         n, neighbor_number, neighbor_list, hopping_real, hopping_imag, xx,
         input.real_part, input.imag_part, output.real_part, output.imag_part
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_apply_current
     (
@@ -528,6 +532,7 @@ void Hamiltonian::chebyshev_01
         state_1.real_part, state_1.imag_part, state.real_part, state.imag_part,
         bessel_0, bessel_1, direction
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_chebyshev_01
     (
@@ -710,6 +715,7 @@ void Hamiltonian::chebyshev_2
         state_2.real_part, state_2.imag_part, state.real_part, state.imag_part,
         bessel_m, label
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_chebyshev_2
     (
@@ -774,6 +780,7 @@ void Hamiltonian::chebyshev_1x(Vector& input, Vector& output, double bessel_1)
         n, input.real_part, input.imag_part,
         output.real_part, output.imag_part, bessel_1
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_chebyshev_1x
     (
@@ -1011,6 +1018,7 @@ void Hamiltonian::chebyshev_2x
         state_2.real_part, state_2.imag_part, state_2x.real_part,
         state_2x.imag_part, state.real_part, state.imag_part, bessel_m, label
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_chebyshev_2x
     (
@@ -1131,6 +1139,7 @@ void Hamiltonian::kernel_polynomial
         state_1.real_part, state_1.imag_part,
         state_2.real_part, state_2.imag_part
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_kernel_polynomial
     (

@@ -19,6 +19,7 @@
 
 
 #include "vector.h"
+#include "error.h"
 #include <string.h>        // memcpy
 #define BLOCK_SIZE 512     // optimized
 
@@ -52,8 +53,8 @@ void Vector::initialize_gpu(int n)
 {
     this->n = n;
     array_size = n * sizeof(double);
-    cudaMalloc((void**)&real_part, array_size);
-    cudaMalloc((void**)&imag_part, array_size);
+    CHECK(cudaMalloc((void**)&real_part, array_size));
+    CHECK(cudaMalloc((void**)&imag_part, array_size));
 }
 #else
 void Vector::initialize_cpu(int n)
@@ -72,6 +73,7 @@ Vector::Vector(int n)
     initialize_gpu(n);
     gpu_set_zero<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, real_part, imag_part);
+    CHECK(cudaGetLastError());
 #else
     initialize_cpu(n);
     cpu_set_zero(n, real_part, imag_part);
@@ -111,6 +113,7 @@ Vector::Vector(Vector& original)
     initialize_gpu(original.n);
     gpu_copy_state<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, original.real_part, original.imag_part, real_part, imag_part);
+    CHECK(cudaGetLastError());
 #else
     initialize_cpu(original.n);
     cpu_copy_state
@@ -122,8 +125,8 @@ Vector::Vector(Vector& original)
 Vector::~Vector()
 {
 #ifndef CPU_ONLY
-    cudaFree(real_part);
-    cudaFree(imag_part);
+    CHECK(cudaFree(real_part));
+    CHECK(cudaFree(imag_part));
 #else
     delete[] real_part;
     delete[] imag_part;
@@ -160,6 +163,7 @@ void Vector::add(Vector& other)
 #ifndef CPU_ONLY
     gpu_add_state<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
+    CHECK(cudaGetLastError());
 #else
     cpu_add_state(n, other.real_part, other.imag_part, real_part, imag_part);
 #endif
@@ -171,6 +175,7 @@ void Vector::copy(Vector& other)
 #ifndef CPU_ONLY
     gpu_copy_state<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
+    CHECK(cudaGetLastError());
 #else
     cpu_copy_state
     (n, other.real_part, other.imag_part, real_part, imag_part);
@@ -223,6 +228,7 @@ void Vector::apply_sz(Vector& other)
 #ifndef CPU_ONLY
     gpu_apply_sz<<<(n - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>
     (n, other.real_part, other.imag_part, real_part, imag_part);
+    CHECK(cudaGetLastError());
 #else
     cpu_apply_sz(n, other.real_part, other.imag_part, real_part, imag_part);
 #endif
@@ -232,8 +238,8 @@ void Vector::apply_sz(Vector& other)
 void Vector::copy_from_host(double* other_real, double* other_imag)
 {
 #ifndef CPU_ONLY 
-    cudaMemcpy(real_part, other_real, array_size, cudaMemcpyHostToDevice);
-    cudaMemcpy(imag_part, other_imag, array_size, cudaMemcpyHostToDevice);
+    CHECK(cudaMemcpy(real_part, other_real, array_size, cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(imag_part, other_imag, array_size, cudaMemcpyHostToDevice));
 #else
     memcpy(real_part, other_real, array_size);
     memcpy(imag_part, other_imag, array_size);
@@ -244,8 +250,8 @@ void Vector::copy_from_host(double* other_real, double* other_imag)
 void Vector::copy_to_host(double* target_real, double* target_imag)
 {
 #ifndef CPU_ONLY
-    cudaMemcpy(target_real, real_part, array_size, cudaMemcpyDeviceToHost);
-    cudaMemcpy(target_imag, imag_part, array_size, cudaMemcpyDeviceToHost);
+    CHECK(cudaMemcpy(target_real, real_part, array_size, cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(target_imag, imag_part, array_size, cudaMemcpyDeviceToHost));
 #else
     memcpy(target_real, real_part, array_size);
     memcpy(target_imag, imag_part, array_size);
@@ -387,6 +393,7 @@ void Vector::inner_product_1
         other.real_part, other.imag_part, target.real_part, target.imag_part,
         offset
     );
+    CHECK(cudaGetLastError());
 #else
     cpu_find_inner_product_1
     (
@@ -500,6 +507,7 @@ void Vector::inner_product_2
         number_of_atoms, real_part, imag_part,
         target.real_part, target.imag_part
     );
+    CHECK(cudaGetLastError());
 #else
     int grid_size = (number_of_atoms - 1) / BLOCK_SIZE + 1;
     cpu_find_inner_product_2
