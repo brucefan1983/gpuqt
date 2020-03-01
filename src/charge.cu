@@ -37,9 +37,9 @@ void Charge::add_impurities
     impurity_strength.resize(Ni);
     find_impurity_indices(generator, number_of_atoms);
     find_impurity_strength(generator);
-    find_cell_numbers(pbc, box_length);
+    find_cell_numbers(pbc, box_length);  
     find_cell_contents(number_of_atoms, pbc, box_length, x, y, z);
-    find_potentials(number_of_atoms, box_length, pbc, x, y, z, potential);
+    find_potentials(number_of_atoms, box_length, pbc, x, y, z, potential);  
 }
 
 
@@ -68,7 +68,7 @@ void Charge::find_impurity_indices(std::mt19937& generator, int max_value)
 
 void Charge::find_impurity_strength(std::mt19937& generator)
 {
-    double W2 = xi * 0.5;
+    double W2 = W * 0.5;
     std::uniform_real_distribution<double> strength(-W2, W2);
     for (int i = 0; i < Ni; ++i)
     {

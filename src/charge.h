@@ -31,7 +31,7 @@ public:
         std::vector<double>&,  std::vector<double>&, double*
     );
     bool has = false;
-    int Ni;       // impurity concentration
+    int Ni;       // number of impurities
     double W;     // impurity strength
     double xi;    // impurity range
 private:
