@@ -88,9 +88,9 @@ void Model::add_vacancies()
     // copy some data
     int *neighbor_number_pristine = new int[number_of_atoms];
     int *neighbor_list_pristine = new int[number_of_pairs];
-    double *hopping_real_pristine = new double[number_of_pairs];
-    double *hopping_imag_pristine = new double[number_of_pairs];
-    double *xx_pristine = new double[number_of_pairs];
+    real *hopping_real_pristine = new real[number_of_pairs];
+    real *hopping_imag_pristine = new real[number_of_pairs];
+    real *xx_pristine = new real[number_of_pairs];
 
     for (int n = 0; n < number_of_atoms; ++n)
     {
@@ -119,9 +119,9 @@ void Model::add_vacancies()
     // allocate new memory
     neighbor_number = new int[number_of_atoms];
     neighbor_list = new int[number_of_pairs];
-    hopping_real = new double[number_of_pairs];
-    hopping_imag = new double[number_of_pairs];
-    xx = new double[number_of_pairs];
+    hopping_real = new real[number_of_pairs];
+    hopping_imag = new real[number_of_pairs];
+    xx = new real[number_of_pairs];
 
     // specify the distribution of the vacancies
     int *is_vacancy = new int[number_of_atoms_pristine];
@@ -196,7 +196,7 @@ void Model::initialize_lattice_model()
     int N_orbital;
     int transport_direction;
     int N_cell[3];
-    double lattice_constant[3];
+    real lattice_constant[3];
 
     input >> N_cell[0] >> N_cell[1] >> N_cell[2];
     std::cout << "- Number of cells in the x direction = "
@@ -345,10 +345,10 @@ void Model::initialize_lattice_model()
     number_of_pairs = number_of_atoms * max_neighbor;
     neighbor_number = new int[number_of_atoms];
     neighbor_list = new int [number_of_pairs];
-    hopping_real = new double[number_of_pairs];
-    hopping_imag = new double[number_of_pairs];
-    xx = new double[number_of_pairs];
-    potential = new double[number_of_atoms];
+    hopping_real = new real[number_of_pairs];
+    hopping_imag = new real[number_of_pairs];
+    xx = new real[number_of_pairs];
+    potential = new real[number_of_atoms];
     for (int n = 0; n < number_of_atoms; ++n)
     {
         potential[n] = 0.0;
@@ -362,15 +362,15 @@ void Model::initialize_lattice_model()
         z.resize(number_of_atoms);
     }
 
-    std::vector<double> x_cell, y_cell, z_cell;
+    std::vector<real> x_cell, y_cell, z_cell;
     x_cell.resize(N_orbital);
     y_cell.resize(N_orbital);
     z_cell.resize(N_orbital);
     int number_of_hoppings_per_cell = N_orbital * max_neighbor;
     std::vector<std::vector<int>> hopping_index;
     hopping_index.assign(4, std::vector<int>(number_of_hoppings_per_cell, 0));
-    std::vector<std::vector<double>> hopping_data;
-    hopping_data.assign(2, std::vector<double>(number_of_hoppings_per_cell, 0));
+    std::vector<std::vector<real>> hopping_data;
+    hopping_data.assign(2, std::vector<real>(number_of_hoppings_per_cell, 0));
 
     std::cout << std::endl << "\torbital\tx\ty\tz" << std::endl;
     for (int n = 0; n < N_orbital; ++n)
@@ -393,7 +393,7 @@ void Model::initialize_lattice_model()
         for (int n = 0; n < number_of_hoppings[m]; ++n)
         {
             int nx, ny, nz, m_neighbor;
-            double hopping_real, hopping_imag;
+            real hopping_real, hopping_imag;
             input >> nx >> ny >> nz >> m_neighbor >> hopping_real
                   >> hopping_imag;
 
@@ -452,7 +452,7 @@ void Model::initialize_lattice_model()
                             hopping_index[3][k], N_orbital
                         );
 
-                        double x12 = lattice_constant[transport_direction]
+                        real x12 = lattice_constant[transport_direction]
                                  * hopping_index[transport_direction][k];
                         x12 += x_cell[hopping_index[3][k]] - x_cell[m];
                         xx[neighbor_index] = x12;

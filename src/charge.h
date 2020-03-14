@@ -19,6 +19,7 @@
 
 
 #pragma once
+#include "common.h"
 #include <random>
 
 
@@ -27,36 +28,36 @@ class Charge
 public:
     void add_impurities
     (
-        std::mt19937&, int, double*, int*,  std::vector<double>&,
-        std::vector<double>&,  std::vector<double>&, double*
+        std::mt19937&, int, real*, int*,  std::vector<real>&,
+        std::vector<real>&,  std::vector<real>&, real*
     );
     bool has = false;
     int Ni;       // number of impurities
-    double W;     // impurity strength
-    double xi;    // impurity range
+    real W;     // impurity strength
+    real xi;    // impurity range
 private:
     int Nx, Ny, Nz, Nxyz; // number of cells
-    double rc;            // cutoff distance for impurity potential
-    double rc2;           // cutoff square
+    real rc;            // cutoff distance for impurity potential
+    real rc2;           // cutoff square
     std::vector<int> cell_count;
     std::vector<int> cell_count_sum;
     std::vector<int> cell_contents;
     std::vector<int> impurity_indices;
-    std::vector<double> impurity_strength;
+    std::vector<real> impurity_strength;
     void find_impurity_indices(std::mt19937&, int);
     void find_impurity_strength(std::mt19937&);
     void find_potentials
     (
-        int, double*, int*, std::vector<double>&, std::vector<double>&,
-        std::vector<double>&, double*
+        int, real*, int*, std::vector<real>&, std::vector<real>&,
+        std::vector<real>&, real*
     );
-    int find_cell_id(double, double, double, double);
-    void find_cell_id(double, double, double, double, int&, int&, int&, int&);
-    void find_cell_numbers(int*, double*);
+    int find_cell_id(real, real, real, real);
+    void find_cell_id(real, real, real, real, int&, int&, int&, int&);
+    void find_cell_numbers(int*, real*);
     void find_cell_contents
     (
-        int, int*, double*, std::vector<double>&, 
-        std::vector<double>&, std::vector<double>&
+        int, int*, real*, std::vector<real>&, 
+        std::vector<real>&, std::vector<real>&
     );
     int find_neighbor_cell(int, int, int, int, int, int, int);
 };

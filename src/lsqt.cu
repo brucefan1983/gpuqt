@@ -76,7 +76,7 @@ static void run_dos(Model& model, Hamiltonian& H, Vector& random_state)
     clock_t time_begin = clock(); 
     find_dos(model, H, random_state, 0);
     clock_t time_finish = clock();
-    double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+    real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
     std::cout << "- Time used for finding DOS = " 
               << time_used << " s" << std::endl;
 }
@@ -89,7 +89,7 @@ static void run_vac0(Model& model, Hamiltonian& H, Vector& random_state)
         clock_t time_begin = clock();
         find_vac0(model, H, random_state);
         clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding VAC0 = " 
                   << time_used << " s" << std::endl;
     }
@@ -103,7 +103,7 @@ static void run_vac(Model& model, Hamiltonian& H, Vector& random_state)
         clock_t time_begin = clock();
         find_vac(model, H, random_state);
         clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding VAC = " 
                   << time_used << " s" << std::endl;
     }
@@ -117,7 +117,7 @@ static void run_msd(Model& model, Hamiltonian& H, Vector& random_state)
         clock_t time_begin = clock();
         find_msd(model, H, random_state);
         clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding MSD = " 
                   << time_used << " s" << std::endl;
     }
@@ -131,7 +131,7 @@ static void run_spin(Model& model, Hamiltonian& H, Vector& random_state)
         clock_t time_begin = clock();
         find_spin_polarization(model, H, random_state);
         clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding spin polarization = " 
                   << time_used << " s" << std::endl;
     }
@@ -151,7 +151,7 @@ static void run_ldos(Model& model, Hamiltonian& H, Vector& random_state)
             find_dos(model, H, random_state, 1);
         }
         clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         std::cout << "- Time used for finding LDOS = "
                   << time_used << " s" << std::endl;
         print_finished_ldos();

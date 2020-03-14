@@ -82,9 +82,9 @@ Model::~Model()
 // It initializes a random vector
 void Model::initialize_state(Vector& random_state, int orbital)
 {
-    std::uniform_real_distribution<double> phase(0, 2 * PI);
-    double *random_state_real = new double[number_of_atoms];
-    double *random_state_imag = new double[number_of_atoms];
+    std::uniform_real_distribution<real> phase(0, 2 * PI);
+    real *random_state_real = new real[number_of_atoms];
+    real *random_state_imag = new real[number_of_atoms];
 
     if (orbital >= 0)
     {
@@ -99,7 +99,7 @@ void Model::initialize_state(Vector& random_state, int orbital)
     {
         for (int n = 0; n < number_of_atoms; n += 2)
         {
-            double random_phase = phase(generator);
+            real random_phase = phase(generator);
             random_state_real[n] = cos(random_phase);
             random_state_imag[n] = sin(random_phase);
             random_state_real[n+1] = 0.0;
@@ -110,7 +110,7 @@ void Model::initialize_state(Vector& random_state, int orbital)
     {
         for (int n = 0; n < number_of_atoms; ++n)
         {
-            double random_phase = phase(generator);
+            real random_phase = phase(generator);
             random_state_real[n] = cos(random_phase);
             random_state_imag[n] = sin(random_phase);
         }
@@ -399,7 +399,7 @@ void Model::initialize_energy()
     std::cout << "- number of energy points = "
               << number_of_energy_points
               << std::endl;
-    energy = new double[number_of_energy_points];
+    energy = new real[number_of_energy_points];
 
     for (int n = 0; n < number_of_energy_points; ++n)
     {
@@ -462,7 +462,7 @@ void Model::initialize_time()
     std::cout << "- number of time steps = "
               << number_of_steps_correlation
               << std::endl;
-    time_step = new double[number_of_steps_correlation];
+    time_step = new real[number_of_steps_correlation];
 
     for (int n = 0; n < number_of_steps_correlation; ++n)
     {

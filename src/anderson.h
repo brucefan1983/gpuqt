@@ -19,15 +19,16 @@
 
 
 #pragma once
+#include "common.h"
 #include <random>
 
 
 class Anderson
 {
 public:
-    void add_disorder(int N, std::mt19937& generator, double* potential);
+    void add_disorder(int N, std::mt19937& generator, real* potential);
     bool has_disorder = false;
-    double disorder_strength;
+    real disorder_strength;
 };
 
 

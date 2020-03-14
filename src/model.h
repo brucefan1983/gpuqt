@@ -19,6 +19,7 @@
 
 
 #pragma once
+#include "common.h"
 #include "anderson.h"
 #include "charge.h"
 #include <random>
@@ -47,20 +48,20 @@ public:
     int number_of_steps_correlation = 0;
     int number_of_local_orbitals = 0;
     std::string input_dir;
-    double energy_max = 10;
+    real energy_max = 10;
 
-    double *energy;
-    double *time_step;
+    real *energy;
+    real *time_step;
     std::vector<int> local_orbitals;
     
     int *neighbor_number;
     int *neighbor_list;  
-    double *xx;
-    double *potential;
-    double *hopping_real;
-    double *hopping_imag;
+    real *xx;
+    real *potential;
+    real *hopping_real;
+    real *hopping_imag;
 
-    double volume;
+    real volume;
     
 private:
 
@@ -99,8 +100,8 @@ private:
     int number_of_vacancies;
 
     int pbc[3];
-    double box_length[3];
-    std::vector<double> x, y, z;
+    real box_length[3];
+    std::vector<real> x, y, z;
 
     std::mt19937 generator;
 };

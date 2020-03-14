@@ -32,7 +32,7 @@ using namespace std;
 static void print_welcome();
 static void check_argc(int);
 static void print_start(std::string);
-static void print_finish(std::string, double);
+static void print_finish(std::string, real);
 
 
 int main(int argc, char *argv[])
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         clock_t time_begin = clock();
         lsqt(directory);
         clock_t time_finish = clock();
-        double time_used = double(time_finish - time_begin) / CLOCKS_PER_SEC;
+        real time_used = real(time_finish - time_begin) / CLOCKS_PER_SEC;
         print_finish(directory, time_used);
     }
     return 0;
@@ -91,7 +91,7 @@ static void print_start(std::string directory)
 }
 
 
-static void print_finish(std::string directory, double time)
+static void print_finish(std::string directory, real time)
 {
     cout << endl;
     cout << "===============================================================\n";
