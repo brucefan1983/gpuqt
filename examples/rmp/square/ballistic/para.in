@@ -1,7 +1,7 @@
 model                    1
 energy_max               4.1
-number_of_moments        2000
-number_of_random_vectors 1
+number_of_moments        3000
+number_of_random_vectors 10
 calculate_msd
 calculate_vac
 
