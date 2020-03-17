@@ -1,0 +1,7 @@
+model                    1
+anderson_disorder        5.0
+energy_max               7.0
+number_of_moments        3000
+calculate_msd
+calculate_vac
+

@@ -1,9 +1,9 @@
 clear; close all; font_size=10;
 
 % data produced by GPUQT
-load dos.out;
-load vac.out;
-load msd.out;
+load dos;
+load vac;
+load msd;
 load sigma_negf;
 load sigma_ave;
 load sigma_cpgf;
