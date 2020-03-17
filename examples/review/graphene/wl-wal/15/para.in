@@ -1,0 +1,5 @@
+model              1
+number_of_moments  3000
+charged_impurity   400000 3.77136 2.59808
+energy_max         15
+calculate_msd
