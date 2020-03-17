@@ -1,8 +1,8 @@
 clear;close all;font_size=12;
 
 % data produced by LSQT
-load dos.out;
-load msd.out;
+load dos;
+load msd;
 
 % energy points and time steps
 load energy.in;
