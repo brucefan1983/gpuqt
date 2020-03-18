@@ -1,8 +1,10 @@
-clear;close all;font_size=12;
+clear;close all;font_size=13;
 
 % data produced by LSQT
 load dos.out;
 load msd.out;
+dos=(dos+fliplr(dos))/2;
+msd=(msd+fliplr(msd))/2;
 
 % energy points and time steps
 load energy.in;
@@ -32,7 +34,7 @@ end
 % length
 len=zeros(Nt,Ne);
 for nt=1:Nt
-   len(nt,:)=2*sqrt(msd_ave(nt,:)./dos_ave);
+   len(nt,:)=0.142*2*sqrt(msd_ave(nt,:)./dos_ave);
 end
 
 % plot the results
@@ -60,11 +62,35 @@ ylabel('$\sigma_{max}$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
 figure;
-semilogy(len(:,51),sigma_from_msd(:,51),'d','linewidth',2);
+for n = 1:10
+semilogy(len(:,51+n),sigma_from_msd(:,51+n),'o','linewidth',2);
 hold on;
-semilogy(len(:,56),sigma_from_msd(:,56),'o','linewidth',2);
+
+p=fminsearch(@(p) norm( p(1)*exp(-len(end-6:end,51+n)/p(2)) - sigma_from_msd(end-6:end,51+n) ),...
+    [1,10]);
+x=5:30;
+semilogy(x,p(1)*exp( -x/p(2) ) );
+end
+
 ylim([0.1,10]);
-xlabel('L (a)', 'fontsize',font_size,'interpreter','latex');
+xlabel('$L$ (nm)', 'fontsize',font_size,'interpreter','latex');
 ylabel('$\sigma$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
+load xi_from_tmm.mat;
+xi_from_tmm(:,2)=xi_from_tmm(:,2)/2*0.142;
+
+axes('Position',[0.5 0.55 0.4 0.35]);
+semilogy(xi_from_tmm(:,1),xi_from_tmm(:,2),'-');
+xlim([0,0.5]);
+hold on;
+
+for n = 1:10
+p=fminsearch(@(p) norm( p(1)*exp(-len(end-6:end,51+n)/p(2)) - sigma_from_msd(end-6:end,51+n) ),...
+    [1,10]);
+semilogy(n*0.02,p(2),'rx');
+end
+xlabel('$E$ (eV)','interpreter','latex');
+ylabel('$\xi$ (nm)','interpreter','latex')
+set(gca,'fontsize',12,'ytick',10.^(0:5));
+legend('One-parameter-scaling','conductivity scaling');
