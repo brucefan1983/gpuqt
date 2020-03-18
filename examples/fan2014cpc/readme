@@ -1,9 +1,0 @@
-This directory contains an example from the following paper:
-
-Zheyong Fan, Andreas Uppstu, Topi Siro, and Ari Harju,
-Efficient linear-scaling quantum transport calculations on graphics
-processing units and applications on electron transport in graphene,
-https://doi.org/10.1016/j.cpc.2013.08.009
-
-We aim to reproduce part of Figure 2 (the case of KPM) in this paper.
-

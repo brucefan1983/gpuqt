@@ -1,9 +1,0 @@
-This directory contains examples presented in the paper:
-
-A. Lherbier, B. Biel, Y.-M. Niquet, and S. Roche,
-Transport Length Scales in Disordered Graphene-Based Materials:
-Strong Localization Regimes and Dimensionality Effects,
-Phys. Rev. Lett. 100, 036803 (2008).
-https://doi.org/10.1103/PhysRevLett.100.036803
-
-We aim to reproduce Figure 1 of this paper.

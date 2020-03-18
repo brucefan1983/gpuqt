@@ -1,9 +1,3 @@
-lherbier2008prl/w=0
-lherbier2008prl/w=1.0
-lherbier2008prl/w=1.5
-lherbier2008prl/w=2.0
-lherbier2008prl/w=2.5
 examples/fan2018cpc/lattice/diffusive
 examples/fan2018cpc/lattice/localized
-examples/rmp/square/ballistic
-examples/rmp/square/diffusive
+
