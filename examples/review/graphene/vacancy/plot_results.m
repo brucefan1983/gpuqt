@@ -63,13 +63,13 @@ set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
 figure;
 for n = 1:10
-semilogy(len(:,51+n),sigma_from_msd(:,51+n),'o','linewidth',2);
+semilogy(len(:,51+n),sigma_from_msd(:,51+n),'o','color', [1 1 1]*0.05*n,'linewidth',1);
 hold on;
 
 p=fminsearch(@(p) norm( p(1)*exp(-len(end-6:end,51+n)/p(2)) - sigma_from_msd(end-6:end,51+n) ),...
     [1,10]);
 x=5:30;
-semilogy(x,p(1)*exp( -x/p(2) ) );
+semilogy(x,p(1)*exp( -x/p(2) ), 'r--');
 end
 
 ylim([0.1,10]);
@@ -77,12 +77,16 @@ xlabel('$L$ (nm)', 'fontsize',font_size,'interpreter','latex');
 ylabel('$\sigma$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
+
+text(8,0.12,'0.02 eV','fontsize',font_size,'interpreter','latex');
+text(25,0.5,'0.2 eV','fontsize',font_size,'interpreter','latex');
+
 load xi_from_tmm.mat;
 xi_from_tmm(:,2)=xi_from_tmm(:,2)/2*0.142;
 
 axes('Position',[0.5 0.55 0.4 0.35]);
 semilogy(xi_from_tmm(:,1),xi_from_tmm(:,2),'-');
-xlim([0,0.5]);
+xlim([0,0.25]);
 hold on;
 
 for n = 1:10
@@ -94,3 +98,4 @@ xlabel('$E$ (eV)','interpreter','latex');
 ylabel('$\xi$ (nm)','interpreter','latex')
 set(gca,'fontsize',12,'ytick',10.^(0:5));
 legend('One-parameter-scaling','conductivity scaling');
+
