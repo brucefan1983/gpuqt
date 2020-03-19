@@ -11,10 +11,10 @@ https://arxiv.org/abs/1811.07387
 * This is still in preprint form, so the figure labels might be changed later. Below are what we proposed for version 3.
 
 
-| directory            | description   |
+| directory            | figure label in the review paper   |
 |----------------------|---------------|
-| square/ballistic     | figures 5 and 6 |
-| square/diffusive     | figures 7  |
+| square/ballistic         | 5 and 6 |
+| square/diffusive         | 7  |
 | square/weak-localization | 8 |
 | square/strong-localization  | 9 |
 | square/cubic         | 10 |
