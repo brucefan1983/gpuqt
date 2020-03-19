@@ -1,10 +1,10 @@
 clear;close all;font_size=12;
 
 %data produced by GPUQT
-load 4/dos.out;
-load 4/msd.out;
-load 4/energy.in;
-load 4/time_step.in
+load 15/dos.out;
+load 15/msd.out;
+load 15/energy.in;
+load 15/time_step.in
 
 % energy points and time steps
 Ne=energy(1);
@@ -43,16 +43,16 @@ ylabel('DOS ($1/eV/a^2$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
 figure;
-plot(len(:,51),sigma_from_msd(:,51),'rd','linewidth',1);
+plot(len(:,56),sigma_from_msd(:,56),'rd','linewidth',1);
 xlim([0,2000]);
 xlabel('$L$ (nm)', 'fontsize',font_size,'interpreter','latex');
 ylabel('$\sigma$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
-len_4=len;
-sigma_4=sigma_from_msd;
-save('len_4','len_4');
-save('sigma_4','sigma_4');
+len_15=len;
+sigma_15=sigma_from_msd;
+save('len_15','len_15');
+save('sigma_15','sigma_15');
 
 
 
