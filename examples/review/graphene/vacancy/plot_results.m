@@ -81,21 +81,27 @@ set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 text(8,0.12,'0.02 eV','fontsize',font_size,'interpreter','latex');
 text(25,0.5,'0.2 eV','fontsize',font_size,'interpreter','latex');
 
-load xi_from_tmm.mat;
+load xi_from_tmm;
+load xi_from_sigma;
+
 xi_from_tmm(:,2)=xi_from_tmm(:,2)/2*0.142;
+xi_from_sigma(:,2)=xi_from_sigma(:,2)/2*0.142;
 
 axes('Position',[0.5 0.55 0.4 0.35]);
 semilogy(xi_from_tmm(:,1),xi_from_tmm(:,2),'-');
-xlim([0,0.25]);
 hold on;
+semilogy(xi_from_sigma(28:52,1),xi_from_sigma(28:52,2),'s');
+xlim([0,0.2]);
+ylim([3,100]);
 
 for n = 1:10
 p=fminsearch(@(p) norm( p(1)*exp(-len(end-6:end,51+n)/p(2)) - sigma_from_msd(end-6:end,51+n) ),...
     [1,10]);
-semilogy(n*0.02,p(2),'rx');
+semilogy(n*0.02,p(2),'bv');
 end
 xlabel('$E$ (eV)','interpreter','latex');
 ylabel('$\xi$ (nm)','interpreter','latex')
-set(gca,'fontsize',12,'ytick',10.^(0:5));
-legend('One-parameter-scaling','conductivity scaling');
+set(gca,'fontsize',11,'ytick',10.^(0:5));
+legend('MacKinnon-Kramer','Thouless relation', 'Kubo conductivity scaling');
+
 
