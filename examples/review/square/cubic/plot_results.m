@@ -37,9 +37,9 @@ xlim([-7,7]);
 ylim([0,15]);
 plot(energy, sigma_e_3000, 'r--', 'linewidth', 1);
 xlabel('Energy ($\gamma$)', 'fontsize', font_size,'interpreter','latex');
-ylabel('$\sigma_{sc}$ ($e^2/ha$)', 'Fontsize',font_size,'interpreter','latex');
+ylabel('$\sigma_{sc}$ ($e^2/ha$)', 'Fontsize',font_size*1.1,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
-text(-3,5, '$N = 10^7;~ N_r = 10;~ M = 3000$','interpreter','latex');
+text(-3.5,5, '$N = 10^7;~ N_r = 10;~ M = 3000$','interpreter','latex','color','[1 0 0]', 'Fontsize',font_size*1.2);
 title('(a)');
 
 subplot(2,2,3)
@@ -53,7 +53,7 @@ xlabel('$N_r$', 'fontsize', font_size,'interpreter','latex');
 ylabel('Relative error (%)', 'Fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 text(2,0.8, '$N_r^{-1/2}$','interpreter','latex');
-text(4,1.1, '$N = 10^7;~ M = 3000$','interpreter','latex');
+text(2,1.1, '$N = 10^7;~ M = 3000$','interpreter','latex','color','[1 0 0]', 'Fontsize',font_size*1.2);
 title('(b)');
 
 subplot(2,2,4)
@@ -63,6 +63,6 @@ ylim([0.1,20]);
 xlabel('$M$', 'fontsize', font_size,'interpreter','latex');
 ylabel('Relative error (%)', 'Fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
-text(50,10, '$N = 10^7;~ N_r = 10$','interpreter','latex');
+text(30,10, '$N = 10^7;~ N_r = 10$','interpreter','latex','color','[1 0 0]', 'Fontsize',font_size*1.2);
 title('(c)');
 

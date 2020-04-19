@@ -62,7 +62,7 @@ ylabel('$\sigma_{max}$ ($e^2/h$)','fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
 figure;
-for n = 1:10
+for n = 1:9
 semilogy(len(:,51+n),sigma_from_msd(:,51+n),'o','color', [1 1 1]*0.05*n,'linewidth',1);
 hold on;
 
@@ -79,7 +79,7 @@ set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 
 
 text(8,0.12,'0.02 eV','fontsize',font_size,'interpreter','latex');
-text(25,0.5,'0.2 eV','fontsize',font_size,'interpreter','latex');
+text(25,0.5,'0.18 eV','fontsize',font_size,'interpreter','latex');
 
 load xi_from_tmm;
 load xi_from_sigma;
@@ -87,21 +87,21 @@ load xi_from_sigma;
 xi_from_tmm(:,2)=xi_from_tmm(:,2)/2*0.142;
 xi_from_sigma(:,2)=xi_from_sigma(:,2)/2*0.142;
 
-axes('Position',[0.5 0.55 0.4 0.35]);
+axes('Position',[0.45 0.56 0.45 0.33]);
 semilogy(xi_from_tmm(:,1),xi_from_tmm(:,2),'-');
 hold on;
 semilogy(xi_from_sigma(28:52,1),xi_from_sigma(28:52,2),'s');
-xlim([0,0.2]);
-ylim([3,100]);
+xlim([0,0.19]);
+ylim([1,200]);
 
 for n = 1:10
 p=fminsearch(@(p) norm( p(1)*exp(-len(end-6:end,51+n)/p(2)) - sigma_from_msd(end-6:end,51+n) ),...
     [1,10]);
 semilogy(n*0.02,p(2),'bv');
 end
-xlabel('$E$ (eV)','interpreter','latex');
-ylabel('$\xi$ (nm)','interpreter','latex')
-set(gca,'fontsize',11,'ytick',10.^(0:5));
-legend('MacKinnon-Kramer','Thouless relation', 'Kubo conductivity scaling');
+xlabel('$E$ (eV)','interpreter','latex','fontsize',10);
+ylabel('$\xi$ (nm)','interpreter','latex','fontsize',10)
+set(gca,'fontsize',10,'ytick',10.^(0:5));
+legend('MacKinnon-Kramer','Perturbative estimate of \xi (in 2D)', 'Kubo conductivity scaling');
 
 
