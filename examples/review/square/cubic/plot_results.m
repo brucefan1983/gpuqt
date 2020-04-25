@@ -1,11 +1,12 @@
 % figure 9 in the review paper
 
-clear; close all; font_size=11;
+clear; close all; font_size=12;
 
 % analyzed data produced by GPUQT
 load sigma_e;
 load 3000/sigma_e_3000; %1 x Ne
 load 3000/sigma_ns_e_3000; %Ns x Ne
+load rel_change.dat; % results by Jose
 Ns=size(sigma_ns_e_3000,1);
 
 % energy points
@@ -57,12 +58,13 @@ text(2,1.1, '$N = 10^7;~ M = 3000$','interpreter','latex','color','[1 0 0]', 'Fo
 title('(b)');
 
 subplot(2,2,4)
-loglog([20:10:50,100:100:400],err10to400(2:end), 'o', 'linewidth', 1);
-xlim([10,1000]);
-ylim([0.1,20]);
+%loglog([20:10:50,100:100:400],err10to400(2:end), 'o', 'linewidth', 1);
+semilogx(rel_change(1:end-1,1),rel_change(1:end-1,2), 'o', 'linewidth', 1); % use Jose's results
+xlim([10,10000]);
+ylim([0,10]);
 xlabel('$M$', 'fontsize', font_size,'interpreter','latex');
-ylabel('Relative error (%)', 'Fontsize',font_size,'interpreter','latex');
-set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
-text(30,10, '$N = 10^7;~ N_r = 10$','interpreter','latex','color','[1 0 0]', 'Fontsize',font_size*1.2);
+ylabel('Relative change (%)', 'Fontsize',font_size,'interpreter','latex');
+set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2,'xtick',10.^(1:4));
+text(30,8, '$N = 10^7;~ N_r = 10$','interpreter','latex','color','[1 0 0]', 'Fontsize',font_size*1.2);
 title('(c)');
 

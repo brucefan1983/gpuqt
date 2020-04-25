@@ -88,20 +88,21 @@ xi_from_tmm(:,2)=xi_from_tmm(:,2)/2*0.142;
 xi_from_sigma(:,2)=xi_from_sigma(:,2)/2*0.142;
 
 axes('Position',[0.45 0.56 0.45 0.33]);
-semilogy(xi_from_tmm(:,1),xi_from_tmm(:,2),'-');
+plot(xi_from_tmm(:,1),xi_from_tmm(:,2),'-');
 hold on;
-semilogy(xi_from_sigma(28:52,1),xi_from_sigma(28:52,2),'s');
+plot(xi_from_sigma(28:52,1),xi_from_sigma(28:52,2),'s');
 xlim([0,0.19]);
-ylim([1,200]);
+ylim([0,40]);
 
 for n = 1:10
 p=fminsearch(@(p) norm( p(1)*exp(-len(end-6:end,51+n)/p(2)) - sigma_from_msd(end-6:end,51+n) ),...
     [1,10]);
-semilogy(n*0.02,p(2),'bv');
+plot(n*0.02,p(2),'bv');
 end
 xlabel('$E$ (eV)','interpreter','latex','fontsize',10);
 ylabel('$\xi$ (nm)','interpreter','latex','fontsize',10)
-set(gca,'fontsize',10,'ytick',10.^(0:5));
+%set(gca,'fontsize',10,'ytick',10.^(0:5));
+set(gca,'fontsize',10);
 legend('MacKinnon-Kramer','Perturbative estimate of \xi (in 2D)', 'Kubo conductivity scaling');
 
 
