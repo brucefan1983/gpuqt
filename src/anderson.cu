@@ -17,18 +17,13 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "anderson.h"
-
 
 void Anderson::add_disorder(int N, std::mt19937& generator, real* potential)
 {
-    real W2 = disorder_strength * 0.5;
-    std::uniform_real_distribution<real> on_site_potential(-W2, W2);
-    for (int n = 0; n < N; ++n)
-    {
-        potential[n] = on_site_potential(generator);
-    }
+  real W2 = disorder_strength * 0.5;
+  std::uniform_real_distribution<real> on_site_potential(-W2, W2);
+  for (int n = 0; n < N; ++n) {
+    potential[n] = on_site_potential(generator);
+  }
 }
-
-

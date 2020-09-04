@@ -17,45 +17,38 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #pragma once
 #include "common.h"
 class Vector;
 class Model;
 
-
 class Hamiltonian
 {
 public:
+  Hamiltonian(Model&);
+  ~Hamiltonian();
 
-    Hamiltonian(Model&);
-    ~Hamiltonian();
-
-    void apply(Vector&, Vector&);
-    void apply_commutator(Vector&, Vector&);
-    void apply_current(Vector&, Vector&);
-    void kernel_polynomial(Vector&, Vector&, Vector&);
-    void chebyshev_01(Vector&, Vector&, Vector&, real, real, int);
-    void chebyshev_2(Vector&, Vector&, Vector&, Vector&, real, int);
-    void chebyshev_1x(Vector&, Vector&, real);
-    void chebyshev_2x
-    (Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, real, int);
+  void apply(Vector&, Vector&);
+  void apply_commutator(Vector&, Vector&);
+  void apply_current(Vector&, Vector&);
+  void kernel_polynomial(Vector&, Vector&, Vector&);
+  void chebyshev_01(Vector&, Vector&, Vector&, real, real, int);
+  void chebyshev_2(Vector&, Vector&, Vector&, Vector&, real, int);
+  void chebyshev_1x(Vector&, Vector&, real);
+  void chebyshev_2x(Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, Vector&, real, int);
 
 private:
+  void initialize_gpu(Model&);
+  void initialize_cpu(Model&);
 
-    void initialize_gpu(Model&);
-    void initialize_cpu(Model&);
-
-    int* neighbor_number;
-    int* neighbor_list;
-    real* potential;
-    real* hopping_real;
-    real* hopping_imag;
-    real* xx;
-    int grid_size;
-    int n;
-    int max_neighbor;
-    real energy_max;
+  int* neighbor_number;
+  int* neighbor_list;
+  real* potential;
+  real* hopping_real;
+  real* hopping_imag;
+  real* xx;
+  int grid_size;
+  int n;
+  int max_neighbor;
+  real energy_max;
 };
-
-

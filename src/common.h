@@ -17,36 +17,28 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #pragma once
 
-
 #ifdef USE_SP
-    typedef float real; // single precision
-#else 
-    typedef double real; // double precision
+typedef float real; // single precision
+#else
+typedef double real; // double precision
 #endif
 
-
 #ifndef CPU_ONLY
-#include <stdio.h> 
+#include <stdio.h>
 
-#define CHECK(call)                                   \
-do                                                    \
-{                                                     \
-    const cudaError_t error_code = call;              \
-    if (error_code != cudaSuccess)                    \
-    {                                                 \
-        printf("CUDA Error:\n");                      \
-        printf("    File:       %s\n", __FILE__);     \
-        printf("    Line:       %d\n", __LINE__);     \
-        printf("    Error code: %d\n", error_code);   \
-        printf("    Error text: %s\n",                \
-            cudaGetErrorString(error_code));          \
-        exit(1);                                      \
-    }                                                 \
-} while (0)
+#define CHECK(call)                                                                                \
+  do {                                                                                             \
+    const cudaError_t error_code = call;                                                           \
+    if (error_code != cudaSuccess) {                                                               \
+      printf("CUDA Error:\n");                                                                     \
+      printf("    File:       %s\n", __FILE__);                                                    \
+      printf("    Line:       %d\n", __LINE__);                                                    \
+      printf("    Error code: %d\n", error_code);                                                  \
+      printf("    Error text: %s\n", cudaGetErrorString(error_code));                              \
+      exit(1);                                                                                     \
+    }                                                                                              \
+  } while (0)
 
 #endif // #ifndef CPU_ONLY
-
-

@@ -17,37 +17,31 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #pragma once
 #include "common.h"
-
 
 class Vector
 {
 public:
+  Vector(int n);
+  Vector(Vector& original);
+  ~Vector();
 
-    Vector(int n);
-    Vector(Vector& original);
-    ~Vector();
+  void add(Vector& other);
+  void copy(Vector& other);
+  void apply_sz(Vector& other);
+  void copy_from_host(real* other_real, real* other_imag);
+  void copy_to_host(real* target_real, real* target_imag);
+  void swap(Vector& other);
+  void inner_product_1(int, Vector& other, Vector& target, int offset);
+  void inner_product_2(int, int, Vector& target);
 
-    void add(Vector& other);
-    void copy(Vector& other);
-    void apply_sz(Vector& other);
-    void copy_from_host(real* other_real, real* other_imag);
-    void copy_to_host(real* target_real, real* target_imag);
-    void swap(Vector& other);
-    void inner_product_1(int, Vector& other, Vector& target, int offset);
-    void inner_product_2(int, int, Vector& target);
-    
-    real* real_part;
-    real* imag_part;
-    
+  real* real_part;
+  real* imag_part;
+
 private:
-
-    void initialize_gpu(int n);
-    void initialize_cpu(int n);
-    int n;
-    int array_size;
+  void initialize_gpu(int n);
+  void initialize_cpu(int n);
+  int n;
+  int array_size;
 };
-
-

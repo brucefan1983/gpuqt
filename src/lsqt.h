@@ -17,12 +17,8 @@
     along with GPUQT.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #pragma once
 #include "common.h"
 #include <string>
 
-
 void lsqt(std::string input_directory);
-
-
