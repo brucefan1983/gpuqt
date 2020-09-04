@@ -1,0 +1,7 @@
+
+
+src/.vscode/*
+src/*/*.obj
+src/*/*.o
+src/lsqt_gpu*
+src/lsqt_cpu*
