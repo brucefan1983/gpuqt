@@ -36,6 +36,7 @@ public:
   bool calculate_msd = false;
   bool calculate_spin = false;
   bool calculate_ldos = false;
+  bool calculate_sigma_cpgf = false;
 
   int number_of_random_vectors = 1;
   int number_of_atoms = 0;

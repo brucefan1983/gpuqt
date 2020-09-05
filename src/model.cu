@@ -201,6 +201,11 @@ void Model::verify_parameters()
   else
     std::cout << "- MSD will not be calculated" << std::endl;
 
+  if (calculate_sigma_cpgf)
+    std::cout << "- sigma from CPGF will be calculated" << std::endl;
+  else
+    std::cout << "- sigma from CPGF will not be calculated" << std::endl;
+
   if (calculate_spin)
     std::cout << "- spin polarization will be calculated" << std::endl;
   else
@@ -280,6 +285,8 @@ void Model::initialize_parameters()
       calculate_spin = true;
     } else if (token == "calculate_ldos") {
       calculate_ldos = true;
+    } else if (token == "calculate_sigma_cpgf") {
+      calculate_sigma_cpgf = true;
     } else if (token == "number_of_random_vectors") {
       ss >> number_of_random_vectors;
     } else if (token == "number_of_moments") {
@@ -296,6 +303,7 @@ void Model::initialize_parameters()
                 << "--calculate_vac0" << std::endl
                 << "--calculate_vac" << std::endl
                 << "--calculate_msd" << std::endl
+                << "--calculate_sigma_cpgf" << std::endl
                 << "--calculate_spin" << std::endl
                 << "--calculate_ldos" << std::endl
                 << "--number_of_random_vectors" << std::endl
