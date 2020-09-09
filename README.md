@@ -9,7 +9,7 @@ https://github.com/proyectoRMP/proyectormp.github.io
 ## Prerequisites
 
 * To use the CPU version, it only requires a `g++` compiler and the `make` program.
-* To use the GPU version, it also requires a CUDA-enabled GPU with compute capability of 3.5 or higher and a `CUDA` toolkit. I have tested the GPU version on both Windows (requres the `cl` compiler from MSVC and the `make` program) and Linux systems. 
+* To use the GPU version, it also requires a CUDA-enabled GPU with compute capability of 3.5 or higher and a `CUDA` toolkit. I have tested the GPU version on both Windows (requires the `cl.exe` compiler from MSVC and a `make.exe` program which can be downloaded [here](http://www.equation.com/servlet/equation.cmd?fa=make)) and Linux systems. 
 
 ## Installing
 
