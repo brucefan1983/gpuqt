@@ -6,20 +6,6 @@ An efficient implementation of linear scaling quantum transport (LSQT) methods w
 There is an independent code from Stephan Roche's group which might be more comprehensive than GPUQT. Here is the link:
 https://github.com/proyectoRMP/proyectormp.github.io
 
-## References
-
-The most original paper on this method is:
-* [1] S. Roche and D. Mayou, Conductivity of Quasiperiodic Systems: A Numerical Study, Phys. Rev. Lett. 79, 2518 (1997). https://doi.org/10.1103/PhysRevLett.79.2518 
-
-The major reference for the CUDA implementation is 
-* [2] Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. 185, 28 (2014). https://doi.org/10.1016/j.cpc.2013.08.009
-
-This code was first published along with the following paper:
-* [3] Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, Comput. Phys. Commun. 230, 113 (2018). https://doi.org/10.1016/j.cpc.2018.04.013
-
-There is a comprehensive review article discussing the linear scaling quantum transport methods:
-* [4] Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, submitted to Physics Reports, https://arxiv.org/abs/1811.07387
-
 ## Prerequisites
 
 * To use the CPU version, it only requires a `g++` compiler and the `make` program.
@@ -48,13 +34,23 @@ Go to the working directories and run the `MATLAB` scripts we have prepared. Aft
 
 ## Authors
 
-* Zheyong Fan (Aalto University): Wrote the first working version of this code.
+* Zheyong Fan (Aalto University; brucenju(at)gmail.com; active developer): Wrote the first working version of this code.
 
-* Ville Vierimaa (Aalto University): Changed the code from the original C style to the current `C++` style and made many other improvements.
+* Ville Vierimaa (Aalto University; not an active developer any more): Changed the code from the original C style to the current `C++` style and made many other improvements. 
 
-* Ari Harju (Aalto University): The supervisor of this project.
+* Ari Harju (Aalto University; not an active developer any more): The supervisor of this project.
 
-## Contact
+## References
 
-* Zheyong Fan: brucenju(at)gmail.com
+The most original paper on this method is:
+* [1] S. Roche and D. Mayou, Conductivity of Quasiperiodic Systems: A Numerical Study, Phys. Rev. Lett. **79**, 2518 (1997). https://doi.org/10.1103/PhysRevLett.79.2518 
+
+The major reference for the CUDA implementation is 
+* [2] Z. Fan, A. Uppstu, T. Siro, and A. Harju, Efficient linear-scaling quantum transport calculations on graphics processing units and applications on electron transport in graphene, Comput. Phys. Commun. **185**, 28 (2014). https://doi.org/10.1016/j.cpc.2013.08.009
+
+This code was first published along with the following paper:
+* [3] Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, Comput. Phys. Commun. **230**, 113 (2018). https://doi.org/10.1016/j.cpc.2018.04.013
+
+There is a comprehensive review article discussing the linear scaling quantum transport methods:
+* [4] Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, submitted to Physics Reports, https://arxiv.org/abs/1811.07387
 
