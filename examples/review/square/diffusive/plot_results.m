@@ -68,7 +68,7 @@ set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 title('(b)');
 
 subplot(2,2,3);
-plot(t_vac(1:30),sigma_vac(1:30,(Ne+1)/2),'bo', 'linewidth', 1);
+semilogx(t_vac(1:30),sigma_vac(1:30,(Ne+1)/2),'bo', 'linewidth', 1);
 hold on;
 plot(t_msd(1:30), sigma_msd(1:30, (Ne+1)/2), 'rs', 'linewidth', 1);
 
@@ -76,29 +76,31 @@ M=100:100:3000;
 eta_scaled=4./M;
 eta=eta_scaled*5;
 t_cpgf=1./eta;
+% extrapolation for CPGF data
+fit_cpgf=zeros(Ne,2);
+for ne=1:Ne
+    fit_cpgf(ne,:)=fminsearch(@(p) norm(1./sigma_ave(end-20:end,ne)-1./p(1)-p(2)./t_cpgf(end-20:end).'), [40, 1]);
+end
+
 hold on;
-plot(t_cpgf,sigma_ave(:,(Ne+1)/2),'x', 'linewidth', 1);
-
-
+plot(t_cpgf,sigma_ave(:,(Ne+1)/2),'x', 'linewidth', 1,'color',[0.1 0.5 0.1]);
+plot((150:10000),1./(1./fit_cpgf((Ne+1)/2,1)+fit_cpgf((Ne+1)/2,2)./(150:10000)),'-','color',[0.1 0.5 0.1],'linewidth',2);
+plot(10.^(0.1:0.1:4),ones(1,40)*max(sigma_vac(:,(Ne+1)/2)),':','linewidth',2);
 xlabel('Time ($\hbar/\gamma$)', 'Fontsize', font_size,'interpreter','latex');
 ylabel('$\sigma$ ($e^2/h$)', 'Fontsize',font_size,'interpreter','latex');
-set(gca,'xtick',0:30:150);
-xlim([0,150]);
+%set(gca,'xtick',0:100:300);
+xlim([0,10000]);
+ylim([0,50]);
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 legend('VAC-KPM','MSD-KPM','KG-CPGF');
-% xlabel('hbar/\eta (hbar/\gamma)', 'Fontsize', font_size);
-% ylabel('\sigma (e^2/h)', 'Fontsize',font_size);
-% set(gca,'xtick',0:30:150);
-% xlim([0,150]);
-% set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
 title('(c)');
 
 subplot(2,2,4);
 plot(energy(1:25:end),max(sigma_vac(:,1:25:end)),'bo','linewidth',1);
 hold on;
 plot(energy(1:25:end),max(sigma_msd(:,1:25:end)),'rs','linewidth',1);
-plot(energy(1:25:end),sigma_cpgf(1:25:end),'x','linewidth',1);
-plot(sigma_negf(:,1),sigma_negf(:,2),'d','linewidth',1);
+plot(energy(1:25:end),fit_cpgf(1:25:end,1),'x','linewidth',1,'color',[0.1 0.5 0.1]);
+plot(sigma_negf(:,1),sigma_negf(:,2),'kd','linewidth',1);
 xlabel('Energy ($\gamma$)', 'fontsize', font_size,'interpreter','latex');
 ylabel('$\sigma_{sc}$ ($e^2/h$)', 'Fontsize',font_size,'interpreter','latex');
 set(gca,'fontsize',font_size,'ticklength',get(gca,'ticklength')*2);
@@ -106,6 +108,3 @@ legend('VAC-KPM','MSD-KPM','KG-CPGF','LB');
 ylim([0,70]);
 set(gca,'xtick',-5:5);
 title('(d)');
-
-
-
