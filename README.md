@@ -20,26 +20,6 @@ This code was first published along with the following paper:
 There is a comprehensive review article discussing the linear scaling quantum transport methods:
 * [4] Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, submitted to Physics Reports, https://arxiv.org/abs/1811.07387
 
-## File organizations
-
-* After downloading and unpacking this code, one can see three directories: `src`, `doc`, and `examples`. 
-
-* The directory `src` contains all the source files (with suffix `.h` or `.cu`) of the main code and two makefiles. The source files are:
-    * `main.cu` - the main function
-    * `lsqt.h` and `lsqt.cu` - the "driver function"
-    * `sigma.h` and `sigma.cu` - functions to obtain the transport properties
-    * `model.h`, `model.cu`, `model_general.cu`, and `model_lattice.cu` - class to define the simulation model
-    * `anderson.h` and `anderson.cu` - class to add Anderson disorder
-    * `charge.h` and `charge.cu` - class to add charged impurities
-    * `hamiltonian.h` and `hamiltonian.cu` - class to perform the matrix-related operations
-    * `vector.h` and `vector.cu` - class to perform the vector-related operations
-    
-* The directory `examples` contains some sub-directories and sub-sub-directories, corresponding to different examples.
-
-* There is also a file named `input.txt` in the `examples` directory, which is a "driver input file" (see below).
-
-* The `doc` directory contains the `pdf` and source files for the manual of this code.
-
 ## Prerequisites
 
 * To use the CPU version, it only requires a `g++` compiler and the `make` program.
