@@ -2,6 +2,8 @@
 
 An efficient implementation of linear scaling quantum transport (LSQT) methods which supports both pure CPU and GPU+CPU computations. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian.
 
+We are working on integratig the LSQT methods into the more general GPUMD package (https://github.com/brucefan1983/GPUMD). Within the molecular dynamics (MD) framework, one can combine the electron and ion motions to incoporate electron-ion scatterings, which is absent from the current package. The current GPUQT package will not be further developed.
+
 ## Related code
 There is an independent code from Stephan Roche's group which might be more comprehensive than GPUQT. Here is the link:
 https://github.com/proyectoRMP/proyectormp.github.io
