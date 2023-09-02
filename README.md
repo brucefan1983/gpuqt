@@ -1,6 +1,6 @@
 # GPUQT
 
-An efficient implementation of linear scaling quantum transport (LSQT) methods which supports both pure CPU and GPU+CPU computations. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian. This is a work in progress. We aim to complete version 1.0 as soon as the review paper [4] is published.
+An efficient implementation of linear scaling quantum transport (LSQT) methods which supports both pure CPU and GPU+CPU computations. This code can be used to obtain charge and spin transport properties of large systems described by a real-space tight-binding Hamiltonian.
 
 ## Related code
 There is an independent code from Stephan Roche's group which might be more comprehensive than GPUQT. Here is the link:
@@ -52,5 +52,5 @@ This code was first published along with the following paper:
 * [3] Z. Fan, V. Vierimaa, and Ari Harju, GPUQT: An efficient linear-scaling quantum transport code fully implemented on graphics processing units, Comput. Phys. Commun. **230**, 113 (2018). https://doi.org/10.1016/j.cpc.2018.04.013
 
 There is a comprehensive review article discussing the linear scaling quantum transport methods:
-* [4] Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, submitted to Physics Reports, https://arxiv.org/abs/1811.07387
+* [4] Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, Physics Reports **903**, 1 (2021). https://doi.org/10.1016/j.physrep.2020.12.001
 
