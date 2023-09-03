@@ -4,10 +4,6 @@ An efficient implementation of linear scaling quantum transport (LSQT) methods w
 
 We are working on integratig the LSQT methods into the more general GPUMD package (https://github.com/brucefan1983/GPUMD). Within the molecular dynamics (MD) framework, one can combine the electron and ion motions to incoporate electron-ion scattering, which is absent from the current package. The current GPUQT package will not be further developed.
 
-## Related code
-There is an independent code from Stephan Roche's group which might be more comprehensive than GPUQT. Here is the link:
-https://github.com/proyectoRMP/proyectormp.github.io
-
 ## Prerequisites
 
 * To use the CPU version, it only requires a `g++` compiler and the `make` program.
