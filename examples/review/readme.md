@@ -2,13 +2,9 @@
 
 * This directory contains examples presented in the review paper:
 
-Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, 
-Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, 
-Linear Scaling Quantum Transport Methodologies, 
-submitted to Reviews of Modern Physics, 
-https://arxiv.org/abs/1811.07387
+Zheyong Fan, Jose Hugo Garcia, Aron W. Cummings, Jose-Eduardo Barrios, Michel Panhans, Ari Harju, Frank Ortmann, and Stephan Roche, Linear Scaling Quantum Transport Methodologies, Physics Reports **903**, 1 (2021). https://doi.org/10.1016/j.physrep.2020.12.001
 
-* This is still in preprint form, so the figure labels might be changed later. Below are what we proposed for version 3.
+* The figure labels might be different from those in the published paper.
 
 
 | directory            | figure label in the review paper   |
